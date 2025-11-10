@@ -1,0 +1,31 @@
+baseURL = 'https://blog.gntech.me/'
+languageCode = 'en-us'
+title = 'My New Hugo Site'
+theme = 'paper'
+[params]
+    mode="auto"
+    useCDN=true
+    subtitle = ""                       # Add a subtitle here
+    github = 'github.com/gntech-dev'           # github.com/YOUR_GITHUB_ID
+    #linkedin = 'YOUR_LINKEDIN_ID'       # linkedin.com/in/YOUR_LINKEDIN_ID
+    #rss = false                        # show rss icon
+
+[[menu.main]]
+name = "Home"
+url = "/"
+weight = 1
+
+[[menu.main]]
+name = "About"
+url = "/about"
+weight = 2
+
+[[menu.main]]
+name = "All posts"
+url = "/posts"
+weight = 3
+
+[[menu.main]]
+name = "Tags"
+url = "/tags"
+weight = 4
