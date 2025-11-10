@@ -20,7 +20,7 @@ If you'd like to collaborate, ask about infrastructure, or need help with media-
 
 Contact
 
-- Email: (add your email here)
+- Email: gnolasco@gtech.me
 - GitHub: https://github.com/gntech-dev
 
 Short bio
