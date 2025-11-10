@@ -2,6 +2,7 @@
 title: "About"
 date: 2025-11-10
 draft: false
+type: "page"
 ---
 
 I'm a Network and Telecommunication Engineering student with more than 10 years of practical experience working across networking, infrastructure, and systems administration.
