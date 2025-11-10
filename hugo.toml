@@ -1,12 +1,12 @@
 baseURL = 'https://blog.gntech.me/'
 languageCode = 'en-us'
-title = 'My New Hugo Site'
+title = 'GnTech Blogs'
 theme = 'paper'
 [params]
     mode="auto"
     useCDN=true
     subtitle = ""                       # Add a subtitle here
-    github = 'github.com/gntech-dev'           # github.com/YOUR_GITHUB_ID
+    github = 'gntech-dev'           # github.com/YOUR_GITHUB_ID
     #linkedin = 'YOUR_LINKEDIN_ID'       # linkedin.com/in/YOUR_LINKEDIN_ID
     #rss = false                        # show rss icon
 
