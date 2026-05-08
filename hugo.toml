@@ -1,3 +1,60 @@
-baseURL = 'https://example.org/'
-languageCode = 'en-us'
-title = 'My New Hugo Site'
+baseURL = "https://blog.gntech.dev"
+title = "GnTech Blog"
+theme = "PaperMod"
+languageCode = "en-us"
+[pagination]
+  pagerSize = 10
+enableInlineShortcodes = true
+enableRobotsTXT = true
+
+[params]
+  description = "Homelab, networking, automation, and infrastructure tinkering"
+  author = "GnTech"
+  ShowReadingTime = true
+  ShowShareButtons = true
+  ShowPostNavLinks = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowWordCount = true
+  ShowRssButtonInSectionTermList = true
+  UseHugoToc = true
+  disableSpecial1stPost = false
+  disableScrollToTop = false
+
+  [params.homeInfoParams]
+    Title = "GnTech Blog"
+    Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin."
+
+  [[params.socialIcons]]
+    name = "github"
+    url = "https://github.com/gntech-dev"
+
+  [[params.socialIcons]]
+    name = "rss"
+    url = "https://blog.gntech.dev/index.xml"
+
+  [params.assets]
+    disableHLJS = true
+    disableFingerprinting = true
+
+  [params.label]
+    text = "GnTech Blog"
+    icon = ""
+    iconHeight = 35
+
+[taxonomies]
+  category = "categories"
+  tag = "tags"
+  series = "series"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    noClasses = false
+    lineNos = true
+    style = "monokai"
+
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
