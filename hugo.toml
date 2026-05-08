@@ -2,10 +2,11 @@ baseURL = "https://blog.gntech.dev"
 title = "GnTech Blog"
 theme = "PaperMod"
 languageCode = "en-us"
-[pagination]
-  pagerSize = 10
 enableInlineShortcodes = true
 enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 10
 
 [params]
   description = "Homelab, networking, automation, and infrastructure tinkering"
@@ -17,6 +18,7 @@ enableRobotsTXT = true
   ShowCodeCopyButtons = true
   ShowWordCount = true
   ShowRssButtonInSectionTermList = true
+  ShowSearchButton = true
   UseHugoToc = true
   disableSpecial1stPost = false
   disableScrollToTop = false
@@ -42,6 +44,36 @@ enableRobotsTXT = true
     icon = ""
     iconHeight = 35
 
+[languages]
+  [languages.en]
+    languageName = "English"
+    weight = 1
+
+    [languages.en.menu]
+      [[languages.en.menu.main]]
+        identifier = "about"
+        name = "About"
+        url = "/about/"
+        weight = 10
+
+      [[languages.en.menu.main]]
+        identifier = "projects"
+        name = "Projects"
+        url = "/projects/"
+        weight = 20
+
+      [[languages.en.menu.main]]
+        identifier = "archives"
+        name = "Archives"
+        url = "/archives/"
+        weight = 30
+
+      [[languages.en.menu.main]]
+        identifier = "search"
+        name = "Search"
+        url = "/search/"
+        weight = 40
+
 [taxonomies]
   category = "categories"
   tag = "tags"
@@ -58,3 +90,7 @@ enableRobotsTXT = true
 
 [outputs]
   home = ["HTML", "RSS", "JSON"]
+
+[services]
+  [services.rss]
+    limit = 20
