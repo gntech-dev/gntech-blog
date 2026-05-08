@@ -64,9 +64,9 @@ Key specs to look for:
 - **SFP 1.25G/2.5G** — Most GPON sticks are 1.25G upstream, 2.5G downstream
 - **SC/APC connector** — Match your ISP's fiber termination (almost always SC/APC for GPON)
 
-{{< alert >}}
+> ⚠️
 **Warning:** GPON sticks need to be provisioned with your ISP's OLT. Some require the ISP's GPON serial number (SN) and/or PLOAM password to authenticate. You'll need to extract this from your existing ONT before swapping.
-{{< /alert >}}
+
 
 ---
 
@@ -141,9 +141,7 @@ Some GPON sticks can be configured through RouterOS using the `omcc` protocol. T
 
 For the full DIY approach, you can also use `otto` — an open-source tool for configuring GPON SFP sticks — running on a Linux host with the stick plugged in. But that requires a separate machine.
 
-{{< alert type="warning" >}}
-If your stick's GPON serial doesn't match what the OLT expects, the VLAN doesn't exist, or the OLT rejects the PLOAM password, the link will show "LOS" (Loss of Signal) even though the fiber is physically connected. This is the #1 troubleshooting gotcha.
-{{< /alert >}}
+> ⚠️ If your stick's GPON serial doesn't match what the OLT expects, the VLAN doesn't exist, or the OLT rejects the PLOAM password, the link will show "LOS" (Loss of Signal) even though the fiber is physically connected. This is the #1 troubleshooting gotcha.
 
 ---
 
