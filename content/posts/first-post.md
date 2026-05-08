@@ -1,8 +1,7 @@
 ---
 title: "Hello, World"
 description: "First post on the new blog"
-date: 2026-05-08T01:00:00-04:00
-draft: false
+date: 2026-05-06
 tags:
   - meta
 categories:

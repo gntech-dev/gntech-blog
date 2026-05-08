@@ -1,4 +1,4 @@
-baseURL = "https://blog.gntech.dev"
+baseURL = "https://blog.gntech.me"
 title = "GnTech Blog"
 theme = "PaperMod"
 languageCode = "en-us"
@@ -33,7 +33,7 @@ enableRobotsTXT = true
 
   [[params.socialIcons]]
     name = "rss"
-    url = "https://blog.gntech.dev/index.xml"
+    url = "https://blog.gntech.me/index.xml"
 
   [params.assets]
     disableHLJS = true

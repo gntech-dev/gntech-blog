@@ -1,9 +1,7 @@
 ---
 title: "Projects"
 description: "What I'm working on"
-date: 2026-05-08T01:00:00-04:00
-draft: false
-showToc: false
+date: 2026-05-08
 ---
 
 Things I've built and maintain. More details in individual posts.

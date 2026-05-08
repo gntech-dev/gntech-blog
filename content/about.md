@@ -1,9 +1,7 @@
 ---
 title: "About"
 description: "About this blog and who writes it"
-date: 2026-05-08T01:00:00-04:00
-draft: false
-showToc: false
+date: 2026-05-08
 ---
 
 Homelab tinkerer, network nerd, automation enthusiast. I write about what I build and what breaks along the way.
