@@ -1,7 +1,7 @@
 ---
-title: "Deploying Frigate NVR on Proxmox — Tapo C320WS, OpenVINO, and Telegram Alerts"
-description: "Setting up Frigate with hardware-accelerated object detection on a Proxmox LXC using OpenVINO, a Tapo C320WS camera, and a custom Telegram notifier."
-date: 2026-05-06
+title: "Deploying Frigate NVR on Proxmox — Tapo C100, OpenVINO, and Telegram Alerts"
+description: "Setting up Frigate with hardware-accelerated object detection on a Proxmox LXC using OpenVINO, a Tapo C100 camera, and a custom Telegram notifier."
+date: 2026-05-07
 tags:
   - frigate
   - proxmox
@@ -14,7 +14,7 @@ categories:
 
 Frigate is an open-source NVR built for real-time object detection with local processing. No cloud subscriptions, no vendor lock-in — just cameras, a GPU, and decent detection models.
 
-This is how I set it up on my Proxmox host, with a Tapo C320WS camera, Intel GPU inference via OpenVINO, MQTT eventing, and Telegram notifications.
+This is how I set it up on my Proxmox host, with a Tapo C100 camera, Intel GPU inference via OpenVINO, MQTT eventing, and Telegram notifications.
 
 ---
 
@@ -22,7 +22,7 @@ This is how I set it up on my Proxmox host, with a Tapo C320WS camera, Intel GPU
 
 ```
 ┌──────────────┐    RTSP (stream1/stream2)    ┌──────────────┐
-│  Tapo C320WS │ ───────────────────────────▶ │   Frigate    │
+│   Tapo C100  │ ───────────────────────────▶ │   Frigate    │
 │  10.0.50.101 │                              │  10.0.20.15  │
 └──────────────┘                              │              │
                     CCTV VLAN (50)            │  Web UI:5000 │
@@ -30,7 +30,7 @@ This is how I set it up on my Proxmox host, with a Tapo C320WS camera, Intel GPU
    ┌──────────┐                                │  WebRTC:8555 │
    │ Telegram │ ◀──── MQTT events ────────    │  go2rtc:1984 │
    │  alerts  │     (frigate-notifier)         │  API   :8971 │
-   └──────────�                                └──────┬───────┘
+   └──────────┘                                └──────┬───────┘
                                                        │
                                                ┌──────▼───────┐
                                                │  Mosquitto   │
@@ -38,7 +38,7 @@ This is how I set it up on my Proxmox host, with a Tapo C320WS camera, Intel GPU
                                                └──────────────┘
 ```
 
-The camera lives on VLAN 50 (CCTV). Frigate runs on a Debian LXC on VLAN 20 (LAB). R1's firewall allows Frigate's host (10.0.20.15) to reach the camera subnet — nothing else touches CCTV.
+The camera lives on VLAN 50 (CCTV). Frigate runs on a Debian LXC on VLAN 20 (LAB). The router's firewall allows Frigate's host (10.0.20.15) to reach the camera subnet — nothing else touches CCTV.
 
 ---
 
@@ -47,7 +47,7 @@ The camera lives on VLAN 50 (CCTV). Frigate runs on a Debian LXC on VLAN 20 (LAB
 Frigate runs on an **HP ProDesk G3 DM** (i5-7500T, 2 GB RAM) as a Debian LXC on Proxmox:
 
 ```
-IP:            10.0.20.15/24
+IP:            10.0.20.15/24 (VLAN 20 LAB)
 CPU:           Intel i5-7500T @ 2.70GHz (2 cores)
 RAM:           2 GB
 GPU:           Intel HD Graphics 630
@@ -55,17 +55,14 @@ Storage:       ~17 GB zvol + 8.5 GB for recordings
 OS:            Debian Bookworm
 ```
 
-Key requirement: the LXC needs `/dev/dri/renderD128` passed through for Intel GPU access. In Proxmox, this means:
+Key requirement: the LXC needs `/dev/dri/renderD128` passed through for Intel GPU access. In Proxmox, this means the LXC must be **privileged** (or use device cgroup), and you add to `/etc/pve/lxc/<CT_ID>.conf`:
 
-1. The LXC must be **privileged** (or use device cgroup)
-2. Add to `/etc/pve/lxc/<CT_ID>.conf`:
-   ```
-   lxc.cgroup2.devices.allow: c 226:128 rwm
-   lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file
-   ```
-3. Inside the container, the `render` group must match the host's GID
+```
+lxc.cgroup2.devices.allow: c 226:128 rwm
+lxc.mount.entry: /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file
+```
 
-This gave VAAPI and OpenVINO access inside the container for hardware-accelerated decoding and inference.
+Inside the container, the `render` group must match the host's GID. This gives VAAPI and OpenVINO access for hardware-accelerated decoding and inference.
 
 ---
 
@@ -137,14 +134,14 @@ log_dest file /mosquitto/log/mosquitto.log
 
 ## Camera
 
-The **Tapo C320WS** is an outdoor WiFi camera that speaks RTSP — no proprietary app required. RTSP must be enabled in the Tapo app's advanced settings.
+The **Tapo C100** is an indoor WiFi camera that speaks RTSP — no proprietary app required for local streaming. RTSP must be enabled in the Tapo app's advanced settings.
 
 | Setting | Value |
 |---------|-------|
-| IP | 10.0.50.101 (VLAN 50) |
-| Model | Tapo C320WS |
-| Stream 1 (main) | `rtsp://user:pass@10.0.50.101:554/stream1` — 1280×720 @ 5fps |
-| Stream 2 (sub) | `rtsp://user:pass@10.0.50.101:554/stream2` — lower res + audio |
+| IP | 10.0.50.101 (VLAN 50 CCTV) |
+| Model | Tapo C100 |
+| Stream 1 (main) | `rtsp://<user>:<pass>@10.0.50.101:554/stream1` — 1280×720 @ 5fps |
+| Stream 2 (sub) | `rtsp://<user>:<pass>@10.0.50.101:554/stream2` — lower res + audio |
 
 ---
 
@@ -176,7 +173,7 @@ cameras:
   tapo:
     ffmpeg:
       inputs:
-        - path: rtsp://user:pass@10.0.50.101:554/stream1
+        - path: rtsp://<user>:<pass>@10.0.50.101:554/stream1
           roles:
             - detect
             - record
@@ -205,12 +202,12 @@ record:
 go2rtc:
   streams:
     tapo:
-      - rtsp://user:pass@10.0.50.101:554/stream1
+      - rtsp://<user>:<pass>@10.0.50.101:554/stream1
 ```
 
 ### Why OpenVINO over Coral TPU?
 
-The i5-7500T's integrated HD 630 GPU is perfectly adequate for a single 720p camera doing person detection. A Coral TPU would be overkill and adds cost + USB passthrough complexity. OpenVINO at 300×300 inference runs comfortably at 5fps with minimal CPU load.
+The i5-7500T's integrated HD 630 GPU is perfectly adequate for a single 720p camera doing person detection. A Coral TPU would be overkill for this scale and adds cost + USB passthrough complexity. OpenVINO at 300×300 inference runs comfortably at 5fps with minimal CPU load.
 
 ---
 
@@ -218,19 +215,19 @@ The i5-7500T's integrated HD 630 GPU is perfectly adequate for a single 720p cam
 
 Frigate 0.17 ships with OpenVINO models. The config specifies `ssdlite_mobilenet_v2.xml` (300×300) which Frigate maps to the actual model path at runtime.
 
-For a single camera, this is fast enough. If you scale to multiple cameras, consider:
-- Bumping resolution to 320×320 for slightly better accuracy
-- Dropping to the `cpu` detector as fallback
-- Or adding a Coral TPU via USB
+For a single camera, this is fast enough. If scaling to multiple cameras:
+- Bump resolution to 320×320 for slightly better accuracy
+- Drop to the `cpu` detector as fallback
+- Or add a Coral TPU via USB
 
 ---
 
 ## Firewall Rules
 
-On the R1 MikroTik, Frigate traffic flows through these rules:
+On the router, Frigate traffic flows through these rules:
 
-- **All VLANs → server 10.0.20.15** — generic allow for any VLAN to reach Frigate host
-- **Frigate hosts (10.0.20.15) → CCTV VLAN (10.0.50.0/24)** — camera access
+- **All VLANs → server 10.0.20.15** — generic allow for any VLAN to reach the Frigate host
+- **Frigate hosts → CCTV VLAN** — `src-address=10.0.20.15 dst-address=10.0.50.0/24`
 - Inter-VLAN default-drop ensures nothing else reaches CCTV
 
 This means the Frigate container on VLAN 20 can pull RTSP from the camera on VLAN 50, while the camera itself is completely isolated from the rest of the network.
@@ -245,7 +242,7 @@ The notifier:
 - Listens for `frigate/events` for new detections
 - Downloads the snapshot and clip from Frigate's API
 - Sends them via Telegram bot
-- Filters to `person` detections only (not cats, leaves, shadows)
+- Filters to `person` detections only
 
 This gives real-time alerts when someone approaches the house, with video evidence, no cloud storage involved.
 
@@ -273,7 +270,7 @@ Storage is modest — ~150 MB for a few days with one camera at 720p. A dedicate
 
 **What to watch for:**
 - WiFi cameras drop frames under load — wire them if possible
-- The C320WS RTSP stream can disconnect; Frigate auto-reconnects but you'll lose a few seconds
+- The C100 RTSP stream can disconnect; Frigate auto-reconnects but you'll lose a few seconds
 - OpenVINO on iGPU uses system RAM as VRAM — 2 GB RAM is tight, 4 GB is safer
 - 720p detection at 5fps is fine for walkway coverage — adjust based on your scene
 
@@ -286,7 +283,3 @@ Next steps:
 - Move to Coral TPU if adding more cameras
 - Integrate with Home Assistant for richer automations
 - Semantic search for reviewing footage by description
-
----
-
-For the full raw config, docker compose, and firewall rules, see the internal docs at [gntech-docs](/).
