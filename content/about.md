@@ -2,18 +2,42 @@
 title: "About"
 description: "About this blog, the person behind it, and the automation that writes it"
 date: 2026-05-08
+lastmod: 2026-05-10
 ---
 
-GnTech is a homelab tinkerer, network nerd, and automation enthusiast. This blog is where I write down what I build — and what breaks along the way — so future-me can actually remember how I solved that weird GPON issue at 2 AM.
+Hi, I'm **Gerlin Nolasco** — the person behind **GnTech**.
+
+GnTech is my personal tech space where I document, test, and share practical knowledge about **networking, homelab infrastructure, servers, virtualization, automation, cybersecurity basics, and self-hosted services**.
+
+This blog is focused on real-world learning. Most of the content comes from things I personally build, break, fix, and improve in my own lab environment.
+
+My goal with GnTech is simple: create useful technical notes, guides, and project write-ups that can help others understand complex topics in a clear and practical way. I believe the best way to learn technology is by building it yourself. That is why this blog is not just theory — it is based on hands-on experience, troubleshooting, and continuous improvement.
+
+---
+
+### What You'll Find Here
+
+- **Networking & Routing** — MikroTik RouterOS, VLAN segmentation, IPv6, GPON/FTTH
+- **Virtualization** — Proxmox VE, container orchestration, VM management
+- **Self-Hosting** — Docker services, Cloudflare Tunnels, monitoring stacks, backup strategies
+- **Security** — Firewall design, VLAN isolation, IoT hardening, secure remote access
+- **Automation** — AI-assisted ops, scripting, Telegram bots, cron workflows
+- **Infrastructure** — Linux and Windows Server, storage, rack hardware, cabling
+
+---
 
 ### The Homelab Stack
 
+- **Router:** MikroTik CCR2004, ROS 7
 - **Servers:** Proxmox cluster (SRV1 primary)
-- **Network:** MikroTik E62iUGS-2axD5axT (R1), VLAN segmentation, GPON/FTTH, WireGuard VPN
 - **Containers:** Docker, LXC
 - **Automation:** OpenClaw Gateway (Zeny IA)
-- **Monitoring:** Frigate NVR, Uptime Kuma, various dashboards
+- **Monitoring:** Frigate NVR, Uptime Kuma, Grafana dashboards
 - **Cameras:** Tapo C100, Frigate with OpenVINO
+- **VPN:** WireGuard via MikroTik DDNS
+- **WAN:** Claro GPON FTTH via PPPoE on VLAN 100
+
+---
 
 ### About This Blog
 
@@ -23,14 +47,13 @@ The interesting part? Posts are drafted automatically by an AI assistant (Zeny I
 
 This is both a blog and a living experiment in AI-assisted infrastructure documentation.
 
-### What You'll Find Here
+---
 
-- Proxmox configurations and hard-won lessons
-- MikroTik RouterOS deep dives (VLANs, WireGuard, Cloudflare Tunnels, GPON)
-- Docker Compose patterns
-- Security camera and NVR setups
-- Network performance tuning
-- Automation workflows
-- Whatever else I'm tinkering with at 2 AM
+### Connect With Me
 
-Posts here are notes to future me — publicly posted in case they help someone else too.
+- GitHub: [gntech-dev](https://github.com/gntech-dev)
+- LinkedIn: [gnolascohernandez](https://www.linkedin.com/in/gnolascohernandez/)
+
+---
+
+**GnTech — Building, learning, and documenting technology one lab at a time.**
