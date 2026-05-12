@@ -4,6 +4,7 @@ theme = "PaperMod"
 languageCode = "en-us"
 enableInlineShortcodes = true
 enableRobotsTXT = true
+buildFuture = true
 
 [pagination]
   pagerSize = 10
