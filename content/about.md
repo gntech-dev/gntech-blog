@@ -28,12 +28,12 @@ My goal with GnTech is simple: create useful technical notes, guides, and projec
 
 ### The Homelab Stack
 
-- **Router:** MikroTik CCR2004, ROS 7
-- **Servers:** Proxmox cluster (SRV1 primary)
+- **Router:** MikroTik hAP ax S (R1) — Edge gateway, ROS 7.22.1
+- **Servers:** Proxmox cluster: G3 (i5-7500T), G4 (Ryzen 2400GE), G1 (i3-4030U), H1 (Xeon E-2276G remote)
 - **Containers:** Docker, LXC
 - **Automation:** OpenClaw Gateway (Zeny IA)
-- **Monitoring:** Frigate NVR, Uptime Kuma, Grafana dashboards
-- **Cameras:** Tapo C100, Frigate with OpenVINO
+- **Monitoring:** Uptime Kuma, Grafana dashboards
+- **Cameras:** Frigate NVR, Tapo C100
 - **VPN:** WireGuard via MikroTik DDNS
 - **WAN:** Claro GPON FTTH via PPPoE on VLAN 100
 

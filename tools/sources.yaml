@@ -1,0 +1,109 @@
+# Blog content sources for topic discovery
+# Used by the daily draft generator to find fresh topics
+
+feeds:
+  # Homelab & self-hosting
+  - name: selfh.st
+    url: https://selfh.st/feed.xml
+    type: rss
+    topics: [selfhosting, tools, automation]
+
+  - name: Hacker News (homelab)
+    url: https://hn.algolia.com/api/v1/search?query=homelab+proxmox+docker&tags=story&hitsPerPage=10
+    type: algolia
+    topics: [homelab, general]
+
+  - name: r/homelab
+    url: https://www.reddit.com/r/homelab/hot.json?limit=15
+    type: reddit
+    topics: [homelab, networking]
+
+  - name: r/selfhosted
+    url: https://www.reddit.com/r/selfhosted/hot.json?limit=15
+    type: reddit
+    topics: [selfhosting, docker]
+
+  # Networking / MikroTik
+  - name: MikroTik Blog
+    url: https://blog.mikrotik.com/feed
+    type: rss
+    topics: [mikrotik, routing]
+
+  - name: r/mikrotik
+    url: https://www.reddit.com/r/mikrotik/hot.json?limit=10
+    type: reddit
+    topics: [mikrotik, networking]
+
+  - name: StubArea51 (MikroTik)
+    url: https://stubarea51.net/feed/
+    type: rss
+    topics: [mikrotik, lab]
+
+  # Linux / Proxmox
+  - name: Proxmox Blog
+    url: https://forum.proxmox.com/forum-8/news.rss
+    type: rss
+    topics: [proxmox, virtualization]
+
+  - name: Phoronix (Linux)
+    url: https://www.phoronix.com/rss.php
+    type: rss
+    topics: [linux, performance]
+
+  - name: r/Proxmox
+    url: https://www.reddit.com/r/Proxmox/hot.json?limit=10
+    type: reddit
+    topics: [proxmox, zfs]
+
+  # Docker / containers
+  - name: Docker Blog
+    url: https://www.docker.com/blog/feed/
+    type: rss
+    topics: [docker, containers]
+
+  # Security
+  - name: r/netsec
+    url: https://www.reddit.com/r/netsec/hot.json?limit=10
+    type: reddit
+    topics: [security, networking]
+
+  # Fibre / GPON
+  - name: DSLReports
+    url: https://www.dslreports.com/forum/rss/fr
+    type: rss
+    topics: [fiber, isp, gpon]
+
+  # Performance / benchmarking
+  - name: ServeTheHome
+    url: https://www.servethehome.com/feed/
+    type: rss
+    topics: [hardware, servers, homelab]
+
+search_queries:
+  - query: "proxmox tips 2026"
+    days_old: 30
+    topics: [proxmox]
+  - query: "mikrotik routeros 7 best practices"
+    days_old: 60
+    topics: [mikrotik]
+  - query: "docker compose production"
+    days_old: 30
+    topics: [docker]
+  - query: "homelab network segmentation vlan"
+    days_old: 60
+    topics: [networking]
+  - query: "linux performance tuning"
+    days_old: 30
+    topics: [linux]
+  - query: "selfhosted alternatives 2026"
+    days_old: 30
+    topics: [selfhosting]
+  - query: "cloudflare tunnel docker"
+    days_old: 60
+    topics: [cloudflare, networking]
+  - query: "zfs best practices"
+    days_old: 90
+    topics: [storage, proxmox]
+  - query: "wireguard performance optimization"
+    days_old: 60
+    topics: [vpn, networking]
