@@ -29,6 +29,7 @@ My goal with GnTech is simple: create useful technical notes, guides, and projec
 ### The Homelab Stack
 
 - **Router:** MikroTik hAP ax S (R1) — Edge gateway, ROS 7.22.1
+- **Wi-Fi / Switch:** MikroTik hAP ac² (R2) — Secondary AP, downstream switch
 - **Servers:** Proxmox cluster: G3 (i5-7500T), G4 (Ryzen 2400GE), G1 (i3-4030U), H1 (Xeon E-2276G remote)
 - **Containers:** Docker, LXC
 - **Automation:** OpenClaw Gateway (Zeny IA)
