@@ -399,3 +399,4 @@ The same patterns work across all RouterOS devices — RB5009, RB4011,
 hAP ax², CRS3xx switches. Bridge VLAN filtering is the standard now.
 Skip the old `vlan` interface on physical ports approach; the bridge
 method is faster, cleaner, and the only path to hardware offloading.
+
