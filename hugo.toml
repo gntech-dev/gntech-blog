@@ -12,6 +12,7 @@ buildFuture = true
 [params]
   description = "Homelab, networking, automation, and infrastructure tinkering"
   author = "GnTech"
+
   ShowReadingTime = true
   ShowShareButtons = true
   ShowPostNavLinks = true
@@ -27,6 +28,10 @@ buildFuture = true
   [params.homeInfoParams]
     Title = "GnTech Blog"
     Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin."
+
+  [params.analytics]
+    [params.analytics.google]
+      SiteVerificationTag = "_PS-pexL-9ALRje-eQz9Mx8Q81_8_TNtVaIuIH4AFfs"
 
   [[params.socialIcons]]
     name = "github"
