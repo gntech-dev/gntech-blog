@@ -58,10 +58,6 @@ isolation between them.
 | 40 | guest | 10.0.40.0/24 | Guest WiFi — internet only |
 | 50 | home | 10.0.50.0/24 | Personal devices, laptops, phones |
 | — | disabled | — | VLAN 1 native/untagged is disabled for security (see note below) |
-| 20 | servers | 10.0.20.0/24 | Docker hosts, NAS, VMs |
-| 30 | iot | 10.0.30.0/24 | Cameras, smart plugs, sensors |
-| 40 | guest | 10.0.40.0/24 | Guest WiFi — internet only |
-| 50 | home | 10.0.50.0/24 | Personal devices, laptops, phones |
 
 ### Firewall Rules (Intended Behavior)
 
