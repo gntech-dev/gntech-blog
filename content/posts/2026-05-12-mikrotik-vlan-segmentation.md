@@ -52,8 +52,12 @@ isolation between them.
 
 | VLAN | Name | Subnet | Purpose |
 |------|------|--------|---------|
-| 1 | Native (untagged) | 10.0.10.0/24 | Management (router, switches, APs) |
 | 10 | mgmt | 10.0.10.0/24 | Host management, Proxmox, iDRAC, IPMI |
+| 20 | servers | 10.0.20.0/24 | Docker hosts, NAS, VMs |
+| 30 | iot | 10.0.30.0/24 | Cameras, smart plugs, sensors |
+| 40 | guest | 10.0.40.0/24 | Guest WiFi — internet only |
+| 50 | home | 10.0.50.0/24 | Personal devices, laptops, phones |
+| — | disabled | — | VLAN 1 native/untagged is disabled for security (see note below) |
 | 20 | servers | 10.0.20.0/24 | Docker hosts, NAS, VMs |
 | 30 | iot | 10.0.30.0/24 | Cameras, smart plugs, sensors |
 | 40 | guest | 10.0.40.0/24 | Guest WiFi — internet only |
@@ -91,24 +95,38 @@ routing through the CPU.
 /interface bridge port add bridge=bridge1 interface=ether5
 /interface bridge port add bridge=bridge1 interface=sfp1
 
-# Tag bridge ports as trunk (ports that carry multiple VLANs)
-/interface bridge port set [find interface=ether2] tag=yes
-/interface bridge port set [find interface=ether3] tag=yes
-/interface bridge port set [find interface=ether4] tag=yes
-/interface bridge port set [find interface=ether5] tag=yes
-/interface bridge port set [find interface=sfp1] tag=yes
 ```
 
-Wait — `tag=yes` on bridge ports configures the port as an **access port**
-in the default VLAN (usually VLAN 1), not a trunk. In RouterOS 7, the
-correct approach is different. Let me clarify:
+> **Important:** The `tag=yes` setting above is the old RouterOS 6 syntax that
+> configures ports as **access ports** in VLAN 1. In RouterOS 7, we use bridge VLAN
+> filtering instead. The correct setup follows below.
+
+### Disable VLAN 1 (Security) {#disable-vlan1}
+
+VLAN 1 is the **default native VLAN** on virtually all switches and routers. It is a well-known attack vector:
+
+- **VLAN hopping** — attackers can craft double-tagged 802.1Q frames to jump from an access port (VLAN 1) to any other VLAN the trunk carries.
+- **Default management** — many devices default to VLAN 1 for management traffic, creating a shared broadcast domain with user devices.
+- **Security audit finding** — any proper network audit flags VLAN 1 being in use.
+
+Best practice: **disable VLAN 1 entirely** on the bridge and assign an explicit PVID to every port.
+
+```bash
+# Remove VLAN 1 from the bridge VLAN table (prevents untagged VLAN 1 traffic)
+/interface bridge vlan remove [find vlan-ids=1]
+
+# Set a default PVID on every port (prevents falling back to VLAN 1)
+/interface bridge port set [find] pvid=10
+```
+
+This forces all untagged traffic to be explicitly assigned to a known VLAN. No port carries VLAN 1 by default.
 
 ### Bridge Port Modes
 
 | Mode | Setting | Behavior |
 |------|---------|----------|
-| **Access** | `pvid=<vlan>` + no VLAN tag in bridge VLAN table for this port | Port accepts untagged traffic on PVID VLAN |
-| **Trunk** | `tag=yes` + VLAN entries with `tagged=<port>` | Port carries multiple tagged VLANs |
+| **Access** | `pvid=<vlan>` + VLAN entry with `untagged=<port>` | Port accepts untagged traffic on PVID VLAN |
+| **Trunk** | No PVID + VLAN entries with `tagged=<port>` | Port carries multiple tagged VLANs |
 
 For our setup:
 - `ether2` → trunk to the managed switch
@@ -116,8 +134,8 @@ For our setup:
 - `sfp1` → trunk to another switch or AP
 
 ```bash
-# Trunk port — carries all VLANs tagged
-/interface bridge port add bridge=bridge1 interface=ether2 tag=yes
+# Trunk port
+/interface bridge port add bridge=bridge1 interface=ether2
 
 # Access ports — assign a VLAN per port
 /interface bridge port add bridge=bridge1 interface=ether3 pvid=10   # mgmt
@@ -125,7 +143,10 @@ For our setup:
 /interface bridge port add bridge=bridge1 interface=ether5 pvid=50   # Home
 
 # SFP trunk
-/interface bridge port add bridge=bridge1 interface=sfp1 tag=yes
+/interface bridge port add bridge=bridge1 interface=sfp1
+
+# Remove VLAN 1 from bridge VLAN table (disable native VLAN)
+/interface bridge vlan remove [find vlan-ids=1]
 
 # Create bridge VLAN entries
 /interface bridge vlan add bridge=bridge1 vlan-ids=10 tagged=bridge1,ether2,sfp1 untagged=ether3
@@ -359,7 +380,7 @@ Check hardware offloading:
 ```
 
 If a port shows `hardware-offload=no`, something is preventing it
-(Common causes: datapath ACLs, untagged VLAN on a port with `tag=yes`,
+(Common causes: datapath ACLs, untagged VLAN on a port with missing PVID,
 or a port with `pvid` set to 0).
 
 **For maximum throughput:** Keep VLAN 1 (native/untagged) off the
