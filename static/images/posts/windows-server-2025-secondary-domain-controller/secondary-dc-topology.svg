@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Windows Server 2025 Secondary Domain Controller Topology</title>
+  <desc id="desc">Diagram showing DC01 and DC02 as redundant Windows Server 2025 domain controllers with AD replication and DNS for clients.</desc>
+  <rect width="1200" height="675" fill="#0b1220"/>
+  <defs>
+    <linearGradient id="blue" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#1d4ed8"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <linearGradient id="green" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#047857"/><stop offset="1" stop-color="#111827"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.35"/></filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#93c5fd"/></marker>
+  </defs>
+  <text x="60" y="70" fill="#f8fafc" font-family="Inter,Segoe UI,Arial" font-size="34" font-weight="700">Secondary Domain Controller</text>
+  <text x="60" y="108" fill="#93c5fd" font-family="Inter,Segoe UI,Arial" font-size="20">Windows Server 2025 AD DS redundancy, DNS, and replication validation</text>
+
+  <rect x="80" y="210" width="300" height="185" rx="20" fill="url(#blue)" stroke="#60a5fa" stroke-width="2" filter="url(#shadow)"/>
+  <text x="120" y="255" fill="#fff" font-family="Inter,Segoe UI,Arial" font-size="28" font-weight="700">DC01</text>
+  <text x="120" y="292" fill="#bfdbfe" font-family="Inter,Segoe UI,Arial" font-size="18">Existing domain controller</text>
+  <text x="120" y="330" fill="#e5e7eb" font-family="Inter,Segoe UI,Arial" font-size="17">10.0.20.10</text>
+  <text x="120" y="360" fill="#e5e7eb" font-family="Inter,Segoe UI,Arial" font-size="17">AD DS · DNS · GC</text>
+
+  <rect x="820" y="210" width="300" height="185" rx="20" fill="url(#green)" stroke="#34d399" stroke-width="2" filter="url(#shadow)"/>
+  <text x="860" y="255" fill="#fff" font-family="Inter,Segoe UI,Arial" font-size="28" font-weight="700">DC02</text>
+  <text x="860" y="292" fill="#bbf7d0" font-family="Inter,Segoe UI,Arial" font-size="18">Additional domain controller</text>
+  <text x="860" y="330" fill="#e5e7eb" font-family="Inter,Segoe UI,Arial" font-size="17">10.0.20.11</text>
+  <text x="860" y="360" fill="#e5e7eb" font-family="Inter,Segoe UI,Arial" font-size="17">AD DS · DNS · GC</text>
+
+  <path d="M395 280 C500 215, 700 215, 805 280" fill="none" stroke="#93c5fd" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M805 330 C700 395, 500 395, 395 330" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <text x="520" y="245" fill="#dbeafe" font-family="Inter,Segoe UI,Arial" font-size="18">AD replication</text>
+  <text x="520" y="418" fill="#dcfce7" font-family="Inter,Segoe UI,Arial" font-size="18">DNS + SYSVOL validation</text>
+
+  <rect x="445" y="120" width="310" height="88" rx="16" fill="#111827" stroke="#fbbf24" stroke-width="2"/>
+  <text x="480" y="155" fill="#fff" font-family="Inter,Segoe UI,Arial" font-size="22" font-weight="700">Domain</text>
+  <text x="480" y="185" fill="#fde68a" font-family="Inter,Segoe UI,Arial" font-size="18">corp.gntech.local</text>
+
+  <rect x="445" y="485" width="310" height="95" rx="16" fill="#111827" stroke="#a78bfa" stroke-width="2"/>
+  <text x="480" y="525" fill="#fff" font-family="Inter,Segoe UI,Arial" font-size="22" font-weight="700">Clients DNS</text>
+  <text x="480" y="555" fill="#ddd6fe" font-family="Inter,Segoe UI,Arial" font-size="17">Preferred: DC01 · Alternate: DC02</text>
+
+  <text x="60" y="628" fill="#64748b" font-family="Inter,Segoe UI,Arial" font-size="16">Verify with dcdiag, repadmin, nltest, DNS SRV lookups, SYSVOL/NETLOGON checks, GC checks, and client failover tests.</text>
+</svg>
