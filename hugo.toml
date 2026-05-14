@@ -2,6 +2,8 @@ baseURL = "https://blog.gntech.me"
 title = "GnTech Blog"
 theme = "PaperMod"
 languageCode = "en-us"
+defaultContentLanguage = "en"
+defaultContentLanguageInSubdir = false
 enableInlineShortcodes = true
 enableRobotsTXT = true
 buildFuture = true
@@ -53,8 +55,16 @@ buildFuture = true
 
 [languages]
   [languages.en]
+    contentDir = "content"
     languageName = "English"
+    languageCode = "en-us"
     weight = 1
+
+    [languages.en.params]
+      description = "Homelab, networking, automation, and infrastructure tinkering"
+      [languages.en.params.homeInfoParams]
+        Title = "GnTech Blog"
+        Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin."
 
     [languages.en.menu]
       [[languages.en.menu.main]]
@@ -79,6 +89,43 @@ buildFuture = true
         identifier = "search"
         name = "Search"
         url = "/search/"
+        weight = 40
+
+  [languages.es]
+    contentDir = "content/es"
+    languageName = "Español"
+    languageCode = "es"
+    weight = 2
+
+    [languages.es.params]
+      description = "Homelab, redes, automatización e infraestructura"
+      [languages.es.params.homeInfoParams]
+        Title = "GnTech Blog"
+        Content = "Proxmox, MikroTik, Docker, Linux y algún que otro agujero de conejo. Escrito por un gremlin del homelab."
+
+    [languages.es.menu]
+      [[languages.es.menu.main]]
+        identifier = "about"
+        name = "Acerca de"
+        url = "/es/about/"
+        weight = 10
+
+      [[languages.es.menu.main]]
+        identifier = "projects"
+        name = "Proyectos"
+        url = "/es/projects/"
+        weight = 20
+
+      [[languages.es.menu.main]]
+        identifier = "archives"
+        name = "Archivos"
+        url = "/es/archives/"
+        weight = 30
+
+      [[languages.es.menu.main]]
+        identifier = "search"
+        name = "Buscar"
+        url = "/es/search/"
         weight = 40
 
 [taxonomies]
