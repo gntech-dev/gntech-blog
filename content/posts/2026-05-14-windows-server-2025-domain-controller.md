@@ -36,6 +36,31 @@ troubleshoot later.
 
 ![Windows Server 2025 AD DS lab topology](/images/posts/windows-server-2025-domain-controller/ad-ds-lab-topology.svg)
 
+> **Image placeholders to add later:**
+>
+> - Screenshot: Server Manager dashboard before AD DS installation
+> - Screenshot: static IP and DNS settings on `DC01`
+> - Screenshot: Add Roles and Features wizard with **Active Directory Domain Services** selected
+> - Screenshot: AD DS post-deployment warning / **Promote this server to a domain controller**
+> - Screenshot: Deployment Configuration page for new forest `corp.gntech.local`
+> - Screenshot: DNS Options / Additional Options pages during promotion
+> - Screenshot: final prerequisites check before install
+> - Screenshot: Active Directory Users and Computers showing created OUs
+> - Screenshot: DNS Manager showing `_msdcs` and SRV records
+> - Screenshot: successful `dcdiag`, `repadmin`, and client domain join verification
+
+## GUI vs Server Core Path
+
+This guide covers both install styles:
+
+- **Desktop Experience / GUI:** use Server Manager, Settings, DNS Manager,
+  Active Directory Users and Computers, and the AD DS configuration wizard.
+- **Server Core / automation:** use PowerShell only. This is the cleaner path
+  for repeatable homelab builds, unattended deployment, and documentation.
+
+Use the GUI path when you want screenshots or you are learning the flow. Use
+the PowerShell path when you want a build you can reproduce exactly.
+
 ## Target Lab Design
 
 Example values used in this guide:
@@ -143,6 +168,26 @@ let domain members sync from the domain hierarchy.
 
 ## Install AD DS and DNS
 
+### GUI: Install the Role with Server Manager
+
+On Windows Server 2025 Desktop Experience:
+
+1. Open **Server Manager**.
+2. Go to **Manage → Add Roles and Features**.
+3. Choose **Role-based or feature-based installation**.
+4. Select the local server `DC01`.
+5. Select **Active Directory Domain Services**.
+6. Accept the required management tools.
+7. Continue through the wizard and click **Install**.
+
+> **Image placeholder:** Add screenshot of Server Manager role selection with
+> **Active Directory Domain Services** checked.
+
+The role install does not make the server a domain controller yet. It only
+installs the AD DS binaries and management tools.
+
+### Server Core / PowerShell: Install the Role
+
 Install the AD DS role with management tools:
 
 ```powershell
@@ -166,6 +211,29 @@ binaries. Promotion creates the forest/domain and configures DNS,
 SYSVOL, NTDS, Kerberos, and the first domain controller objects.
 
 ## Promote the Server to a New Forest
+
+### GUI: Promote with the AD DS Wizard
+
+After role installation, Server Manager shows a notification flag.
+
+1. Click the notification flag.
+2. Select **Promote this server to a domain controller**.
+3. Choose **Add a new forest**.
+4. Enter the root domain name: `corp.gntech.local`.
+5. Keep **Domain Name System (DNS) server** checked.
+6. Set the Directory Services Restore Mode password.
+7. Confirm the NetBIOS name: `CORP`.
+8. Review paths for database, logs, and SYSVOL.
+9. Run the prerequisites check.
+10. Click **Install** and let the server reboot.
+
+> **Image placeholder:** Add screenshot of the Deployment Configuration page
+> showing **Add a new forest** and `corp.gntech.local`.
+>
+> **Image placeholder:** Add screenshot of the prerequisites check passing
+> before clicking **Install**.
+
+### Server Core / PowerShell: Promote with `Install-ADDSForest`
 
 For a new lab forest:
 
@@ -229,6 +297,18 @@ resolving to `10.0.20.10`.
 Clients should use the DC for DNS. The DC can forward unknown internet
 queries to upstream resolvers.
 
+### GUI: DNS Manager
+
+1. Open **Server Manager → Tools → DNS**.
+2. Right-click `DC01` → **Properties**.
+3. Open the **Forwarders** tab.
+4. Add `1.1.1.1` and `9.9.9.9`, or your internal resolver.
+
+> **Image placeholder:** Add screenshot of DNS Manager forwarders configured on
+> `DC01`.
+
+### Server Core / PowerShell
+
 ```powershell
 Add-DnsServerForwarder -IPAddress 1.1.1.1,9.9.9.9 -PassThru
 Get-DnsServerForwarder
@@ -239,6 +319,21 @@ forward to that instead. The rule is simple: clients ask AD DNS first;
 AD DNS either answers internal records or forwards external queries.
 
 ## Create a Basic OU Structure
+
+### GUI: Create OUs in Active Directory Users and Computers
+
+On Desktop Experience:
+
+1. Open **Server Manager → Tools → Active Directory Users and Computers**.
+2. Expand `corp.gntech.local`.
+3. Right-click the domain → **New → Organizational Unit**.
+4. Create `Servers`, `Workstations`, `Users`, `Groups`, and `Service Accounts`.
+5. Right-click `Users` → **New → User** to create `test.user`.
+
+> **Image placeholder:** Add screenshot of Active Directory Users and Computers
+> showing the OU layout after creation.
+
+### Server Core / PowerShell: Create OUs and Users
 
 Install the AD PowerShell module if it is not loaded automatically:
 

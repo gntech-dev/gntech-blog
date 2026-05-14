@@ -36,6 +36,32 @@ controller guide first.
 
 ![Windows Server 2025 secondary domain controller topology](/images/posts/windows-server-2025-secondary-domain-controller/secondary-dc-topology.svg)
 
+> **Image placeholders to add later:**
+>
+> - Screenshot: `DC01` health checks before adding `DC02`
+> - Screenshot: `DC02` static IP and DNS pointing to `DC01`
+> - Screenshot: Server Manager role selection for AD DS on `DC02`
+> - Screenshot: AD DS wizard **Add a domain controller to an existing domain**
+> - Screenshot: Domain Controller Options with DNS and Global Catalog enabled
+> - Screenshot: Replication source / Additional Options page
+> - Screenshot: prerequisites check before promoting `DC02`
+> - Screenshot: Active Directory Users and Computers showing both DCs
+> - Screenshot: DNS Manager showing replicated zones on `DC02`
+> - Screenshot: `repadmin`, `dcdiag`, SYSVOL/NETLOGON, and client failover validation
+
+## GUI vs Server Core Path
+
+This guide covers both install styles:
+
+- **Desktop Experience / GUI:** use Server Manager, AD DS Configuration
+  Wizard, DNS Manager, Active Directory Users and Computers, and Active
+  Directory Sites and Services.
+- **Server Core / automation:** use PowerShell commands for repeatable builds,
+  remote administration, and clean documentation.
+
+The GUI path is useful for screenshots and learning the workflow. The Server
+Core path is better for real repeatable infrastructure.
+
 ## Target Design
 
 Example values used here:
@@ -195,6 +221,22 @@ True
 
 ## Install AD DS on DC02
 
+### GUI: Install the Role with Server Manager
+
+On Windows Server 2025 Desktop Experience:
+
+1. Open **Server Manager**.
+2. Go to **Manage → Add Roles and Features**.
+3. Choose **Role-based or feature-based installation**.
+4. Select `DC02`.
+5. Select **Active Directory Domain Services**.
+6. Accept the required management tools.
+7. Click **Install**.
+
+> **Image placeholder:** Add screenshot of AD DS role selection on `DC02`.
+
+### Server Core / PowerShell: Install the Role
+
 Install the AD DS role and tools:
 
 ```powershell
@@ -214,6 +256,32 @@ Expected:
 ```
 
 ## Promote DC02 as an Additional Domain Controller
+
+### GUI: Promote with the AD DS Wizard
+
+After the AD DS role installs, Server Manager shows a notification flag.
+
+1. Click the notification flag.
+2. Select **Promote this server to a domain controller**.
+3. Choose **Add a domain controller to an existing domain**.
+4. Enter `corp.gntech.local` and provide domain admin credentials.
+5. Keep **Domain Name System (DNS) server** checked.
+6. Keep **Global Catalog (GC)** checked.
+7. Set the Directory Services Restore Mode password for `DC02`.
+8. Pick a replication source or leave it automatic.
+9. Review paths and run the prerequisites check.
+10. Click **Install** and let `DC02` reboot.
+
+> **Image placeholder:** Add screenshot of the Deployment Configuration page
+> showing **Add a domain controller to an existing domain**.
+>
+> **Image placeholder:** Add screenshot of Domain Controller Options with DNS
+> and Global Catalog checked.
+>
+> **Image placeholder:** Add screenshot of the prerequisites check before
+> installation.
+
+### Server Core / PowerShell: Promote with `Install-ADDSDomainController`
 
 Use `Install-ADDSDomainController`. This adds a domain controller to an
 existing domain, instead of creating a new forest.
@@ -492,11 +560,16 @@ Set-DnsClientServerAddress \
 
 ## AD Sites and Services Cleanup
 
+### GUI: Active Directory Sites and Services
+
 Open Active Directory Sites and Services:
 
 ```powershell
 dssite.msc
 ```
+
+> **Image placeholder:** Add screenshot of Active Directory Sites and Services
+> showing `DC01` and `DC02` under the correct site.
 
 Check:
 
