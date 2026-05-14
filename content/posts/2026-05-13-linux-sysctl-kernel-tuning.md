@@ -1,6 +1,6 @@
 ---
 title: "Linux Sysctl Kernel Tuning for Homelabs — Network, Memory, and Docker Performance"
-description: "Practical Linux kernel tuning via sysctl for homelab servers — TCP buffers, BBR, connection handling, OOM management, fs.inotify limits, and Docker-specific sysctls. Real configs, no theory."
+description: "Complete Linux sysctl kernel tuning guide for homelabs — optimize TCP buffers, BBR congestion control, OOM killer, fs.inotify, and Docker performance. Real commands, real configs."
 date: 2026-05-13T11:00:00-04:00
 tags:
   - linux
@@ -8,6 +8,14 @@ tags:
   - docker
   - networking
   - proxmox
+keywords:
+  - Linux kernel tuning
+  - sysctl optimization
+  - server performance homelab
+  - TCP BBR buffer
+  - Docker sysctl settings
+summary: "Complete Linux sysctl kernel tuning guide for homelab servers. Network buffers, BBR congestion control, OOM management, fs.inotify limits, and Docker-specific sysctl configs."
+canonical: "https://gntech.dev/posts/linux-sysctl-kernel-tuning-for-homelabs/"
 ---
 
 The Linux kernel ships with conservative defaults. They're chosen to work

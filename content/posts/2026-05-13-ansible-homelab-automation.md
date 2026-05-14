@@ -1,6 +1,6 @@
 ---
 title: "Ansible Homelab Automation — Infrastructure as Code for Docker and Linux Servers"
-description: "Practical Ansible setup for homelabs — playbook structure, Docker container management, system configuration, secrets with ansible-vault, and a full project template. No theory, just working configs."
+description: "Practical Ansible homelab automation — infrastructure as code for Docker and Linux servers. Playbook structure, community.docker, ansible-vault, Jinja2 templates, and full project template."
 date: 2026-05-13T16:30:00-04:00
 tags:
   - automation
@@ -8,6 +8,14 @@ tags:
   - linux
   - devops
   - homelab
+keywords:
+  - Ansible homelab automation
+  - infrastructure as code homelab
+  - Docker Ansible deployment
+  - ansible-vault secrets
+  - Linux server configuration automation
+summary: "Practical Ansible homelab automation guide — playbook structure, Docker container deployment with community.docker, ansible-vault secrets, Jinja2 templates, Git workflow, and full project template."
+canonical: "https://gntech.dev/posts/ansible-homelab-automation/"
 ---
 
 If you manage more than two Linux servers in your homelab, you've

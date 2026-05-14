@@ -1,6 +1,6 @@
 ---
 title: "Docker Container Resource Limits — CPU, Memory, and I/O Constraints for Homelabs"
-description: "Why every container needs resource limits in a homelab. Practical Docker Compose configs for CPU pinning, memory caps, swap control, block I/O throttling, and cgroup v2. Real examples for Plex, Postgres, Frigate, and more."
+description: "Master Docker container resource limits for homelabs — CPU pinning, memory caps, swap control, block I/O throttling, cgroup v2. Real Compose configs for Postgres, Plex, Frigate, and Jellyfin."
 date: 2026-05-13T15:00:00-04:00
 tags:
   - docker
@@ -8,6 +8,14 @@ tags:
   - performance
   - homelab
   - devops
+keywords:
+  - Docker container limits
+  - CPU memory I/O constraints
+  - Docker Compose resource management
+  - cgroup v2 Docker
+  - homelab Docker optimization
+summary: "Practical Docker container resource limits guide for homelabs — CPU quota/pinning, memory hard/soft limits, swap control, block I/O throttling, cgroup v2 differences, and Docker Compose examples."
+canonical: "https://gntech.dev/posts/docker-container-resource-limits/"
 ---
 
 If you run more than ten containers on a single Docker host — and in a

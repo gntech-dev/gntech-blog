@@ -480,16 +480,17 @@ x-logging: &logging
       max-size: "10m"
       max-file: "3"
 
+x-base: &base
+  <<: [*common-labels, *logging]
+
 services:
   postgres:
     image: postgres:16-alpine
-    <<: *common-labels
-    <<: *logging
+    <<: *base
 
   api:
     image: myapi:latest
-    <<: *common-labels
-    <<: *logging
+    <<: *base
     depends_on:
       postgres:
         condition: service_healthy
@@ -683,9 +684,14 @@ x-logging: &logging
 x-restart-policy: &restart-policy
   restart: unless-stopped
 
-x-networks: &networks
-  networks:
-    - proxy
+# Combined base anchor — merge multiple anchors together
+x-base: &base
+  restart: unless-stopped
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
 
 secrets:
   db_root_password:
@@ -698,8 +704,7 @@ secrets:
 services:
   postgres:
     image: postgres:16-alpine
-    <<: *restart-policy
-    <<: *logging
+    <<: *base
     volumes:
       - pgdata:/var/lib/postgresql/data
     secrets:
@@ -719,8 +724,7 @@ services:
 
   app:
     image: myapp:latest
-    <<: *restart-policy
-    <<: *logging
+    <<: *base
     depends_on:
       postgres:
         condition: service_healthy
@@ -740,19 +744,20 @@ services:
       resources:
         limits:
           memory: 256M
-    <<: *networks
+    networks:
+      - proxy
 
   traefik:
     image: traefik:v3.3
-    <<: *restart-policy
-    <<: *logging
+    <<: *base
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./config/traefik:/etc/traefik
-    <<: *networks
+    networks:
+      - proxy
     depends_on:
       app:
         condition: service_healthy
