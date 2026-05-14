@@ -126,8 +126,12 @@ healthchecks, you get real ordering.
 services:
   postgres:
     image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: appdb
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -145,7 +149,7 @@ services:
       retries: 3
       start_period: 10s
     environment:
-      DATABASE_URL: "postgres://appuser:password@postgres:5432/appdb"
+      DATABASE_URL: "postgres://postgres@postgres:5432/appdb"
 
   nginx:
     image: nginx:alpine
@@ -374,9 +378,11 @@ services:
     secrets:
       - db_password
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: appdb
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
       # This works because postgres reads POSTGRES_PASSWORD_FILE at init
 
   api:
@@ -385,9 +391,9 @@ services:
       - db_password
       - api_key
     environment:
-      DATABASE_URL: "postgresql://appuser@postgres:5432/appdb"
-      # Read password from secret
-      # The app reads /run/secrets/db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      DATABASE_URL: "postgresql://postgres@postgres:5432/appdb"
+      # The app reads /run/secrets/db_password for the password
       API_KEY_FILE: /run/secrets/api_key
 ```
 
@@ -674,17 +680,7 @@ Here's a real compose.yml that combines all the patterns:
 
 ```yaml
 # compose.yml — Production homelab stack
-x-logging: &logging
-  logging:
-    driver: "json-file"
-    options:
-      max-size: "10m"
-      max-file: "3"
-
-x-restart-policy: &restart-policy
-  restart: unless-stopped
-
-# Combined base anchor — merge multiple anchors together
+# Combined base config for restart policy + logging
 x-base: &base
   restart: unless-stopped
   logging:
@@ -694,10 +690,8 @@ x-base: &base
       max-file: "3"
 
 secrets:
-  db_root_password:
-    file: ./secrets/db_root_password.txt
-  db_app_password:
-    file: ./secrets/db_app_password.txt
+  db_password:
+    file: ./secrets/db_password.txt
   api_key:
     file: ./secrets/api_key.txt
 
@@ -708,13 +702,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     secrets:
-      - db_root_password
+      - db_password
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_root_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       POSTGRES_USER: postgres
       POSTGRES_DB: appdb
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -729,10 +723,11 @@ services:
       postgres:
         condition: service_healthy
     secrets:
-      - db_app_password
+      - db_password
       - api_key
     environment:
-      DATABASE_URL: "postgresql://appuser@postgres:5432/appdb"
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      DATABASE_URL: "postgresql://postgres@postgres:5432/appdb"
       API_KEY_FILE: /run/secrets/api_key
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
@@ -745,6 +740,7 @@ services:
         limits:
           memory: 256M
     networks:
+      - internal
       - proxy
 
   traefik:
