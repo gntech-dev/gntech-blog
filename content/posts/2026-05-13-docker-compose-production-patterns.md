@@ -17,7 +17,7 @@ keywords:
   - Docker restart policies pmax
   - production docker compose configuration
 summary: "Practical Docker Compose patterns for reliable homelab deployments. Healthchecks, conditional dependencies, profiles for optional services, secrets management, extension fields, and restart policies with real compose files."
-canonical: "https://gntech.dev/posts/docker-compose-production-patterns-for-homelabs/"
+canonical: "https://blog.gntech.me/posts/docker-compose-production-patterns-for-homelabs/"
 ---
 
 Most `docker-compose.yml` files you find in tutorials are minimal. They

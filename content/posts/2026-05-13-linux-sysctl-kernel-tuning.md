@@ -15,7 +15,7 @@ keywords:
   - TCP BBR buffer
   - Docker sysctl settings
 summary: "Complete Linux sysctl kernel tuning guide for homelab servers. Network buffers, BBR congestion control, OOM management, fs.inotify limits, and Docker-specific sysctl configs."
-canonical: "https://gntech.dev/posts/linux-sysctl-kernel-tuning-for-homelabs/"
+canonical: "https://blog.gntech.me/posts/linux-sysctl-kernel-tuning-for-homelabs/"
 ---
 
 The Linux kernel ships with conservative defaults. They're chosen to work

@@ -15,7 +15,7 @@ keywords:
   - HBA passthrough Proxmox
   - IOMMU groups configuration
 summary: "Complete Proxmox VE PCIe passthrough guide — GPU for Jellyfin transcoding, NVMe direct access, SAS HBA for NAS VMs. Kernel configs, vfio-pci, IOMMU groups, and working Proxmox VM settings."
-canonical: "https://gntech.dev/posts/proxmox-pcie-passthrough/"
+canonical: "https://blog.gntech.me/posts/proxmox-pcie-passthrough/"
 ---
 
 PCIe passthrough is how you take a single Proxmox host and get

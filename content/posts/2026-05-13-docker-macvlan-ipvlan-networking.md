@@ -15,7 +15,7 @@ keywords:
   - Docker multi-network compose
   - Proxmox MAC spoofing Docker
 summary: "Step-by-step Docker MACVLAN and IPVLAN guide — give containers real LAN IPs for Pi-hole, Home Assistant, Scrypted. Host communication fix, Proxmox gotcha, multi-network Compose examples."
-canonical: "https://gntech.dev/posts/docker-macvlan-ipvlan-networking/"
+canonical: "https://blog.gntech.me/posts/docker-macvlan-ipvlan-networking/"
 ---
 
 By default, Docker containers sit on an isolated bridge network

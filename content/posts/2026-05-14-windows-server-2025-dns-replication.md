@@ -16,7 +16,7 @@ keywords:
   - dcdiag DNS verification
   - DNS SRV records Active Directory
 summary: "Step-by-step Windows Server 2025 DNS replication guide: AD-integrated zones, DNS role install, forward/reverse zones, forwarders, secure dynamic updates, GUI and Server Core paths, and verification."
-canonical: "https://gntech.dev/posts/windows-server-2025-dns-replication/"
+canonical: "https://blog.gntech.me/posts/windows-server-2025-dns-replication/"
 cover:
   image: "/images/posts/windows-server-2025-dns-replication/dns-replication-topology.svg"
   alt: "Windows Server 2025 DNS replication topology with DC01 and DC02 hosting AD-integrated DNS zones"
@@ -39,7 +39,7 @@ verification.
 > **Image placeholders to add later:**
 >
 > - Screenshot: Server Manager DNS role installed on both DCs
-> - Screenshot: DNS Manager showing `corp.gntech.local` on `DC01`
+> - Screenshot: DNS Manager showing `gntech.me` on `DC01`
 > - Screenshot: zone properties showing **Store the zone in Active Directory**
 > - Screenshot: replication scope set to domain DNS servers
 > - Screenshot: secure dynamic updates enabled
@@ -64,10 +64,10 @@ Windows infrastructure.
 
 | Item | Value |
 |------|-------|
-| Domain | `corp.gntech.local` |
+| Domain | `gntech.me` |
 | DNS/DC 1 | `DC01` / `10.0.20.10` |
 | DNS/DC 2 | `DC02` / `10.0.20.11` |
-| Forward zone | `corp.gntech.local` |
+| Forward zone | `gntech.me` |
 | Reverse zone | `20.0.10.in-addr.arpa` |
 | Replication type | AD-integrated |
 | Replication scope | Domain DNS servers |
@@ -148,14 +148,14 @@ Get-DnsServerZone -ComputerName DC02
 Expected zone:
 
 ```text
-corp.gntech.local
+gntech.me
 ```
 
 ### GUI: DNS Manager
 
 1. Open **Server Manager → Tools → DNS**.
 2. Expand `DC01` → **Forward Lookup Zones**.
-3. Confirm `corp.gntech.local` exists.
+3. Confirm `gntech.me` exists.
 4. Right-click the zone → **Properties**.
 5. Confirm **Type** is **Active Directory-Integrated**.
 6. Confirm **Dynamic updates** is **Secure only**.
@@ -170,7 +170,7 @@ If the zone does not exist, create it as AD-integrated:
 
 ```powershell
 Add-DnsServerPrimaryZone \
-  -Name "corp.gntech.local" \
+  -Name "gntech.me" \
   -ReplicationScope "Domain" \
   -DynamicUpdate "Secure"
 ```
@@ -179,14 +179,14 @@ If the zone exists, enforce secure dynamic updates:
 
 ```powershell
 Set-DnsServerPrimaryZone \
-  -Name "corp.gntech.local" \
+  -Name "gntech.me" \
   -DynamicUpdate "Secure"
 ```
 
 Check the zone:
 
 ```powershell
-Get-DnsServerZone -Name "corp.gntech.local" |
+Get-DnsServerZone -Name "gntech.me" |
   Select-Object ZoneName,ZoneType,IsDsIntegrated,DynamicUpdate,ReplicationScope
 ```
 
@@ -231,13 +231,13 @@ be explicit.
 
 ```powershell
 Add-DnsServerResourceRecordA \
-  -ZoneName "corp.gntech.local" \
+  -ZoneName "gntech.me" \
   -Name "router" \
   -IPv4Address "10.0.20.1" \
   -CreatePtr
 
 Add-DnsServerResourceRecordA \
-  -ZoneName "corp.gntech.local" \
+  -ZoneName "gntech.me" \
   -Name "srv1" \
   -IPv4Address "10.0.20.30" \
   -CreatePtr
@@ -246,8 +246,8 @@ Add-DnsServerResourceRecordA \
 Verify:
 
 ```powershell
-Resolve-DnsName router.corp.gntech.local -Server 10.0.20.10
-Resolve-DnsName router.corp.gntech.local -Server 10.0.20.11
+Resolve-DnsName router.gntech.me -Server 10.0.20.10
+Resolve-DnsName router.gntech.me -Server 10.0.20.11
 Resolve-DnsName 10.0.20.1 -Server 10.0.20.10
 ```
 
@@ -295,7 +295,7 @@ Alternate DNS: 10.0.20.11
 ```
 
 Do not hand out public DNS servers directly to Windows clients in an AD
-domain. Public DNS cannot resolve `_ldap._tcp.dc._msdcs.corp.gntech.local`.
+domain. Public DNS cannot resolve `_ldap._tcp.dc._msdcs.gntech.me`.
 
 ## Verify DNS Replication
 
@@ -304,7 +304,7 @@ Create a test record on `DC01`:
 ```powershell
 Add-DnsServerResourceRecordA \
   -ComputerName DC01 \
-  -ZoneName "corp.gntech.local" \
+  -ZoneName "gntech.me" \
   -Name "dnsrep-test" \
   -IPv4Address "10.0.20.250"
 ```
@@ -318,8 +318,8 @@ repadmin /syncall /AdeP
 Query both DNS servers:
 
 ```powershell
-Resolve-DnsName dnsrep-test.corp.gntech.local -Server 10.0.20.10
-Resolve-DnsName dnsrep-test.corp.gntech.local -Server 10.0.20.11
+Resolve-DnsName dnsrep-test.gntech.me -Server 10.0.20.10
+Resolve-DnsName dnsrep-test.gntech.me -Server 10.0.20.11
 ```
 
 Remove the test record:
@@ -327,7 +327,7 @@ Remove the test record:
 ```powershell
 Remove-DnsServerResourceRecord \
   -ComputerName DC01 \
-  -ZoneName "corp.gntech.local" \
+  -ZoneName "gntech.me" \
   -RRType A \
   -Name "dnsrep-test" \
   -Force
@@ -340,10 +340,10 @@ Force replication again and verify it disappears from both servers.
 These records are what domain clients actually use:
 
 ```powershell
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV -Server 10.0.20.10
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV -Server 10.0.20.11
-Resolve-DnsName _kerberos._tcp.corp.gntech.local -Type SRV -Server 10.0.20.10
-Resolve-DnsName _gc._tcp.corp.gntech.local -Type SRV -Server 10.0.20.11
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV -Server 10.0.20.10
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV -Server 10.0.20.11
+Resolve-DnsName _kerberos._tcp.gntech.me -Type SRV -Server 10.0.20.10
+Resolve-DnsName _gc._tcp.gntech.me -Type SRV -Server 10.0.20.11
 ```
 
 Expected: records for both domain controllers where appropriate.
@@ -389,7 +389,7 @@ Avoid: manual standard primary/secondary zone transfer between DCs
 ## Final Verification Script
 
 ```powershell
-$Zone = "corp.gntech.local"
+$Zone = "gntech.me"
 $Servers = "10.0.20.10", "10.0.20.11"
 
 Write-Host "== Zones ==" -ForegroundColor Cyan

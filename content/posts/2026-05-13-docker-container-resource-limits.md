@@ -15,7 +15,7 @@ keywords:
   - cgroup v2 Docker
   - homelab Docker optimization
 summary: "Practical Docker container resource limits guide for homelabs — CPU quota/pinning, memory hard/soft limits, swap control, block I/O throttling, cgroup v2 differences, and Docker Compose examples."
-canonical: "https://gntech.dev/posts/docker-container-resource-limits/"
+canonical: "https://blog.gntech.me/posts/docker-container-resource-limits/"
 ---
 
 If you run more than ten containers on a single Docker host — and in a

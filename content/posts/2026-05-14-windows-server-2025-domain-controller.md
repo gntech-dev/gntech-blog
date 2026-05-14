@@ -16,7 +16,7 @@ keywords:
   - dcdiag repadmin verification
   - homelab Active Directory setup
 summary: "Step-by-step Windows Server 2025 domain controller deployment: static IP, AD DS installation, DNS configuration, domain promotion, OU/user setup, client join testing, and post-install verification."
-canonical: "https://gntech.dev/posts/windows-server-2025-domain-controller/"
+canonical: "https://blog.gntech.me/posts/windows-server-2025-domain-controller/"
 cover:
   image: "/images/posts/windows-server-2025-domain-controller/ad-ds-lab-topology.svg"
   alt: "Windows Server 2025 domain controller topology with AD DS, DNS, clients, and verification tools"
@@ -42,7 +42,7 @@ troubleshoot later.
 > - Screenshot: static IP and DNS settings on `DC01`
 > - Screenshot: Add Roles and Features wizard with **Active Directory Domain Services** selected
 > - Screenshot: AD DS post-deployment warning / **Promote this server to a domain controller**
-> - Screenshot: Deployment Configuration page for new forest `corp.gntech.local`
+> - Screenshot: Deployment Configuration page for new forest `gntech.me`
 > - Screenshot: DNS Options / Additional Options pages during promotion
 > - Screenshot: final prerequisites check before install
 > - Screenshot: Active Directory Users and Computers showing created OUs
@@ -69,7 +69,7 @@ Example values used in this guide:
 |------|-------|
 | Server name | `DC01` |
 | Server OS | Windows Server 2025 |
-| Domain/FQDN | `corp.gntech.local` |
+| Domain/FQDN | `gntech.me` |
 | NetBIOS name | `CORP` |
 | DC IP | `10.0.20.10/24` |
 | Gateway | `10.0.20.1` |
@@ -219,7 +219,7 @@ After role installation, Server Manager shows a notification flag.
 1. Click the notification flag.
 2. Select **Promote this server to a domain controller**.
 3. Choose **Add a new forest**.
-4. Enter the root domain name: `corp.gntech.local`.
+4. Enter the root domain name: `gntech.me`.
 5. Keep **Domain Name System (DNS) server** checked.
 6. Set the Directory Services Restore Mode password.
 7. Confirm the NetBIOS name: `CORP`.
@@ -228,7 +228,7 @@ After role installation, Server Manager shows a notification flag.
 10. Click **Install** and let the server reboot.
 
 > **Image placeholder:** Add screenshot of the Deployment Configuration page
-> showing **Add a new forest** and `corp.gntech.local`.
+> showing **Add a new forest** and `gntech.me`.
 >
 > **Image placeholder:** Add screenshot of the prerequisites check passing
 > before clicking **Install**.
@@ -243,7 +243,7 @@ $SafeModePassword = Read-Host \
   -AsSecureString
 
 Install-ADDSForest \
-  -DomainName "corp.gntech.local" \
+  -DomainName "gntech.me" \
   -DomainNetbiosName "CORP" \
   -InstallDns \
   -SafeModeAdministratorPassword $SafeModePassword \
@@ -267,7 +267,7 @@ CORP\Administrator
 or:
 
 ```text
-corp.gntech.local\Administrator
+gntech.me\Administrator
 ```
 
 ## Post-Promotion DNS Cleanup
@@ -285,8 +285,8 @@ Verify:
 
 ```powershell
 Get-DnsClientServerAddress -InterfaceAlias "Ethernet"
-Resolve-DnsName corp.gntech.local
-Resolve-DnsName dc01.corp.gntech.local
+Resolve-DnsName gntech.me
+Resolve-DnsName dc01.gntech.me
 ```
 
 Expected: both names resolve to the domain/DC records, with `DC01`
@@ -325,7 +325,7 @@ AD DNS either answers internal records or forwards external queries.
 On Desktop Experience:
 
 1. Open **Server Manager → Tools → Active Directory Users and Computers**.
-2. Expand `corp.gntech.local`.
+2. Expand `gntech.me`.
 3. Right-click the domain → **New → Organizational Unit**.
 4. Create `Servers`, `Workstations`, `Users`, `Groups`, and `Service Accounts`.
 5. Right-click `Users` → **New → User** to create `test.user`.
@@ -363,7 +363,7 @@ New-ADUser \
   -GivenName "Test" \
   -Surname "User" \
   -SamAccountName "test.user" \
-  -UserPrincipalName "test.user@corp.gntech.local" \
+  -UserPrincipalName "test.user@gntech.me" \
   -Path "OU=Users,$BaseDN" \
   -AccountPassword $Password \
   -Enabled $true \
@@ -394,7 +394,7 @@ Create or verify the PTR record for the DC:
 Add-DnsServerResourceRecordPtr \
   -Name "10" \
   -ZoneName "20.0.10.in-addr.arpa" \
-  -PtrDomainName "dc01.corp.gntech.local"
+  -PtrDomainName "dc01.gntech.me"
 ```
 
 Check it:
@@ -419,15 +419,15 @@ Set-DnsClientServerAddress \
 Verify DNS before joining:
 
 ```powershell
-Resolve-DnsName corp.gntech.local
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
+Resolve-DnsName gntech.me
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 ```
 
 Join the domain:
 
 ```powershell
 Add-Computer \
-  -DomainName "corp.gntech.local" \
+  -DomainName "gntech.me" \
   -Credential "CORP\Administrator" \
   -Restart
 ```
@@ -455,7 +455,7 @@ have DNS, SYSVOL, replication, or secure channel problems.
 Run from the DC:
 
 ```powershell
-nltest /dsgetdc:corp.gntech.local
+nltest /dsgetdc:gntech.me
 ```
 
 Expected indicators:
@@ -464,8 +464,8 @@ Expected indicators:
 DC: \\DC01
 Address: \\10.0.20.10
 Dom Guid: ...
-Dom Name: corp.gntech.local
-Forest Name: corp.gntech.local
+Dom Name: gntech.me
+Forest Name: gntech.me
 The command completed successfully
 ```
 
@@ -549,19 +549,19 @@ netdom query fsmo
 Expected: all five FSMO roles are held by `DC01` in a single-DC forest.
 
 ```text
-Schema master               DC01.corp.gntech.local
-Domain naming master        DC01.corp.gntech.local
-PDC                         DC01.corp.gntech.local
-RID pool manager            DC01.corp.gntech.local
-Infrastructure master       DC01.corp.gntech.local
+Schema master               DC01.gntech.me
+Domain naming master        DC01.gntech.me
+PDC                         DC01.gntech.me
+RID pool manager            DC01.gntech.me
+Infrastructure master       DC01.gntech.me
 ```
 
 ### 6. Verify DNS SRV Records
 
 ```powershell
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
-Resolve-DnsName _kerberos._tcp.corp.gntech.local -Type SRV
-Resolve-DnsName gc._msdcs.corp.gntech.local -Type A
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
+Resolve-DnsName _kerberos._tcp.gntech.me -Type SRV
+Resolve-DnsName gc._msdcs.gntech.me -Type A
 ```
 
 If these fail, clients will not reliably find domain controllers.
@@ -619,7 +619,7 @@ New-ADGroup -Name "GG-Server-Admins" -GroupScope Global -GroupCategory Security 
 Enable-ADOptionalFeature \
   -Identity 'Recycle Bin Feature' \
   -Scope ForestOrConfigurationSet \
-  -Target 'corp.gntech.local'
+  -Target 'gntech.me'
 ```
 
 Verify:
@@ -668,7 +668,7 @@ Check DNS on the client:
 
 ```powershell
 Get-DnsClientServerAddress
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 ```
 
 Fix: point client DNS to the DC, not the router or public resolvers.
@@ -723,7 +723,7 @@ If time is wrong, Kerberos tickets fail and logons get weird fast.
 Run this after the DC is built:
 
 ```powershell
-$Domain = "corp.gntech.local"
+$Domain = "gntech.me"
 $DC = "DC01"
 
 Write-Host "== DNS ==" -ForegroundColor Cyan

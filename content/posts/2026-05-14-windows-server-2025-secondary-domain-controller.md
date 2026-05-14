@@ -16,7 +16,7 @@ keywords:
   - repadmin dcdiag secondary DC
   - DNS failover domain controller
 summary: "Step-by-step guide to adding DC02 as a secondary Windows Server 2025 domain controller: preparation, AD DS promotion, DNS, Global Catalog, replication checks, SYSVOL validation, and client failover testing."
-canonical: "https://gntech.dev/posts/windows-server-2025-secondary-domain-controller/"
+canonical: "https://blog.gntech.me/posts/windows-server-2025-secondary-domain-controller/"
 cover:
   image: "/images/posts/windows-server-2025-secondary-domain-controller/secondary-dc-topology.svg"
   alt: "Windows Server 2025 secondary domain controller topology with DC01, DC02, replication, DNS, and client failover"
@@ -68,11 +68,11 @@ Example values used here:
 
 | Item | Value |
 |------|-------|
-| Existing DC | `DC01.corp.gntech.local` |
+| Existing DC | `DC01.gntech.me` |
 | Existing DC IP | `10.0.20.10` |
-| New DC | `DC02.corp.gntech.local` |
+| New DC | `DC02.gntech.me` |
 | New DC IP | `10.0.20.11` |
-| Domain | `corp.gntech.local` |
+| Domain | `gntech.me` |
 | NetBIOS | `CORP` |
 | Site | `Default-First-Site-Name` initially |
 | Roles on DC02 | AD DS, DNS, Global Catalog |
@@ -171,8 +171,8 @@ Verify network and DNS:
 
 ```powershell
 Test-Connection 10.0.20.10 -Count 4
-Resolve-DnsName corp.gntech.local
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
+Resolve-DnsName gntech.me
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 ```
 
 If SRV lookup fails, stop. Domain promotion depends on AD DNS.
@@ -195,7 +195,7 @@ promotion.
 
 ```powershell
 Add-Computer \
-  -DomainName "corp.gntech.local" \
+  -DomainName "gntech.me" \
   -Credential "CORP\Administrator" \
   -Restart
 ```
@@ -264,7 +264,7 @@ After the AD DS role installs, Server Manager shows a notification flag.
 1. Click the notification flag.
 2. Select **Promote this server to a domain controller**.
 3. Choose **Add a domain controller to an existing domain**.
-4. Enter `corp.gntech.local` and provide domain admin credentials.
+4. Enter `gntech.me` and provide domain admin credentials.
 5. Keep **Domain Name System (DNS) server** checked.
 6. Keep **Global Catalog (GC)** checked.
 7. Set the Directory Services Restore Mode password for `DC02`.
@@ -293,7 +293,7 @@ $SafeModePassword = Read-Host \
   -AsSecureString
 
 Install-ADDSDomainController \
-  -DomainName "corp.gntech.local" \
+  -DomainName "gntech.me" \
   -Credential $Credential \
   -InstallDns \
   -NoGlobalCatalog:$false \
@@ -357,8 +357,8 @@ Run these checks after the reboot.
 From `DC02`:
 
 ```powershell
-nltest /dsgetdc:corp.gntech.local
-nltest /dclist:corp.gntech.local
+nltest /dsgetdc:gntech.me
+nltest /dclist:gntech.me
 ```
 
 Expected: both `DC01` and `DC02` appear in the domain controller list.
@@ -467,9 +467,9 @@ Do not continue until SYSVOL is healthy.
 
 ```powershell
 Get-DnsServerZone
-Resolve-DnsName corp.gntech.local -Server 10.0.20.10
-Resolve-DnsName corp.gntech.local -Server 10.0.20.11
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV -Server 10.0.20.11
+Resolve-DnsName gntech.me -Server 10.0.20.10
+Resolve-DnsName gntech.me -Server 10.0.20.11
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV -Server 10.0.20.11
 ```
 
 Expected: both DCs answer the zone and SRV records.
@@ -477,8 +477,8 @@ Expected: both DCs answer the zone and SRV records.
 Check host records:
 
 ```powershell
-Resolve-DnsName DC01.corp.gntech.local -Server 10.0.20.11
-Resolve-DnsName DC02.corp.gntech.local -Server 10.0.20.10
+Resolve-DnsName DC01.gntech.me -Server 10.0.20.11
+Resolve-DnsName DC02.gntech.me -Server 10.0.20.10
 ```
 
 ### 7. Verify Global Catalog
@@ -527,8 +527,8 @@ Set-DnsClientServerAddress \
 Verify domain discovery:
 
 ```powershell
-nltest /dsgetdc:corp.gntech.local
-Resolve-DnsName _kerberos._tcp.corp.gntech.local -Type SRV
+nltest /dsgetdc:gntech.me
+Resolve-DnsName _kerberos._tcp.gntech.me -Type SRV
 Test-ComputerSecureChannel -Verbose
 gpupdate /force
 ```
@@ -543,7 +543,7 @@ Set-DnsClientServerAddress \
   -ServerAddresses 10.0.20.11
 
 ipconfig /flushdns
-nltest /dsgetdc:corp.gntech.local
+nltest /dsgetdc:gntech.me
 gpupdate /force
 ```
 
@@ -618,7 +618,7 @@ Check DNS on `DC02` before promotion:
 
 ```powershell
 Get-DnsClientServerAddress
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 Test-NetConnection DC01 -Port 389
 Test-NetConnection DC01 -Port 53
 ```
@@ -659,8 +659,8 @@ Do not point clients to `DC02` until SYSVOL and NETLOGON are present.
 Check Sites and Services and DNS SRV records:
 
 ```powershell
-nltest /dsgetdc:corp.gntech.local /force
-Resolve-DnsName _ldap._tcp.dc._msdcs.corp.gntech.local -Type SRV
+nltest /dsgetdc:gntech.me /force
+Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 ```
 
 If clients have static DNS pointing only to `DC01`, update DHCP option 6
@@ -671,7 +671,7 @@ or the client NIC configuration.
 Run from an elevated PowerShell session on either DC:
 
 ```powershell
-$Domain = "corp.gntech.local"
+$Domain = "gntech.me"
 $DCs = "DC01", "DC02"
 
 Write-Host "== Domain Controllers ==" -ForegroundColor Cyan
