@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">Windows Server 2025 DHCP Failover Topology</title><desc id="desc">Two Windows Server 2025 DHCP servers using failover replication for a shared IPv4 scope.</desc>
+<rect width="1200" height="675" fill="#0b1220"/>
+<defs><filter id="s"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".35"/></filter><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"/></marker></defs>
+<text x="60" y="70" fill="#f8fafc" font-family="Segoe UI,Arial" font-size="34" font-weight="700">Windows Server 2025 DHCP Failover</text>
+<text x="60" y="108" fill="#fbbf24" font-family="Segoe UI,Arial" font-size="20">Load-balance or hot-standby DHCP scope replication</text>
+<rect x="80" y="215" width="305" height="185" rx="20" fill="#7c2d12" stroke="#fb923c" stroke-width="2" filter="url(#s)"/>
+<text x="120" y="262" fill="#fff" font-family="Segoe UI,Arial" font-size="28" font-weight="700">DHCP01</text>
+<text x="120" y="302" fill="#fed7aa" font-family="Segoe UI,Arial" font-size="18">10.0.20.20</text>
+<text x="120" y="336" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">Scope: 10.0.20.100-200</text>
+<rect x="815" y="215" width="305" height="185" rx="20" fill="#713f12" stroke="#facc15" stroke-width="2" filter="url(#s)"/>
+<text x="855" y="262" fill="#fff" font-family="Segoe UI,Arial" font-size="28" font-weight="700">DHCP02</text>
+<text x="855" y="302" fill="#fef3c7" font-family="Segoe UI,Arial" font-size="18">10.0.20.21</text>
+<text x="855" y="336" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">Replicated leases/options</text>
+<path d="M395 280 C510 215,690 215,805 280" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" marker-end="url(#a)"/>
+<path d="M805 335 C690 405,510 405,395 335" fill="none" stroke="#fbbf24" stroke-width="5" stroke-linecap="round" marker-end="url(#a)"/>
+<text x="505" y="260" fill="#fde68a" font-family="Segoe UI,Arial" font-size="18">DHCP failover replication</text>
+<rect x="435" y="120" width="330" height="100" rx="18" fill="#111827" stroke="#34d399" stroke-width="2"/>
+<text x="475" y="160" fill="#fff" font-family="Segoe UI,Arial" font-size="23" font-weight="700">Relationship</text>
+<text x="475" y="193" fill="#bbf7d0" font-family="Segoe UI,Arial" font-size="17">LoadBalance 50/50 or HotStandby</text>
+<rect x="435" y="475" width="330" height="100" rx="18" fill="#111827" stroke="#60a5fa" stroke-width="2"/>
+<text x="475" y="515" fill="#fff" font-family="Segoe UI,Arial" font-size="23" font-weight="700">Router / Relay</text>
+<text x="475" y="548" fill="#bfdbfe" font-family="Segoe UI,Arial" font-size="17">IP helper → DHCP01 + DHCP02</text>
+<text x="60" y="628" fill="#64748b" font-family="Segoe UI,Arial" font-size="16">Verify authorization, scopes, options, leases, failover state, replication, and client renew behavior.</text>
+</svg>

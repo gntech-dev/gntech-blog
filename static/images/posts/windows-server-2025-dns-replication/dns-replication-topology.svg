@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+<title id="title">Windows Server 2025 DNS Replication Topology</title><desc id="desc">Two Windows Server 2025 domain controllers hosting AD-integrated DNS zones replicated through Active Directory.</desc>
+<rect width="1200" height="675" fill="#0b1220"/>
+<defs><filter id="s"><feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".35"/></filter><marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#38bdf8"/></marker></defs>
+<text x="60" y="70" fill="#f8fafc" font-family="Segoe UI,Arial" font-size="34" font-weight="700">Windows Server 2025 DNS Replication</text>
+<text x="60" y="108" fill="#93c5fd" font-family="Segoe UI,Arial" font-size="20">AD-integrated zones replicated between DC01 and DC02</text>
+<rect x="80" y="205" width="310" height="190" rx="20" fill="#172554" stroke="#60a5fa" stroke-width="2" filter="url(#s)"/>
+<text x="120" y="252" fill="#fff" font-family="Segoe UI,Arial" font-size="28" font-weight="700">DC01 / DNS01</text>
+<text x="120" y="292" fill="#bfdbfe" font-family="Segoe UI,Arial" font-size="18">10.0.20.10</text>
+<text x="120" y="326" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">AD DS + DNS Server</text>
+<text x="120" y="358" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">corp.gntech.local</text>
+<rect x="810" y="205" width="310" height="190" rx="20" fill="#064e3b" stroke="#34d399" stroke-width="2" filter="url(#s)"/>
+<text x="850" y="252" fill="#fff" font-family="Segoe UI,Arial" font-size="28" font-weight="700">DC02 / DNS02</text>
+<text x="850" y="292" fill="#bbf7d0" font-family="Segoe UI,Arial" font-size="18">10.0.20.11</text>
+<text x="850" y="326" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">AD DS + DNS Server</text>
+<text x="850" y="358" fill="#e5e7eb" font-family="Segoe UI,Arial" font-size="17">replicated zone copy</text>
+<rect x="430" y="105" width="340" height="110" rx="18" fill="#111827" stroke="#fbbf24" stroke-width="2"/>
+<text x="470" y="150" fill="#fff" font-family="Segoe UI,Arial" font-size="23" font-weight="700">AD-integrated DNS Zone</text>
+<text x="470" y="185" fill="#fde68a" font-family="Segoe UI,Arial" font-size="18">ReplicationScope: Domain</text>
+<path d="M398 275 C500 210,700 210,802 275" fill="none" stroke="#38bdf8" stroke-width="5" stroke-linecap="round" marker-end="url(#a)"/>
+<path d="M802 330 C700 400,500 400,398 330" fill="none" stroke="#34d399" stroke-width="5" stroke-linecap="round" marker-end="url(#a)"/>
+<text x="505" y="270" fill="#dbeafe" font-family="Segoe UI,Arial" font-size="18">AD replication carries zone data</text>
+<rect x="430" y="470" width="340" height="105" rx="18" fill="#111827" stroke="#a78bfa" stroke-width="2"/>
+<text x="470" y="512" fill="#fff" font-family="Segoe UI,Arial" font-size="23" font-weight="700">Clients</text>
+<text x="470" y="546" fill="#ddd6fe" font-family="Segoe UI,Arial" font-size="17">DNS: 10.0.20.10, 10.0.20.11</text>
+<text x="60" y="628" fill="#64748b" font-family="Segoe UI,Arial" font-size="16">Verify with Resolve-DnsName, Get-DnsServerZone, dcdiag /test:dns, repadmin, and client SRV lookups.</text>
+</svg>
