@@ -29,6 +29,10 @@ This post covers the patterns that turn a throwaway compose file into
 something you can deploy, forget, and trust. Every pattern includes a
 real example you can drop into your existing stack.
 
+> **Note:** Some examples are partial Compose snippets meant to demonstrate
+> one pattern at a time. When copying them into a real `compose.yml`, make
+> sure referenced services, secrets, volumes, and networks are also defined.
+
 ---
 
 ## 1. Healthchecks — Know When a Container Is Actually Ready
