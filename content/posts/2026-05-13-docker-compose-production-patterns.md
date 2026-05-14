@@ -123,15 +123,21 @@ healthchecks, you get real ordering.
 ### Service-Healthy Dependencies
 
 ```yaml
+secrets:
+  db_app_password:
+    file: ./secrets/db_app_password.txt
+
 services:
   postgres:
     image: postgres:16-alpine
+    secrets:
+      - db_app_password
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: appuser
       POSTGRES_DB: appdb
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_app_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -142,6 +148,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    secrets:
+      - db_app_password
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
       interval: 10s
@@ -149,7 +157,11 @@ services:
       retries: 3
       start_period: 10s
     environment:
-      DATABASE_URL: "postgres://postgres@postgres:5432/appdb"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: appdb
+      DATABASE_USER: appuser
+      DATABASE_PASSWORD_FILE: /run/secrets/db_app_password
 
   nginx:
     image: nginx:alpine
@@ -359,8 +371,8 @@ by the UID the container runs as.
 
 ```yaml
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
   api_key:
     file: ./secrets/api_key.txt
   tls_cert:
@@ -376,24 +388,30 @@ services:
   postgres:
     image: postgres:16-alpine
     secrets:
-      - db_password
+      - db_app_password
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: appuser
       POSTGRES_DB: appdb
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_app_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
-      # This works because postgres reads POSTGRES_PASSWORD_FILE at init
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      # Official postgres image creates appuser/appdb on first init
+      # and reads POSTGRES_PASSWORD_FILE for appuser's password.
 
   api:
     image: myapi:latest
     secrets:
-      - db_password
+      - db_app_password
       - api_key
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      DATABASE_URL: "postgresql://postgres@postgres:5432/appdb"
-      # The app reads /run/secrets/db_password for the password
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: appdb
+      DATABASE_USER: appuser
+      DATABASE_PASSWORD_FILE: /run/secrets/db_app_password
+      # This requires app support for *_PASSWORD_FILE.
+      # If the app only accepts DATABASE_URL, use an entrypoint wrapper
+      # that reads /run/secrets/db_app_password and exports DATABASE_URL.
       API_KEY_FILE: /run/secrets/api_key
 ```
 
@@ -403,8 +421,8 @@ Only mount secrets to services that need them:
 
 ```yaml
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
   pgadmin_pass:
     file: ./secrets/pgadmin_pass.txt
   grafana_admin_pass:
@@ -413,19 +431,19 @@ secrets:
 services:
   postgres:
     secrets:
-      - db_password
+      - db_app_password
 
   pgadmin:
     profiles:
       - debug
     secrets:
       - pgadmin_pass
-    # pgadmin cannot read db_password or grafana_admin_pass
+    # pgadmin cannot read db_app_password or grafana_admin_pass
 
   grafana:
     secrets:
       - grafana_admin_pass
-    # grafana cannot read db_password or pgadmin_pass
+    # grafana cannot read db_app_password or pgadmin_pass
 ```
 
 This is least-privilege in practice. A compromised pgadmin container
@@ -437,7 +455,7 @@ cannot read your database password or Grafana admin credentials.
 docker/
 ├── compose.yml
 ├── secrets/
-│   ├── db_password.txt
+│   ├── db_app_password.txt
 │   ├── api_key.txt
 │   ├── pgadmin_pass.txt
 │   └── grafana_admin.txt
@@ -690,8 +708,8 @@ x-base: &base
       max-file: "3"
 
 secrets:
-  db_password:
-    file: ./secrets/db_password.txt
+  db_app_password:
+    file: ./secrets/db_app_password.txt
   api_key:
     file: ./secrets/api_key.txt
 
@@ -702,13 +720,13 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     secrets:
-      - db_password
+      - db_app_password
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      POSTGRES_USER: postgres
+      POSTGRES_USER: appuser
       POSTGRES_DB: appdb
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_app_password
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -723,11 +741,14 @@ services:
       postgres:
         condition: service_healthy
     secrets:
-      - db_password
+      - db_app_password
       - api_key
     environment:
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
-      DATABASE_URL: "postgresql://postgres@postgres:5432/appdb"
+      DATABASE_HOST: postgres
+      DATABASE_PORT: "5432"
+      DATABASE_NAME: appdb
+      DATABASE_USER: appuser
+      DATABASE_PASSWORD_FILE: /run/secrets/db_app_password
       API_KEY_FILE: /run/secrets/api_key
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
