@@ -73,7 +73,7 @@ Example values used here:
 | New DC | `DC02.gntech.me` |
 | New DC IP | `10.0.20.11` |
 | Domain | `gntech.me` |
-| NetBIOS | `CORP` |
+| NetBIOS | `GNTECH` |
 | Site | `Default-First-Site-Name` initially |
 | Roles on DC02 | AD DS, DNS, Global Catalog |
 | Client DNS | Preferred `10.0.20.10`, alternate `10.0.20.11` |
@@ -196,14 +196,14 @@ promotion.
 ```powershell
 Add-Computer \
   -DomainName "gntech.me" \
-  -Credential "CORP\Administrator" \
+  -Credential "GNTECH\Administrator" \
   -Restart
 ```
 
 After reboot, log in as a domain admin:
 
 ```text
-CORP\Administrator
+GNTECH\Administrator
 ```
 
 Verify the secure channel:
@@ -287,7 +287,7 @@ Use `Install-ADDSDomainController`. This adds a domain controller to an
 existing domain, instead of creating a new forest.
 
 ```powershell
-$Credential = Get-Credential "CORP\Administrator"
+$Credential = Get-Credential "GNTECH\Administrator"
 $SafeModePassword = Read-Host \
   -Prompt "Enter Directory Services Restore Mode password for DC02" \
   -AsSecureString

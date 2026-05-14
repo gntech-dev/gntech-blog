@@ -70,7 +70,7 @@ Example values used in this guide:
 | Server name | `DC01` |
 | Server OS | Windows Server 2025 |
 | Domain/FQDN | `gntech.me` |
-| NetBIOS name | `CORP` |
+| NetBIOS name | `GNTECH` |
 | DC IP | `10.0.20.10/24` |
 | Gateway | `10.0.20.1` |
 | DNS on DC | `127.0.0.1`, then `10.0.20.10` |
@@ -222,7 +222,7 @@ After role installation, Server Manager shows a notification flag.
 4. Enter the root domain name: `gntech.me`.
 5. Keep **Domain Name System (DNS) server** checked.
 6. Set the Directory Services Restore Mode password.
-7. Confirm the NetBIOS name: `CORP`.
+7. Confirm the NetBIOS name: `GNTECH`.
 8. Review paths for database, logs, and SYSVOL.
 9. Run the prerequisites check.
 10. Click **Install** and let the server reboot.
@@ -244,7 +244,7 @@ $SafeModePassword = Read-Host \
 
 Install-ADDSForest \
   -DomainName "gntech.me" \
-  -DomainNetbiosName "CORP" \
+  -DomainNetbiosName "GNTECH" \
   -InstallDns \
   -SafeModeAdministratorPassword $SafeModePassword \
   -NoRebootOnCompletion:$false \
@@ -261,7 +261,7 @@ raising forest or domain functional levels.
 After reboot, log in as:
 
 ```text
-CORP\Administrator
+GNTECH\Administrator
 ```
 
 or:
@@ -344,7 +344,7 @@ Import-Module ActiveDirectory
 Create a clean structure:
 
 ```powershell
-$BaseDN = "DC=corp,DC=gntech,DC=local"
+$BaseDN = "DC=gntech,DC=me"
 
 New-ADOrganizationalUnit -Name "Servers" -Path $BaseDN
 New-ADOrganizationalUnit -Name "Workstations" -Path $BaseDN
@@ -428,21 +428,21 @@ Join the domain:
 ```powershell
 Add-Computer \
   -DomainName "gntech.me" \
-  -Credential "CORP\Administrator" \
+  -Credential "GNTECH\Administrator" \
   -Restart
 ```
 
 After reboot, log in as:
 
 ```text
-CORP\test.user
+GNTECH\test.user
 ```
 
 Move the computer object into the correct OU:
 
 ```powershell
 Get-ADComputer -Filter 'Name -eq "CLIENT01"' |
-  Move-ADObject -TargetPath "OU=Workstations,DC=corp,DC=gntech,DC=local"
+  Move-ADObject -TargetPath "OU=Workstations,DC=gntech,DC=me"
 ```
 
 ## Verification Checklist
@@ -610,7 +610,7 @@ Create named admin accounts and keep the built-in Administrator for
 break-glass use.
 
 ```powershell
-New-ADGroup -Name "GG-Server-Admins" -GroupScope Global -GroupCategory Security -Path "OU=Groups,DC=corp,DC=gntech,DC=local"
+New-ADGroup -Name "GG-Server-Admins" -GroupScope Global -GroupCategory Security -Path "OU=Groups,DC=gntech,DC=me"
 ```
 
 ### Enable the Recycle Bin
