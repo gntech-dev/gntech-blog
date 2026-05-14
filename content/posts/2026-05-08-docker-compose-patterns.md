@@ -17,6 +17,8 @@ Docker Compose is the default orchestration tool for most homelab setups. It's n
 
 This post covers the patterns I use across my Proxmox Docker hosts. These aren't theoretical — they're what's running right now on the homelab.
 
+> **Note:** Some examples are partial Compose snippets meant to demonstrate one pattern at a time. When copying them into a real `compose.yml`, make sure referenced services, images, secrets, volumes, and networks are also defined.
+
 ---
 
 ## Directory Layout

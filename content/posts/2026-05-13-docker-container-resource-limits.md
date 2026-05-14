@@ -263,35 +263,14 @@ docker run -d \
   postgres:16
 ```
 
-In Compose, block I/O limits require the `docker-compose.yml` long
-syntax or `docker-compose.override.yml` with `device_write_bps`:
+Compose does not support portable block I/O throttling through the modern
+Compose Specification. The `deploy.resources` section can set CPU and memory,
+but not per-device disk I/O limits.
 
-```yaml
-services:
-  torrent-client:
-    image: lscr.io/linuxserver/transmission:latest
-    devices:
-      - /dev/sda:/dev/sda
-    deploy:
-      resources:
-        limits:
-          # Compose spec v3 doesn't directly support device limits
-          # Use docker-compose.override.yml with device_write_bps
-```
-
-For maximum control, use the docker run options or a docker-compose v2
-file with the `device_write_bps` and `device_read_bps` keys directly:
-
-```yaml
-# docker-compose.override.yml
-version: '2.4'
-services:
-  torrent-client:
-    device_write_bps:
-      - /dev/sda:50mb
-    device_read_bps:
-      - /dev/sda:100mb
-```
+Use `docker run` for block I/O throttling, or apply host-level controls with
+systemd/cgroups for the Docker service. If you see old examples using
+`device_write_bps` or `device_read_bps` in Compose files, test them on your
+Compose version first — recent `docker compose` releases reject those keys.
 
 ---
 
@@ -319,6 +298,9 @@ services:
       - pgdata:/var/lib/postgresql/data
     # Remember: shared_buffers in postgresql.conf should be ~25% of the memory limit
     # With a 2G limit, set shared_buffers = 512MB
+
+volumes:
+  pgdata:
 ```
 
 No swap (`--memory-swap=2G` via docker-compose.override if needed).
@@ -367,8 +349,8 @@ services:
     #   - /dev/sda:30mb
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ${FRIGATE_CONFIG}:/config
-      - ${FRIGATE_STORAGE}:/media/frigate
+      - ${FRIGATE_CONFIG:-./config}:/config
+      - ${FRIGATE_STORAGE:-./media}:/media/frigate
       - type: tmpfs
         target: /tmp/cache
         tmpfs:

@@ -493,6 +493,11 @@ services:
       - "9093:9093"
     networks:
       - monitoring
+
+networks:
+  monitoring:
+    external: true
+    name: monitoring
 ```
 
 ```yaml
@@ -557,6 +562,11 @@ services:
       - "9221:9221"
     networks:
       - monitoring
+
+networks:
+  monitoring:
+    external: true
+    name: monitoring
 ```
 
 ```yaml
