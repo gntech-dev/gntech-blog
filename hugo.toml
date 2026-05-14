@@ -21,6 +21,7 @@ buildFuture = true
   ShowWordCount = true
   ShowRssButtonInSectionTermList = true
   ShowSearchButton = true
+  comments = true
   UseHugoToc = true
   disableSpecial1stPost = false
   disableScrollToTop = false
