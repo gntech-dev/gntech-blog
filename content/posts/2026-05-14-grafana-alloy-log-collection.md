@@ -26,9 +26,9 @@ official replacement is Grafana Alloy — a unified telemetry collector
 that handles logs, metrics, and traces in a single binary with a
 component-based pipeline architecture.
 
-The older monitoring setup on this blog from May 9 ([Homelab Monitoring
-Stack](/posts/2026-05-09-homelab-monitoring-stack/)) used Promtail for log shipping.
-This post updates that stack with Alloy, including a complete
+The [monitoring foundation guide](/posts/2026-05-17-homelab-monitoring-stack/)
+now covers the Prometheus and Grafana metrics path. This separate article
+covers the Alloy logging extension, including a
 docker-compose deployment, Alloy's River config syntax, Docker container
 auto-discovery, and host log tailing — all feeding into the same Loki
 instance you probably already have.
