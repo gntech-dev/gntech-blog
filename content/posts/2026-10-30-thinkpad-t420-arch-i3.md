@@ -2,7 +2,7 @@
 title: "ThinkPad T420 with Arch Linux and i3 — A Practical Admin Laptop"
 description: "Give a ThinkPad T420 a useful second life with Arch Linux, i3, PipeWire, working brightness keys, and a straightforward verification checklist."
 date: 2026-10-30T14:00:00-04:00
-draft: true
+draft: false
 tags:
   - thinkpad
   - arch-linux
