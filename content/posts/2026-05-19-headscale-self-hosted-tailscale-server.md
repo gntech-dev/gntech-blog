@@ -17,7 +17,6 @@ keywords:
   - Docker Compose Headscale reverse proxy Traefik
   - mesh VPN homelab headscale tailscale
 summary: "Deploy Headscale with Docker Compose to run your own WireGuard mesh VPN control plane. Complete guide from setup to client registration, ACL configuration, subnet routing, and production hardening."
-canonical: "https://gntech.dev/posts/headscale-self-hosted-tailscale-server/"
 ---
 
 Tailscale makes connecting devices dead simple — install the client,
@@ -474,7 +473,7 @@ sudo tailscale up \
 Approve the `0.0.0.0/0` route on Headscale:
 
 ```bash
-docker compose exec headscale headscale routes enable -r <route-id>
+docker compose exec headscale headscale routes enable -r "<route-id>"
 ```
 
 Clients can then use this node as an exit node:
@@ -675,13 +674,13 @@ sudo systemctl enable --now tailscaled
 # Register with pre-auth key (no browser needed)
 sudo tailscale up \
   --login-server https://headscale.example.org \
-  --authkey <preauth-key> \
+  --authkey "<preauth-key>" \
   --hostname web-server-01
 
 # Advertise routes
 sudo tailscale up \
   --login-server https://headscale.example.org \
-  --authkey <preauth-key> \
+  --authkey "<preauth-key>" \
   --advertise-routes=10.0.20.0/24 \
   --accept-routes
 ```

@@ -18,7 +18,6 @@ keywords:
   - Docker service monitoring alerts notification
   - homelab observability Prometheus Grafana
 summary: "Deploy a production-grade Prometheus Grafana monitoring stack with Docker Compose — including Node Exporter, cAdvisor, and Alertmanager for complete homelab observability."
-canonical: "https://blog.gntech.me/posts/2026-05-21-prometheus-grafana-monitoring-stack/"
 ---
 
 If you run a homelab with multiple Docker services, VMs, and

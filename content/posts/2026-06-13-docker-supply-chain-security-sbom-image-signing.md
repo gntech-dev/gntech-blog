@@ -17,10 +17,9 @@ keywords:
   - SLSA supply chain levels software artifact homelab
   - Docker image attestation in-toto provenance
 summary: "Practical guide to securing your container supply chain in the homelab: generate SBOMs with Syft, sign images with Cosign, scan for vulnerabilities with Grype, and enforce Docker Content Trust."
-canonical: "https://blog.gntech.me/posts/docker-supply-chain-security-sbom-image-signing/"
 ---
 
-If you pull Docker images from Docker Hub, third-party registries, or even your own registry, you're trusting the entire chain from source code to your `docker pull`. The SolarWinds breach, the recent [Docker CVE-2026-31431](/posts/docker-cve-2026-31431-copy-fail-mitigation/), and the Arch Linux AUR malware incident (June 2026, 1500+ affected packages) all make one thing clear: supply chain attacks target infrastructure you thought was safe.
+Pulling a container image means trusting its publisher, build process, and distribution path. An SBOM helps identify what an image contains; a verified signature helps establish who signed a particular artifact. Neither replaces vulnerability management or proves an image is safe.
 
 In a homelab, you might think "I'm not a target." You are — bots and automated scanners don't discriminate. The good news: securing your container supply chain with open-source tools is straightforward and lightweight. This guide covers the three pillars — SBOM generation, vulnerability scanning, image signing, and verification — using Syft, Grype, Cosign, and Docker Content Trust.
 

@@ -16,7 +16,6 @@ keywords:
   - MikroTik CRS3xx VRF L3 routing hardware offload
   - RouterOS 7 multi-tenancy VRF route separation ISP WAN
 summary: "Configure VRFs on MikroTik RouterOS 7 for multi-tenant network segmentation. Step-by-step guide covering VRF creation, static routes, BGP VRF, route leaking between VRFs, firewall integration, and practical homelab topology examples."
-canonical: "https://blog.gntech.me/posts/mikrotik-routeros7-vrf-configuration/"
 ---
 
 ## What Is VRF and Why Use It in Your Homelab
@@ -68,7 +67,7 @@ Creating a VRF in RouterOS 7 is straightforward — add a VRF entry that maps to
 
 Alternatively, you can assign interfaces and set routing marks through the IP settings:
 
-```bash
+```routeros
 /ip vrf add interface=bridge-red routing-mark=vrf-red
 /ip vrf add interface=bridge-iot routing-mark=vrf-blue
 /ip vrf add interface=bridge-gst routing-mark=vrf-green
@@ -95,7 +94,7 @@ Columns: NAME, INTERFACES
 
 Each VRF interface needs an IP address. Because the interface is assigned to a VRF, the address belongs to that VRF's routing table only.
 
-```bash
+```routeros
 # Trusted LAN (VRF-RED)
 /ip address add address=192.168.10.1/24 interface=bridge-red network=192.168.10.0
 
@@ -112,7 +111,7 @@ The key behavior here: these addresses only appear in their respective VRF routi
 
 Each VRF needs its own default route. Set the routing mark to match the VRF:
 
-```bash
+```routeros
 # Default route in VRF-RED via ISP gateway
 /ip route add dst-address=0.0.0.0/0 gateway=100.64.0.1 routing-table=vrf-red distance=1
 
@@ -125,7 +124,7 @@ Each VRF needs its own default route. Set the routing mark to match the VRF:
 
 For connected subnets within the homelab, add static routes so each VRF knows how to reach its local networks:
 
-```bash
+```routeros
 /ip route add dst-address=192.168.10.0/24 gateway=192.168.10.1 routing-table=vrf-red
 /ip route add dst-address=10.0.100.0/24 gateway=10.0.100.1 routing-table=vrf-blue
 /ip route add dst-address=172.16.0.0/24 gateway=172.16.0.1 routing-table=vrf-green
@@ -133,7 +132,7 @@ For connected subnets within the homelab, add static routes so each VRF knows ho
 
 Verify routes per VRF:
 
-```bash
+```routeros
 /ip route print where table=vrf-red
 /ip route print where table=vrf-blue
 /ip route print where table=vrf-green
@@ -193,7 +192,7 @@ RouterOS 7 uses routing filter rules to import or export routes between tables. 
 
 A simpler and more common pattern for static leaking uses static routes with appropriate scope and target-scope:
 
-```bash
+```routeros
 # On the main table, add route through VRF-RED gateway
 /ip route add dst-address=10.0.100.0/24 gateway=10.0.100.1 routing-table=main
 
@@ -221,7 +220,7 @@ Firewall in a VRF environment requires careful attention. The RouterOS firewall 
 
 ### Default-Deny Inter-VRF Policy
 
-```bash
+```routeros
 # Drop inter-VRF traffic by default (forward chain)
 /ip firewall filter add chain=forward src-address-list=!trusted_subnets \
     action=drop comment="Default deny inter-VRF"
@@ -242,7 +241,7 @@ Firewall in a VRF environment requires careful attention. The RouterOS firewall 
 
 Allow specific services between VRFs:
 
-```bash
+```routeros
 # Allow IoT to reach DNS (192.168.10.53) on trusted LAN
 /ip firewall filter add chain=forward in-interface=bridge-iot \
     out-interface=bridge-red dst-address=192.168.10.53/32 \
@@ -270,7 +269,7 @@ Allow specific services between VRFs:
 
 NAT rules must also account for VRFs. Configure masquerade for each VRF's outbound traffic:
 
-```bash
+```routeros
 # NAT for VRF-RED
 /ip firewall nat add chain=srcnat out-interface=ether1 \
     routing-mark=vrf-red action=masquerade \
@@ -293,7 +292,7 @@ The `routing-mark` match ensures that only traffic belonging to the specific VRF
 
 Here is a consolidated example combining all the concepts. This assumes a MikroTik RB5009 with ether1 as WAN, ether2-ether5 for trusted LAN, ether6-ether7 for IoT, and ether8 as guest access point uplink.
 
-```bash
+```routeros
 # --- Routing Tables ---
 /routing table add name=vrf-red fib=100
 /routing table add name=vrf-blue fib=200
@@ -390,7 +389,7 @@ Common pitfalls and solutions:
 
 For persistent connectivity issues, enable traffic logging on the firewall to see which interface pair is dropping packets:
 
-```bash
+```routeros
 /ip firewall filter add chain=forward in-interface=bridge-iot \
     out-interface=bridge-red action=log \
     comment="Trace IoT to trusted drops"

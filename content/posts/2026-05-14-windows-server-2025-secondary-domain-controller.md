@@ -16,7 +16,6 @@ keywords:
   - repadmin dcdiag secondary DC
   - DNS failover domain controller
 summary: "Step-by-step guide to adding DC02 as a secondary Windows Server 2025 domain controller: preparation, AD DS promotion, DNS, Global Catalog, replication checks, SYSVOL validation, and client failover testing."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-secondary-domain-controller/"
 cover:
   image: "/images/posts/windows-server-2025-secondary-domain-controller/secondary-dc-topology.svg"
   alt: "Windows Server 2025 secondary domain controller topology with DC01, DC02, replication, DNS, and client failover"
@@ -36,18 +35,6 @@ controller guide first.
 
 ![Windows Server 2025 secondary domain controller topology](/images/posts/windows-server-2025-secondary-domain-controller/secondary-dc-topology.svg)
 
-> **Image placeholders to add later:**
->
-> - Screenshot: `DC01` health checks before adding `DC02`
-> - Screenshot: `DC02` static IP and DNS pointing to `DC01`
-> - Screenshot: Server Manager role selection for AD DS on `DC02`
-> - Screenshot: AD DS wizard **Add a domain controller to an existing domain**
-> - Screenshot: Domain Controller Options with DNS and Global Catalog enabled
-> - Screenshot: Replication source / Additional Options page
-> - Screenshot: prerequisites check before promoting `DC02`
-> - Screenshot: Active Directory Users and Computers showing both DCs
-> - Screenshot: DNS Manager showing replicated zones on `DC02`
-> - Screenshot: `repadmin`, `dcdiag`, SYSVOL/NETLOGON, and client failover validation
 
 ## GUI vs Server Core Path
 
@@ -150,11 +137,7 @@ DC02
 ### 3. Configure Static IP
 
 ```powershell
-New-NetIPAddress \
-  -InterfaceAlias "Ethernet" \
-  -IPAddress 10.0.20.11 \
-  -PrefixLength 24 \
-  -DefaultGateway 10.0.20.1
+New-NetIPAddress  -InterfaceAlias "Ethernet"  -IPAddress 10.0.20.11  -PrefixLength 24  -DefaultGateway 10.0.20.1
 ```
 
 For DNS, point `DC02` to the existing domain controller first. This is
@@ -162,9 +145,7 @@ important because `DC02` must find the existing AD domain before it can
 join or promote.
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10
 ```
 
 Verify network and DNS:
@@ -194,10 +175,7 @@ basic DNS, credential, and secure channel problems obvious before AD DS
 promotion.
 
 ```powershell
-Add-Computer \
-  -DomainName "gntech.me" \
-  -Credential "GNTECH\Administrator" \
-  -Restart
+Add-Computer  -DomainName "gntech.me"  -Credential "GNTECH\Administrator"  -Restart
 ```
 
 After reboot, log in as a domain admin:
@@ -233,7 +211,6 @@ On Windows Server 2025 Desktop Experience:
 6. Accept the required management tools.
 7. Click **Install**.
 
-> **Image placeholder:** Add screenshot of AD DS role selection on `DC02`.
 
 ### Server Core / PowerShell: Install the Role
 
@@ -272,14 +249,6 @@ After the AD DS role installs, Server Manager shows a notification flag.
 9. Review paths and run the prerequisites check.
 10. Click **Install** and let `DC02` reboot.
 
-> **Image placeholder:** Add screenshot of the Deployment Configuration page
-> showing **Add a domain controller to an existing domain**.
->
-> **Image placeholder:** Add screenshot of Domain Controller Options with DNS
-> and Global Catalog checked.
->
-> **Image placeholder:** Add screenshot of the prerequisites check before
-> installation.
 
 ### Server Core / PowerShell: Promote with `Install-ADDSDomainController`
 
@@ -288,18 +257,9 @@ existing domain, instead of creating a new forest.
 
 ```powershell
 $Credential = Get-Credential "GNTECH\Administrator"
-$SafeModePassword = Read-Host \
-  -Prompt "Enter Directory Services Restore Mode password for DC02" \
-  -AsSecureString
+$SafeModePassword = Read-Host  -Prompt "Enter Directory Services Restore Mode password for DC02"  -AsSecureString
 
-Install-ADDSDomainController \
-  -DomainName "gntech.me" \
-  -Credential $Credential \
-  -InstallDns \
-  -NoGlobalCatalog:$false \
-  -SafeModeAdministratorPassword $SafeModePassword \
-  -NoRebootOnCompletion:$false \
-  -Force
+Install-ADDSDomainController  -DomainName "gntech.me"  -Credential $Credential  -InstallDns  -NoGlobalCatalog:$false  -SafeModeAdministratorPassword $SafeModePassword  -NoRebootOnCompletion:$false  -Force
 ```
 
 The server reboots after promotion.
@@ -320,17 +280,13 @@ on both DCs.
 On `DC01`:
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10,10.0.20.11
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10,10.0.20.11
 ```
 
 On `DC02`:
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.11,10.0.20.10
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.11,10.0.20.10
 ```
 
 This keeps each DC using itself first, with the other DC as backup. Some
@@ -519,9 +475,7 @@ Pick a domain-joined Windows client.
 Set DNS to both DCs:
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10,10.0.20.11
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10,10.0.20.11
 ```
 
 Verify domain discovery:
@@ -538,9 +492,7 @@ stop DNS registration use by pointing the client only to `DC02`, not by
 hard powering off a DC during replication.
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.11
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.11
 
 ipconfig /flushdns
 nltest /dsgetdc:gntech.me
@@ -553,9 +505,7 @@ applies Group Policy.
 Restore normal DNS order afterward:
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10,10.0.20.11
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10,10.0.20.11
 ```
 
 ## AD Sites and Services Cleanup
@@ -568,8 +518,6 @@ Open Active Directory Sites and Services:
 dssite.msc
 ```
 
-> **Image placeholder:** Add screenshot of Active Directory Sites and Services
-> showing `DC01` and `DC02` under the correct site.
 
 Check:
 
@@ -585,9 +533,7 @@ nearest DC.
 PowerShell example:
 
 ```powershell
-New-ADReplicationSubnet \
-  -Name "10.0.20.0/24" \
-  -Site "Default-First-Site-Name"
+New-ADReplicationSubnet  -Name "10.0.20.0/24"  -Site "Default-First-Site-Name"
 ```
 
 ## Monitoring Checks to Keep

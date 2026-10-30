@@ -17,7 +17,6 @@ keywords:
   - Terraform remote state Proxmox infrastructure
   - declarative infrastructure management Proxmox homelab
 summary: "Automate Proxmox LXC and VM provisioning using Terraform or OpenTofu with a GitOps pipeline — declarative infrastructure, remote state, and CI/CD from Git pushes."
-canonical: "https://gntech.dev/posts/proxmox-terraform-gitops-iac/"
 ---
 
 Manually creating LXC containers and VMs through the Proxmox web UI

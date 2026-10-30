@@ -17,7 +17,6 @@ keywords:
   - Mailcow SSL Let's Encrypt certificate
   - self-hosted email server security hardening
 summary: "Full guide to deploying Mailcow Dockerized in your homelab — from Docker Compose setup and DNS records to Traefik reverse proxy, DKIM signing, and email deliverability tuning."
-canonical: "https://blog.gntech.me/posts/2026-05-21-mailcow-dockerized-selfhosted-email/"
 ---
 
 Running your own email server is one of the most rewarding homelab

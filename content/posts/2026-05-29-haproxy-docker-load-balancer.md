@@ -18,7 +18,6 @@ keywords:
   - HAProxy stats dashboard monitoring
   - Docker Compose HAProxy frontend backend setup
 summary: "Step-by-step guide to deploying HAProxy with Docker Compose for TCP/HTTP load balancing in your homelab — SSL termination, health checks, stats monitoring, and backend failover with real configuration files."
-canonical: "https://blog.gntech.me/posts/haproxy-docker-load-balancer/"
 ---
 
 HAProxy is the de facto standard for high-performance TCP and HTTP load

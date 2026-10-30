@@ -17,7 +17,6 @@ keywords:
   - Gitea Actions runner Docker
   - self-hosted Git CI CD pipeline
 summary: "Complete guide to deploying Gitea with Docker Compose in your homelab — PostgreSQL backend, SSH passthrough, daily backups, and Gitea Actions CI/CD for automated Docker builds and deployments."
-canonical: "https://blog.gntech.me/posts/gitea-docker-ci-cd-homelab/"
 ---
 
 Relying on GitHub, GitLab, or Bitbucket for every project puts your

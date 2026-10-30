@@ -17,7 +17,6 @@ keywords:
   - RouterOS 7 routing filter redistribution configuration
   - OSPF stub area NSSA MikroTik homelab deployment
 summary: "Configure OSPF dynamic routing on MikroTik RouterOS 7 for your homelab. Step-by-step guide with real RouterOS CLI commands, area design patterns, route redistribution, and multi-router topology examples."
-canonical: "https://gntech.dev/posts/mikrotik-routeros7-ospf-dynamic-routing/"
 ---
 
 When your homelab grows past a single router and a handful of VLANs, static routes become a maintenance burden. Every new subnet, every link change, every failover scenario requires manual updates across every router. OSPF (Open Shortest Path First) solves this by dynamically discovering the network topology and converging on the best paths automatically.
@@ -404,7 +403,7 @@ Verify OSPFv3 neighbors:
 
 ## 9. OSPF with Linux FRR (Optional Interop)
 
-You can peer a MikroTik router with a Linux host running FRR (Free Range Routing) — useful for testing, education, or routing to a Docker host. This is covered in the [Docker networking patterns guide](https://gntech.dev/posts/docker-compose-networking-patterns/).
+You can peer a MikroTik router with a Linux host running FRR (Free Range Routing) — useful for testing, education, or routing to a Docker host. This is covered in the [Docker networking patterns guide](/posts/2026-05-15-docker-compose-networking-patterns/).
 
 ### Install FRR on Debian/Ubuntu
 
@@ -482,7 +481,7 @@ These commands will become your daily drivers once OSPF is running:
 | Authentication fails | Mismatched key or key-id | Double-check `auth-key` and `auth-key-id` |
 | Routes flapping | Cost oscillation | Set explicit `cost=` on interface templates |
 
-**MTU tip:** RouterOS defaults to 1500 on Ethernet. If you use VLAN tagging or bridge VXLAN (common with [Proxmox SDN](https://gntech.dev/posts/proxmox-sdn-software-defined-networking/)), the effective MTU drops. Check with:
+**MTU tip:** RouterOS defaults to 1500 on Ethernet. If you use VLAN tagging or bridge VXLAN (common with [Proxmox SDN](/posts/2026-05-19-proxmox-sdn-software-defined-networking/)), the effective MTU drops. Check with:
 
 ```routeros
 /interface ethernet print mtu
@@ -499,4 +498,4 @@ OSPF on MikroTik RouterOS 7 is production-class dynamic routing accessible to an
 
 The RouterOS 7 interface-template approach makes configuration clean — no more per-interface OSPF setup like RouterOS 6 required. With routing filters, stub areas, and authentication, you have everything needed for a robust dynamic routing environment.
 
-**Next steps:** Once you're comfortable with OSPF, explore BGP for WAN-facing routing, VRF for multi-tenant network segmentation, or pair OSPF with the [MikroTik firewall rules for inter-VLAN filtering](https://gntech.dev/posts/mikrotik-firewall-rules/). For a broader look at the RouterOS 7 routing stack, check the [RouterOS 7 best practices guide](https://gntech.dev/posts/mikrotik-routeros7-best-practices/).
+**Next steps:** Once you're comfortable with OSPF, explore BGP for WAN-facing routing, VRF for multi-tenant network segmentation, or pair OSPF with the [MikroTik firewall rules for inter-VLAN filtering](/posts/2026-05-24-mikrotik-firewall-rules/). For a broader look at the RouterOS 7 routing stack, check the [RouterOS 7 best practices guide](/posts/2026-05-26-mikrotik-routeros7-best-practices/).

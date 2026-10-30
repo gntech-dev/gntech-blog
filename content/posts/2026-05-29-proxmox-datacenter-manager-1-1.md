@@ -17,7 +17,6 @@ keywords:
   - Proxmox Datacenter Manager world map visualization
   - PDM 1.1 upgrade from earlier versions
 summary: "Step-by-step guide to deploying Proxmox Datacenter Manager 1.1 for centralized multi-cluster management. Covers automated installation workflows, Ceph monitoring, subscription key management, world map visualization, and upgrade procedures."
-canonical: "https://blog.gntech.me/posts/proxmox-datacenter-manager-1-1/"
 ---
 
 If you manage more than one Proxmox VE cluster, you know the pain of

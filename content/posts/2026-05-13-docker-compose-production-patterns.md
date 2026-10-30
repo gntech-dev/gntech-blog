@@ -17,7 +17,6 @@ keywords:
   - Docker restart policies pmax
   - production docker compose configuration
 summary: "Practical Docker Compose patterns for reliable homelab deployments. Healthchecks, conditional dependencies, profiles for optional services, secrets management, extension fields, and restart policies with real compose files."
-canonical: "https://blog.gntech.me/posts/docker-compose-production-patterns-for-homelabs/"
 ---
 
 Most `docker-compose.yml` files you find in tutorials are minimal. They
@@ -110,7 +109,7 @@ docker compose ps
 docker compose ps --status unhealthy
 
 # See healthcheck log output
-docker inspect --format='{{json .State.Health}}' <container_name>
+docker inspect --format='{{json .State.Health}}' "<container_name>"
 ```
 
 A container marked `(unhealthy)` won't receive traffic from other
@@ -665,7 +664,7 @@ Monitor restart count:
 
 ```bash
 # Check how many times a container has restarted
-docker inspect --format '{{.RestartCount}}' <container_name>
+docker inspect --format '{{.RestartCount}}' "<container_name>"
 
 # Watch restart events in real time
 docker events --filter 'type=container' --filter 'event=restart'

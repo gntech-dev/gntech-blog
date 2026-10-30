@@ -17,7 +17,6 @@ keywords:
   - MikroTik BGP inbound outbound route filtering
   - RouterOS 7 BGP IPv6 MP-BGP configuration
 summary: "Configure BGP on MikroTik RouterOS 7 for homelab dynamic routing. Covers eBGP/iBGP peering, prefix advertisement, route filtering with filter chains, BGP communities, and multi-router topology with real RouterOS CLI commands."
-canonical: "https://blog.gntech.me/posts/mikrotik-routeros7-bgp-configuration/"
 ---
 
 BGP (Border Gateway Protocol) is the backbone routing protocol of the

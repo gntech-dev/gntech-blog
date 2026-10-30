@@ -16,7 +16,6 @@ keywords:
   - Linux bridge STP configuration container networking issues
   - Homelab bridge network packet capture traffic analysis tcpdump
 summary: "A practical guide to debugging Linux bridge networks used by Docker and Proxmox. Covers tcpdump packet captures, brctl and bridge fdb inspection, VLAN troubleshooting, Docker network namespace traversal, and fixes for common connectivity problems."
-canonical: "https://blog.gntech.me/posts/linux-bridge-networking-debugging-docker-proxmox/"
 ---
 
 ## Why Linux Bridges Deserve Your Debugging Attention

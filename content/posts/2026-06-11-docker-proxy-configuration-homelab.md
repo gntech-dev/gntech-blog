@@ -17,7 +17,6 @@ keywords:
   - Docker CLI proxy environment variables build-time configuration
   - Docker proxy vs Gluetun VPN gateway container networking
 summary: "Configure HTTP/HTTPS proxy for Docker daemon, CLI, and individual containers in your homelab. Covers systemd drop-in overrides, daemon.json settings, Docker Compose proxy variables, and the critical NO_PROXY configuration to avoid breaking internal container communication."
-canonical: "https://blog.gntech.me/posts/docker-proxy-configuration-homelab/"
 ---
 
 Your Proxmox host runs Docker behind a Gluetun WireGuard gateway. Containers start, DNS works, but `docker pull` hangs. `docker build` times out fetching packages. Your app container tries to reach an external API through `localhost:3128` — but nothing is listening there.
@@ -399,4 +398,4 @@ Docker proxy configuration is a three-layer problem: daemon for pulls, CLI for b
 
 Start with the systemd drop-in file for the daemon, add container-level proxy variables in your Compose files, and always include RFC1918 subnets plus `.local` in NO_PROXY. If you need a forward proxy, run Tinyproxy or Squid in a container and bind it to the same network stack as your VPN gateway.
 
-For more homelab Docker patterns, check out the [Docker Compose networking patterns](/posts/docker-compose-networking-patterns/) guide and the [Gluetun VPN gateway container](/posts/gluetun-vpn-gateway-docker-wireguard/) deployment.
+For more homelab Docker patterns, check out the [Docker Compose networking patterns](/posts/2026-05-15-docker-compose-networking-patterns/) guide and the [Gluetun VPN gateway container](/posts/2026-06-05-gluetun-vpn-gateway-docker-wireguard/) deployment.

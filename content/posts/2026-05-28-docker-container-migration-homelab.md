@@ -17,7 +17,6 @@ keywords:
   - Docker container migration minimal downtime homelab
   - migrate Docker environment to new host step by step
 summary: "Migrate Docker containers between homelab hosts with minimal downtime. Covers volume backup and restore, image export/import, Compose stack portability, and rsync-based data transfer strategies."
-canonical: "https://gntech.dev/posts/docker-container-migration-homelab/"
 ---
 
 You've outgrown your first Docker host, you're rebuilding Proxmox nodes, or you just want to move a stack to a beefier server without starting from scratch. Migrating Docker containers between hosts is a task every homelab operator eventually faces, and doing it wrong means losing persistent data, breaking DNS, or forgetting critical .env files.
@@ -139,7 +138,7 @@ docker compose up -d
 
 ## 4. Method B — NFS-Based Zero-Copy Migration
 
-If your homelab already uses NFS (see our [NFS storage homelab guide](https://gntech.dev/posts/nfs-storage-homelab-proxmox-docker/)), you can migrate without copying a single byte of application data. The idea is simple: mount the same NFS export on both hosts, and all you move is the container runtime.
+If your homelab already uses NFS (see our [NFS storage homelab guide](/posts/2026-05-25-nfs-storage-homelab-proxmox-docker/)), you can migrate without copying a single byte of application data. The idea is simple: mount the same NFS export on both hosts, and all you move is the container runtime.
 
 ### NFS Volume in a Compose File
 
@@ -359,4 +358,4 @@ Docker container migration doesn't have to be stressful. Pick the method that fi
 
 The most important rule: test your restore process on a throwaway host before doing it for real. Practise the migration with a non-critical service first, then scale up. Keep old hosts around for at least 24 hours post-migration, and version-control your Compose files so you're never hunting for configs after the move.
 
-For automated volume backups, check out our [restic Docker backup guide](https://gntech.dev/posts/restic-docker-backup-strategy/) — it pairs perfectly with the migration and restore workflows covered here.
+For automated volume backups, check out our [restic Docker backup guide](/posts/2026-05-19-restic-docker-backup-strategy/) — it pairs perfectly with the migration and restore workflows covered here.

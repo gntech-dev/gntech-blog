@@ -17,7 +17,6 @@ keywords:
   - Homelab intrusion prevention Fail2ban deployment
   - Fail2ban email alerts fail2ban-client commands
 summary: "Protect your homelab from brute-force attacks with Fail2ban. Deploy on bare-metal for SSH and configure custom jails for Docker containers using Traefik and Nginx logs with email alerting."
-canonical: "https://blog.gntech.me/posts/fail2ban-docker-deployment-homelab/"
 ---
 
 ## Why Fail2ban Belongs in Every Homelab
@@ -399,22 +398,17 @@ curl -k https://your-service.example.com/
 sudo fail2ban-client status traefik-auth
 ```
 
-## Monitoring Fail2ban with Prometheus
+## Monitoring Fail2ban
 
-For visibility at scale, the [fail2ban_exporter](https://github.com/ribbybibby/fail2ban_exporter) exposes per-jail ban counts as Prometheus metrics. Run it alongside your existing monitoring stack:
+Check per-jail state through the installed client and logs:
 
-```yaml
-services:
-  fail2ban-exporter:
-    image: ghcr.io/ribbybibby/fail2ban_exporter:latest
-    ports:
-      - "9191:9191"
-    volumes:
-      - /var/run/fail2ban/fail2ban.sock:/var/run/fail2ban/fail2ban.sock
-    restart: unless-stopped
+```bash
+sudo fail2ban-client status
+sudo fail2ban-client status sshd
+sudo journalctl -u fail2ban --since '1 hour ago' --no-pager
 ```
 
-Then add a scrape target in Prometheus and a Grafana dashboard to track bans over time.
+Use your actual jail name in place of `sshd`. If you add Prometheus integration, select a maintained exporter, verify its image exists, and review the permissions it needs. The previously linked exporter repository and image could not be verified and have been removed; this article does not provide a tested Prometheus exporter deployment.
 
 ## Putting It All Together
 

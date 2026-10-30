@@ -17,7 +17,6 @@ keywords:
   - Valkey performance tuning maxmemory
   - Valkey Docker Compose Dockerfile configuration
 summary: "Complete guide to deploying Valkey 9.1 with Docker Compose — the high-performance Redis fork with new security, observability, and performance features. Covers config, ACL hardening, and connecting your homelab services."
-canonical: "https://blog.gntech.me/posts/valkey-docker-deployment-homelab/"
 ---
 
 If your homelab runs WordPress, Nextcloud, Grafana, GitLab, or
@@ -240,7 +239,7 @@ docker exec valkey valkey-cli ACL LOAD
 
 You can test access restrictions:
 
-```bash
+```text
 # Authenticate as the wordpress user
 docker exec valkey valkey-cli -a wp-secure-pass
 

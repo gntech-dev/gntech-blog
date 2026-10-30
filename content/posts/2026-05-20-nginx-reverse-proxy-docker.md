@@ -16,7 +16,6 @@ keywords:
   - Nginx gzip compression caching configuration
   - Docker Nginx health check logging setup
 summary: "Complete guide to deploying Nginx with Docker Compose as a reverse proxy and caching layer. Covers multi-service proxying, static file caching, gzip compression, SSL termination, and performance tuning for homelab environments."
-canonical: "https://blog.gntech.me/posts/nginx-reverse-proxy-docker/"
 ---
 
 Traefik dominates the homelab reverse proxy conversation, and for good reason — automatic service discovery, Let's Encrypt integration, and a slick dashboard. But Traefik is not always the right tool. When you need raw throughput, fine-grained caching control, or a lightweight sidecar that sits in front of a single service, **Nginx** is faster, simpler, and uses fewer resources.

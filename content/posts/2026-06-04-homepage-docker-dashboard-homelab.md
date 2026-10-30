@@ -17,7 +17,6 @@ keywords:
   - Docker container health status dashboard
   - Homepage API widgets homelab integration
 summary: "Deploy Homepage, the lightweight homelab dashboard, with Docker Compose. Configure service widgets, system monitors, Docker stats, and API integrations in a single YAML-driven interface."
-canonical: "https://blog.gntech.me/posts/homepage-docker-dashboard-homelab/"
 ---
 
 ## Why a Self-Hosted Dashboard Belongs in Every Homelab

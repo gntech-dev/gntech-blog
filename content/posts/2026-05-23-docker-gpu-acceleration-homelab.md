@@ -17,7 +17,6 @@ keywords:
   - Docker runtime nvidia container configuration
   - GPU accelerated containers homelab performance
 summary: "Set up GPU acceleration in Docker containers with the NVIDIA Container Toolkit — from installation to real workloads like Ollama AI inference, Jellyfin hardware transcoding, and Frigate object detection."
-canonical: "https://gntech.dev/posts/docker-gpu-acceleration-homelab/"
 ---
 
 Your homelab server has an NVIDIA GPU sitting idle in the PCIe

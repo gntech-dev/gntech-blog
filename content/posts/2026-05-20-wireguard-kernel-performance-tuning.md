@@ -17,7 +17,6 @@ keywords:
   - iperf3 WireGuard benchmarking methodology
   - Linux kernel network stack optimization VPN
 summary: "A practical guide to maximizing WireGuard throughput on Linux — covering kernel sysctl tuning, BBR congestion control, UDP buffer sizes, MTU/MSS clamping, NAPI polling optimization, and proper benchmarking with iperf3."
-canonical: "https://blog.gntech.me/posts/wireguard-kernel-performance-tuning/"
 ---
 
 WireGuard is already the fastest general-purpose VPN protocol available,

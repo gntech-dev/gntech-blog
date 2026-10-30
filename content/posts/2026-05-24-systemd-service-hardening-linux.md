@@ -17,7 +17,6 @@ keywords:
   - ReadWritePaths MemoryMax TasksMax systemd resource limits
   - harden systemd service root filesystem protection
 summary: "Harden Linux systemd services with built-in sandboxing directives — ProtectHome, ProtectSystem, CapabilityBoundingSet, NoNewPrivileges, PrivateTmp, and systemd-analyze security scoring. Includes real hardened service files for common homelab daemons."
-canonical: "https://gntech.dev/posts/systemd-service-hardening-linux/"
 ---
 
 Many homelab administrators focus on network firewalls, container security, and kernel parameters — but overlook the sandboxing features built into systemd itself. Every service that runs on your Linux host can be locked down with zero code changes, using systemd's security directives.

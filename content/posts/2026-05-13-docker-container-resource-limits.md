@@ -15,7 +15,6 @@ keywords:
   - cgroup v2 Docker
   - homelab Docker optimization
 summary: "Practical Docker container resource limits guide for homelabs — CPU quota/pinning, memory hard/soft limits, swap control, block I/O throttling, cgroup v2 differences, and Docker Compose examples."
-canonical: "https://blog.gntech.me/posts/docker-container-resource-limits/"
 ---
 
 If you run more than ten containers on a single Docker host — and in a
@@ -406,20 +405,20 @@ On modern distros (Debian 12+, Ubuntu 22.04+, Fedora 37+):
 
 ```bash
 # Memory usage for a container
-cat /sys/fs/cgroup/memory/system.slice/docker-<container-id>.scope/memory.current
+cat /sys/fs/cgroup/memory/system.slice/docker-"<container-id>".scope/memory.current
 
 # CPU usage (microseconds)
-cat /sys/fs/cgroup/cpu.system.slice/docker-<container-id>.scope/cpu.stat
+cat /sys/fs/cgroup/cpu.system.slice/docker-"<container-id>".scope/cpu.stat
 
 # IO stats
-cat /sys/fs/cgroup/io.system.slice/docker-<container-id>.scope/io.stat
+cat /sys/fs/cgroup/io.system.slice/docker-"<container-id>".scope/io.stat
 ```
 
 For cgroup v2, Docker also provides `docker inspect`:
 
 ```bash
-docker inspect <container> --format '{{.HostConfig.Memory}}'
-docker inspect <container> --format '{{.HostConfig.NanoCpus}}'
+docker inspect "<container>" --format '{{.HostConfig.Memory}}'
+docker inspect "<container>" --format '{{.HostConfig.NanoCpus}}'
 ```
 
 ---

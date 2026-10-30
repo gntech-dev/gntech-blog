@@ -17,7 +17,6 @@ keywords:
   - protect Docker socket
   - container API permissions
 summary: "Secure your Docker socket with a proxy that grants granular API permissions to Portainer, Watchtower, Traefik, and Dozzle — without exposing root-level access."
-canonical: "https://gntech.dev/posts/docker-socket-proxy/"
 ---
 
 Every homelab runs containers that need Docker API access. Portainer needs

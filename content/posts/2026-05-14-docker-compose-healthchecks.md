@@ -17,7 +17,6 @@ keywords:
   - wait-for-it Docker alternative
   - service dependency management docker
 summary: "Stop using sleep and wait-for-it scripts. Use Docker Compose health checks with proper conditions to orchestrate service startup in your homelab reliably."
-canonical: "https://gntech.dev/posts/docker-compose-healthchecks/"
 ---
 
 Every homelab has a service that depends on a database. Your web app
@@ -52,7 +51,7 @@ container's state changes based on the result:
 In `docker ps`, you'll see the status column show `healthy` or
 `unhealthy` when health checks are configured:
 
-```bash
+```text
 $ docker ps
 CONTAINER ID   STATUS
 abc123         Up 2 seconds (healthy)

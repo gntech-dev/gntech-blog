@@ -17,7 +17,6 @@ keywords:
   - Homelab Proxmox automation security best practices
   - Proxmox API token PVE PAM authentication
 summary: "Learn to secure Proxmox API access using API tokens and fine-grained RBAC. Covers token creation, role-based permission separation, Terraform/Ansible integration, and audit logging — all without exposing root credentials."
-canonical: "https://blog.gntech.me/posts/proxmox-api-tokens-rbac-secure-automation/"
 ---
 
 Every homelab running Proxmox eventually hits the automation wall. You want Terraform to spin up VMs, Ansible to configure LXC containers, or a monitoring tool to query node status. The default approach — embedding the root password into scripts and CI pipelines — works until it doesn't. One leaked env file, one committed secret in a public repo, and your entire virtualization host is exposed.

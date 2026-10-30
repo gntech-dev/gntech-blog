@@ -19,7 +19,6 @@ keywords:
   - WireGuard remote access homelab MikroTik
   - WireGuard kernel module nested container LXC
 summary: "Deploy a lightweight WireGuard VPN server in a Proxmox LXC container — configure persistent tunnels, NAT routing, client generation, and firewall rules for secure remote access to your entire homelab network."
-canonical: "https://gntech.dev/posts/wireguard-vpn-proxmox-lxc/"
 ---
 
 You SSH into your homelab from a coffee shop, manage Proxmox
@@ -240,10 +239,10 @@ Keep a mapping file:
 ```bash
 cat > /etc/wireguard/clients.txt << 'EOF'
 # Client          IP              Public key
-# laptop          10.10.10.2      <key>
-# phone           10.10.10.3      <key>
-# tablet          10.10.10.4      <key>
-# server-remote   10.10.10.10     <key>
+# laptop          10.10.10.2      "<key>"
+# phone           10.10.10.3      "<key>"
+# tablet          10.10.10.4      "<key>"
+# server-remote   10.10.10.10     "<key>"
 EOF
 ```
 
@@ -300,12 +299,12 @@ wg show
 
 # Output should look like:
 # interface: wg0
-#   public key: <server public key>
+#   public key: "<server public key>"
 #   private key: (hidden)
 #   listening port: 51820
 #
-# peer: <laptop public key>
-#   endpoint: <client public IP>:<ephemeral port>
+# peer: "<laptop public key>"
+#   endpoint: "<client public IP>":"<ephemeral port>"
 #   allowed ips: 10.10.10.2/32
 #   transfer: 1.23 KiB received, 4.56 KiB sent
 ```
@@ -331,7 +330,7 @@ from your edge router to the LXC container's IP address.
 
 If your edge router is MikroTik (like the GnTech homelab):
 
-```bash
+```routeros
 /ip firewall nat
 add chain=dstnat \
   protocol=udp \
@@ -433,7 +432,7 @@ A simple bash wrapper for client management:
 ```bash
 #!/bin/bash
 # /usr/local/bin/wg-add-client.sh
-# Usage: wg-add-client.sh <client-name> <vpn-ip>
+# Usage: wg-add-client.sh "<client-name>" "<vpn-ip>"
 
 CLIENT=$1
 IP=$2

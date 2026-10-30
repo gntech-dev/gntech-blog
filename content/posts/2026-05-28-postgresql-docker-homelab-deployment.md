@@ -17,7 +17,6 @@ keywords:
   - PostgreSQL streaming replication Docker Compose
   - Docker PostgreSQL performance tuning shared_buffers
 summary: "Complete guide to deploying PostgreSQL 16 with Docker Compose in your homelab — persistent volumes, health checks, pgvector extension, automated pg_dump backups, replication, and performance tuning."
-canonical: "https://blog.gntech.me/posts/postgresql-docker-homelab-deployment/"
 ---
 
 PostgreSQL is the backbone of modern self-hosted infrastructure.

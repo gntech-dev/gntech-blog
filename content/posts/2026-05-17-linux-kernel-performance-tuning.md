@@ -16,7 +16,6 @@ keywords:
   - CPU frequency scaling governor performance
   - Linux memory management vm swappiness tuning
 summary: "Tune your Linux server kernel for maximum throughput and low latency. Covers TCP BBR, network buffer tuning, I/O schedulers, memory management, and CPU governor configuration with real config files and benchmarks."
-canonical: "https://gntech.dev/posts/linux-kernel-performance-tuning/"
 ---
 
 The Linux kernel ships with conservative defaults designed to work
@@ -52,7 +51,7 @@ sysctl net.ipv4.tcp_congestion_control
 # Receiver:
 iperf3 -s
 # Sender:
-iperf3 -c <RECEIVER_IP> -t 30 -P 4
+iperf3 -c "<RECEIVER_IP>" -t 30 -P 4
 ```
 
 Save these outputs somewhere you can reference later. "Feels faster"
@@ -488,7 +487,7 @@ echo "=== File max ==="
 sysctl fs.file-max
 
 # Network throughput comparison
-iperf3 -c <SECOND_SERVER_IP> -t 30 -P 4
+iperf3 -c "<SECOND_SERVER_IP>" -t 30 -P 4
 ```
 
 Compare the iperf3 results against your baseline. On a homelab server

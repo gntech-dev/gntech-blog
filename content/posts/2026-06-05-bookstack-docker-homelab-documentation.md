@@ -17,7 +17,6 @@ keywords:
   - BookStack LDAP SSO authentication setup
   - Self-hosted documentation wiki backup automation
 summary: "Deploy BookStack with Docker Compose for a self-hosted homelab documentation wiki. Real configs for MariaDB, Traefik, LDAP, and automated backups."
-canonical: "https://blog.gntech.me/posts/bookstack-docker-homelab-documentation/"
 ---
 
 ## Why Your Homelab Needs a Documentation Wiki
@@ -34,7 +33,7 @@ BookStack is not the only documentation tool in the self-hosted space. Here is h
 
 - **BookStack**: Hierarchical out of the box, WYSIWYG + Markdown editor, built-in search, role-based permissions, LDAP/OAuth/SAML authentication, PDF export, no build step
 - **Wiki.js**: Modular and extensible, Git-backed storage, but requires a Node.js runtime and client-side rendering that can feel sluggish on lower-end hardware
-- **Docusaurus**: Static site generator — excellent for developer docs but requires a build step and Git-based workflow; covered in a [previous post](/posts/docusaurus-documentation-site-homelab/)
+- **Docusaurus**: Static site generator — excellent for developer docs but requires a build step and Git-based workflow; covered in a [previous post](/posts/2026-05-30-docusaurus-documentation-site-homelab/)
 - **Outline**: Modern UI and real-time editing, but requires MinIO/S3 object storage and a Redis instance, adding operational overhead
 
 For a homelab, BookStack wins because it has no external dependencies beyond a database. The linuxserver.io Docker image keeps maintenance near zero, the WYSIWYG editor means you do not need Markdown fluency to contribute, and the hierarchical shelf/book/chapter/page model mirrors real infrastructure organization.
@@ -307,4 +306,4 @@ Start by documenting your VLAN layout and firewall rules — the things you most
 **Related reading:**
 - [BookStack Installation Docs](https://www.bookstackapp.com/docs/admin/installation/)
 - [linuxserver/bookstack Docker Image](https://hub.docker.com/r/linuxserver/bookstack)
-- [Docusaurus Documentation Site for Homelab](/posts/docusaurus-documentation-site-homelab/)
+- [Docusaurus Documentation Site for Homelab](/posts/2026-05-30-docusaurus-documentation-site-homelab/)

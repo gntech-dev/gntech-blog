@@ -16,7 +16,6 @@ keywords:
   - dcdiag DNS verification
   - DNS SRV records Active Directory
 summary: "Step-by-step Windows Server 2025 DNS replication guide: AD-integrated zones, DNS role install, forward/reverse zones, forwarders, secure dynamic updates, GUI and Server Core paths, and verification."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-dns-replication/"
 cover:
   image: "/images/posts/windows-server-2025-dns-replication/dns-replication-topology.svg"
   alt: "Windows Server 2025 DNS replication topology with DC01 and DC02 hosting AD-integrated DNS zones"
@@ -36,17 +35,6 @@ verification.
 
 ![Windows Server 2025 DNS replication topology](/images/posts/windows-server-2025-dns-replication/dns-replication-topology.svg)
 
-> **Image placeholders to add later:**
->
-> - Screenshot: Server Manager DNS role installed on both DCs
-> - Screenshot: DNS Manager showing `gntech.me` on `DC01`
-> - Screenshot: zone properties showing **Store the zone in Active Directory**
-> - Screenshot: replication scope set to domain DNS servers
-> - Screenshot: secure dynamic updates enabled
-> - Screenshot: reverse lookup zone creation wizard
-> - Screenshot: DNS forwarders tab
-> - Screenshot: `_msdcs`, `_sites`, `_tcp`, and `_udp` SRV folders
-> - Screenshot: `Resolve-DnsName`, `dcdiag /test:dns`, and `repadmin` success
 
 ## GUI vs Server Core Path
 
@@ -114,8 +102,6 @@ Get-WindowsFeature DNS
 4. Select **DNS Server**.
 5. Accept management tools and install.
 
-> **Image placeholder:** Add screenshot of the DNS Server role selected in
-> Server Manager.
 
 ### Server Core / PowerShell
 
@@ -161,26 +147,19 @@ gntech.me
 6. Confirm **Dynamic updates** is **Secure only**.
 7. Click **Replication** and select the domain DNS replication scope.
 
-> **Image placeholder:** Add screenshot of zone properties showing
-> AD-integrated storage and secure dynamic updates.
 
 ### Server Core / PowerShell
 
 If the zone does not exist, create it as AD-integrated:
 
 ```powershell
-Add-DnsServerPrimaryZone \
-  -Name "gntech.me" \
-  -ReplicationScope "Domain" \
-  -DynamicUpdate "Secure"
+Add-DnsServerPrimaryZone  -Name "gntech.me"  -ReplicationScope "Domain"  -DynamicUpdate "Secure"
 ```
 
 If the zone exists, enforce secure dynamic updates:
 
 ```powershell
-Set-DnsServerPrimaryZone \
-  -Name "gntech.me" \
-  -DynamicUpdate "Secure"
+Set-DnsServerPrimaryZone  -Name "gntech.me"  -DynamicUpdate "Secure"
 ```
 
 Check the zone:
@@ -206,16 +185,11 @@ AD logons, but it is worth configuring.
 7. Enter network ID `10.0.20`.
 8. Allow **Secure only** dynamic updates.
 
-> **Image placeholder:** Add screenshot of reverse lookup zone creation for
-> `10.0.20.0/24`.
 
 ### Server Core / PowerShell
 
 ```powershell
-Add-DnsServerPrimaryZone \
-  -NetworkId "10.0.20.0/24" \
-  -ReplicationScope "Domain" \
-  -DynamicUpdate "Secure"
+Add-DnsServerPrimaryZone  -NetworkId "10.0.20.0/24"  -ReplicationScope "Domain"  -DynamicUpdate "Secure"
 ```
 
 Verify:
@@ -230,17 +204,9 @@ Most domain members register dynamically. Infrastructure records should
 be explicit.
 
 ```powershell
-Add-DnsServerResourceRecordA \
-  -ZoneName "gntech.me" \
-  -Name "router" \
-  -IPv4Address "10.0.20.1" \
-  -CreatePtr
+Add-DnsServerResourceRecordA  -ZoneName "gntech.me"  -Name "router"  -IPv4Address "10.0.20.1"  -CreatePtr
 
-Add-DnsServerResourceRecordA \
-  -ZoneName "gntech.me" \
-  -Name "srv1" \
-  -IPv4Address "10.0.20.30" \
-  -CreatePtr
+Add-DnsServerResourceRecordA  -ZoneName "gntech.me"  -Name "srv1"  -IPv4Address "10.0.20.30"  -CreatePtr
 ```
 
 Verify:
@@ -262,19 +228,13 @@ Clients should ask AD DNS. AD DNS should forward internet queries.
 3. Add upstream resolvers, for example `1.1.1.1` and `9.9.9.9`.
 4. Repeat on both DCs, or configure through PowerShell.
 
-> **Image placeholder:** Add screenshot of DNS forwarders configured on `DC01`
-> and `DC02`.
 
 ### Server Core / PowerShell
 
 ```powershell
-Set-DnsServerForwarder \
-  -ComputerName DC01 \
-  -IPAddress 1.1.1.1,9.9.9.9
+Set-DnsServerForwarder  -ComputerName DC01  -IPAddress 1.1.1.1,9.9.9.9
 
-Set-DnsServerForwarder \
-  -ComputerName DC02 \
-  -IPAddress 1.1.1.1,9.9.9.9
+Set-DnsServerForwarder  -ComputerName DC02  -IPAddress 1.1.1.1,9.9.9.9
 ```
 
 Verify:
@@ -302,11 +262,7 @@ domain. Public DNS cannot resolve `_ldap._tcp.dc._msdcs.gntech.me`.
 Create a test record on `DC01`:
 
 ```powershell
-Add-DnsServerResourceRecordA \
-  -ComputerName DC01 \
-  -ZoneName "gntech.me" \
-  -Name "dnsrep-test" \
-  -IPv4Address "10.0.20.250"
+Add-DnsServerResourceRecordA  -ComputerName DC01  -ZoneName "gntech.me"  -Name "dnsrep-test"  -IPv4Address "10.0.20.250"
 ```
 
 Force AD replication:
@@ -325,12 +281,7 @@ Resolve-DnsName dnsrep-test.gntech.me -Server 10.0.20.11
 Remove the test record:
 
 ```powershell
-Remove-DnsServerResourceRecord \
-  -ComputerName DC01 \
-  -ZoneName "gntech.me" \
-  -RRType A \
-  -Name "dnsrep-test" \
-  -Force
+Remove-DnsServerResourceRecord  -ComputerName DC01  -ZoneName "gntech.me"  -RRType A  -Name "dnsrep-test"  -Force
 ```
 
 Force replication again and verify it disappears from both servers.

@@ -17,7 +17,6 @@ keywords:
   - CrowdSec remediation firewall bouncer Docker
   - CrowdSec fail2ban alternative Docker 2026
 summary: "Deploy CrowdSec with Docker Compose and Traefik to protect your homelab services with collaborative threat intelligence. Covers the LAPI agent, bouncers, collections, custom scenarios, and remediation pipeline with real configs."
-canonical: "https://gntech.dev/posts/crowdsec-docker-traefik-deployment/"
 ---
 
 Every homelab exposed to the internet collects unwanted traffic.

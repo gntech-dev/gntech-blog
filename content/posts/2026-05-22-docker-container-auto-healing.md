@@ -17,7 +17,6 @@ keywords:
   - Uptime Kuma webhook container restart
   - self-healing Docker compose stack
 summary: "Docker marks unhealthy containers but does not restart them. Build a self-healing homelab with docker-autoheal, systemd watchdog services, custom health scripts, and Uptime Kuma webhooks — no Kubernetes needed."
-canonical: "https://gntech.dev/posts/docker-container-auto-healing/"
 ---
 
 Docker's `HEALTHCHECK` instruction tells you when a container is
@@ -589,24 +588,25 @@ docker events --filter 'event=health_status' --format '{{json .}}' | \
 
 ### Prometheus Metrics
 
-Expose container health as Prometheus metrics using
-[prometheus-health-exporter](https://github.com/maxmcd/google-health-exporter)
-or a custom exporter:
+For node_exporter deployments with the textfile collector configured for `/var/lib/node_exporter/textfile`, this example exports container health. Run it with permission to query Docker and write to that directory:
 
 ```bash
 #!/bin/bash
 # Simple health metrics exporter for Prometheus node_exporter textfile
+mkdir -p /var/lib/node_exporter/textfile
 while true; do
+  {
   echo "# HELP docker_container_health Docker container health status"
   echo "# TYPE docker_container_health gauge"
   docker ps --format '{{.Names}}\t{{.Status}}' | while IFS=$'\t' read name status; do
     case "$status" in
-      *healthy*)   health=1 ;;
       *unhealthy*) health=0 ;;
+      *healthy*)   health=1 ;;
       *)           health=-1 ;;
     esac
     echo "docker_container_health{container=\"$name\"} $health"
-  done > /var/lib/node_exporter/textfile/docker_health.prom.$$
+  done
+  } > /var/lib/node_exporter/textfile/docker_health.prom.$$
   mv /var/lib/node_exporter/textfile/docker_health.prom.$$ \
      /var/lib/node_exporter/textfile/docker_health.prom
   sleep 15

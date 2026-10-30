@@ -17,7 +17,6 @@ keywords:
   - Grafana Alloy Docker logs
   - Docker container log management
 summary: "Configure Docker logging drivers, set up log rotation limits, and deploy a centralized log pipeline with Loki and Grafana Alloy. Practical configurations to prevent disk-full disasters and enable real-time container observability in your homelab."
-canonical: "https://gntech.dev/posts/docker-logging-log-management/"
 ---
 
 Every container in your homelab produces stdout and stderr logs by
@@ -170,7 +169,7 @@ If you already have logs eating disk, find and truncate them:
 du -sh /var/lib/docker/containers/*/*-json.log | sort -rh | head -10
 
 # Safely truncate a specific container's log
-truncate -s 0 /var/lib/docker/containers/<container-id>/<container-id>-json.log
+truncate -s 0 /var/lib/docker/containers/"<container-id>"/"<container-id>"-json.log
 
 # Or truncate ALL container logs (will lose history)
 find /var/lib/docker/containers/ -name '*-json.log' -exec truncate -s 0 {} \;
@@ -427,7 +426,7 @@ This lets you filter by compose project and service name in Loki:
 ## Logging with the Docker Socket Proxy
 
 If you follow Docker socket security best practices (covered in the
-[Docker Socket Proxy post](/posts/docker-socket-proxy/)), Grafana Alloy
+[Docker Socket Proxy post](/posts/2026-05-14-docker-socket-proxy/)), Grafana Alloy
 can talk to the socket proxy instead of the raw socket:
 
 ```yaml

@@ -17,7 +17,6 @@ keywords:
   - Docusaurus multi-stage build Dockerfile static site
   - Homelab documentation site Docusaurus architecture guide
 summary: "Step-by-step guide to setting up Docusaurus for homelab documentation — from initial scaffolding to Docker deployment with full-text search, versioning, and automated GitOps publishing."
-canonical: "https://blog.gntech.me/posts/docusaurus-homelab-documentation-guide/"
 ---
 
 Documenting your homelab is one of those tasks everyone puts off — until you need to remember why you configured that VLAN or where the WireGuard peer config lives. A proper documentation site solves this, and Docusaurus is an excellent choice for homelabbers who prefer static sites, Git workflows, and Markdown-driven content.
@@ -191,7 +190,7 @@ Always use non-root containers. Set `user: "1000:1000"` in your Compose files.
 :::
 
 :::caution
-Bridge VLAN filtering disables hardware offload when combined with IGMP snooping.
+Check switch-chip and RouterOS support before combining VLAN filtering, IGMP snooping, and hardware offloading.
 :::
 
 :::danger
@@ -203,7 +202,7 @@ Never expose your Docker socket to untrusted containers.
 
 Docusaurus supports MDX tabs natively:
 
-```md
+````md
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
@@ -220,7 +219,7 @@ import TabItem from '@theme/TabItem';
   ```
 </TabItem>
 </Tabs>
-```
+````
 
 **Mermaid diagrams for network topology:**
 

@@ -17,7 +17,6 @@ keywords:
   - RouterOS container registry Docker Hub pull
   - MikroTik container mount volume persistent storage
 summary: "Run Docker containers directly on MikroTik RouterOS 7 — enable container mode, configure veth bridges, pull images from Docker Hub, and deploy Pi-hole or AdGuard Home without extra hardware."
-canonical: "https://blog.gntech.me/posts/2026-05-21-mikrotik-containers-docker-routeros/"
 ---
 
 RouterOS has supported Linux containers since v7.4beta, and the

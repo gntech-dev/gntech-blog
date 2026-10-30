@@ -17,7 +17,6 @@ keywords:
   - Portainer Business Edition community edition comparison
   - Portainer container management UI tutorial
 summary: "Deploy Portainer with Docker Compose for visual container management across your homelab. Covers CE vs Business Edition, multi-host agent setup, stack deployment, security hardening, and backup strategies."
-canonical: "https://blog.gntech.me/posts/portainer-docker-deployment-homelab/"
 ---
 
 Portainer is the most widely deployed container management UI in the

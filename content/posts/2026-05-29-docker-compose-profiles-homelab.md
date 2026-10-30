@@ -16,7 +16,6 @@ keywords:
   - Docker Compose profiles monitoring profile compose example
   - Docker Compose profiles infrastructure management guide
 summary: "Learn how Docker Compose profiles let you start only the services you need — enable monitoring, disable dev tools in production, and keep a single docker-compose.yml for your entire homelab stack."
-canonical: "https://blog.gntech.me/posts/docker-compose-profiles-homelab/"
 ---
 
 Your homelab's `docker-compose.yml` starts small. Traefik, PostgreSQL,
@@ -424,6 +423,6 @@ budget — and your future self — will thank you.
 
 ### See Also
 
-- [Docker Compose Production Patterns](/posts/docker-compose-production-patterns/)
-- [Docker Compose Networking Patterns](/posts/docker-compose-networking-patterns/)
-- [Docker Container Resource Limits](/posts/docker-container-resource-limits/)
+- [Docker Compose Production Patterns](/posts/2026-05-13-docker-compose-production-patterns/)
+- [Docker Compose Networking Patterns](/posts/2026-05-15-docker-compose-networking-patterns/)
+- [Docker Container Resource Limits](/posts/2026-05-13-docker-container-resource-limits/)

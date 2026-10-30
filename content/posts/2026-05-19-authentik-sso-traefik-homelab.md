@@ -17,7 +17,6 @@ keywords:
   - Authentik access policy groups
   - Authentik PostgreSQL Redis stack
 summary: "Complete guide to deploying Authentik with Docker Compose and integrating it with Traefik as a forward-auth SSO provider for centralized authentication, MFA, and access policies across all homelab services."
-canonical: "https://gntech.dev/posts/authentik-sso-traefik-homelab/"
 ---
 
 As your homelab grows from a handful of containers to a dozen
@@ -61,7 +60,7 @@ auth-only needs, Authelia is lighter.
 
 ## Prerequisites
 
-- Traefik already deployed (see the [Traefik reverse proxy guide](/posts/traefik-reverse-proxy-docker/))
+- Traefik already deployed (see the [Traefik reverse proxy guide](/posts/2026-05-09-traefik-reverse-proxy-docker/))
 - Docker and Docker Compose v2
 - A domain pointed at your Traefik instance (e.g., `auth.example.com`)
 - PostgreSQL knowledge (Authentik requires a Postgres database)

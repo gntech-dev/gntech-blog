@@ -16,7 +16,6 @@ keywords:
   - Entra Connect staging mode
   - OU filtering sync
 summary: "Step-by-step Microsoft Entra Connect v2 installation on Windows Server 2025: prerequisites, express install, custom configuration with OU filtering and writeback, verification, and mandatory upgrade before September 30, 2026."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-entra-connect-sync/"
 cover:
   image: "https://upload.wikimedia.org/wikipedia/commons/2/26/Windows_Server_logo.svg"
   alt: "Windows Server logo"

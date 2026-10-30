@@ -17,7 +17,6 @@ keywords:
   - n8n workflow automation homelab use cases
   - n8n Ollama AI integration self-hosted
 summary: "Complete guide to deploying n8n with Docker Compose in your homelab — PostgreSQL backend, persistent workflows, Traefik SSL, security hardening, and practical workflow automation examples."
-canonical: "https://gntech.dev/posts/n8n-docker-deployment-homelab-automation/"
 ---
 
 If you've used Zapier, Make (formerly Integromat), or IFTTT,

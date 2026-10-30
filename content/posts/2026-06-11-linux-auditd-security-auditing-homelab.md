@@ -17,7 +17,6 @@ keywords:
   - Docker daemon audit integration Linux security
   - auditd systemd-journald log aggregation homelab
 summary: "Configure Linux auditd to watch container starts, file changes, and Proxmox host activity. Includes auditctl rules, ausearch queries, and Docker integration for comprehensive homelab security auditing."
-canonical: "https://blog.gntech.me/posts/linux-auditd-security-auditing-homelab/"
 ---
 
 Your Proxmox host runs a dozen Docker containers, a handful of LXCs, and has SSH exposed to the local network. You trust your users, but you have no record of who ran `docker exec --privileged` into that production container or when someone edited `/etc/pve/user.cfg`.

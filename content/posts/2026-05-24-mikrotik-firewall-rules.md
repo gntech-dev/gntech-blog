@@ -18,7 +18,6 @@ keywords:
   - MikroTik firewall NAT masquerade rule configuration
   - MikroTik RouterOS 7 firewall rule ordering best practices
 summary: "Configure a production-ready MikroTik RouterOS 7 firewall — understand filter, NAT, mangle, and raw tables, enable FastTrack for wire-speed forwarding, implement connection tracking state rules, and build brute force protection with dynamic address lists."
-canonical: "https://gntech.dev/posts/mikrotik-firewall-rules/"
 ---
 
 The MikroTik firewall is one of the most flexible packet filtering engines available at any price point. Built on top of Linux Netfilter, RouterOS gives you four independent firewall tables (filter, NAT, mangle, raw) with connection tracking, stateful inspection, Layer 7 matching, and FastTrack hardware-accelerated forwarding. It's also where most homelab configurations have subtle gaps that leave the router vulnerable.

@@ -638,7 +638,7 @@ cd /opt/docker/monitoring
 # Install node_exporter on host (not in Docker)
 # Edit .env with your admin password
 docker compose up -d
-# Browse to http://<host>:3000  (admin / your-password)
+# Browse to http://"<host>":3000  (admin / your-password)
 ```
 
 A monitoring stack isn't optional in a serious homelab. It's the

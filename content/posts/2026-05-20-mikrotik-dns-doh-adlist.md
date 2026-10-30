@@ -16,7 +16,6 @@ keywords:
   - RouterOS DNS cache cache-size configuration
   - MikroTik DNS filtering network-wide blocking
 summary: "Configure DNS over HTTPS and the built-in DNS Adlist feature on MikroTik RouterOS 7 to block ads, trackers, and malware network-wide — no Pi-hole, no extra hardware, no containers needed."
-canonical: "https://blog.gntech.me/posts/mikrotik-dns-doh-adlist/"
 ---
 
 There is a recurring question on r/mikrotik: *"Any real benefit to

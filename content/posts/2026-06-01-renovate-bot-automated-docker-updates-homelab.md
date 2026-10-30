@@ -17,7 +17,6 @@ keywords:
   - Docker digest pinning immutable builds Renovate
   - Homelab dependency management automated PR workflow
 summary: "Automate Docker dependency updates in your homelab with Renovate Bot. Self-host or use the cloud bot to scan Docker Compose files and Dockerfiles, then open pull requests with version bumps, digest updates, and changelog summaries."
-canonical: "https://blog.gntech.me/posts/renovate-bot-automated-docker-updates-homelab/"
 ---
 
 ## Why Automate Docker Dependency Updates in Your Homelab
@@ -204,7 +203,7 @@ Body:
 - **Update type**: minor
 - **Release notes**: https://github.com/nginx/nginx/releases/tag/release-1.26.0
 
-![nginx-version](https://img.shields.io/badge/nginx-1.25%20→%201.26-blue)
+![nginx-version](https://img.shields.io/badge/nginx-1.25%20%E2%86%92%201.26-blue)
 
 Diff:
 -    image: nginx:1.25-alpine
@@ -344,7 +343,7 @@ In my homelab, Renovate manages 12 repositories with 30+ Docker Compose stacks. 
 
 ### See Also
 
-- [Gitea Docker CI/CD Pipeline for Homelab](/posts/gitea-docker-ci-cd-homelab/)
-- [Docker Watchtower — Automated Container Image Updates](/posts/docker-watchtower-auto-updates/)
-- [Docker Compose Production Patterns](/posts/docker-compose-production-patterns/)
-- [GitOps Patterns for Homelab Infrastructure](/posts/ansible-homelab-automation/)
+- [Gitea Docker CI/CD Pipeline for Homelab](/posts/2026-05-18-gitea-docker-ci-cd-homelab/)
+- [Docker Watchtower — Automated Container Image Updates](/posts/2026-05-11-docker-watchtower-auto-updates/)
+- [Docker Compose Production Patterns](/posts/2026-05-13-docker-compose-production-patterns/)
+- [GitOps Patterns for Homelab Infrastructure](/posts/2026-05-27-ansible-homelab-automation/)

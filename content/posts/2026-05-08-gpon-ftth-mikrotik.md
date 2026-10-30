@@ -95,7 +95,7 @@ Some ISP routers expose SSH or Telnet. If available:
 ```bash
 # Show GPON info on many Huawei and ZTE ONTs
 cat /proc/gpon/omcc_gsb
-gpONserialNumber()
+# Serial-number commands differ by ONT model and firmware.
 
 # Common busybox paths
 cat /proc/gpon/status
@@ -151,7 +151,7 @@ Once the stick is plugged in and authenticated with the OLT, it shows up as an S
 
 ### Step 1 — Identify the Interface
 
-```bash
+```routeros
 /interface print where type="sfp"
 ```
 
@@ -161,13 +161,13 @@ Look for an interface like `sfp-sfpplus1`. The link should come up once the GPON
 
 Most ISPs require VLAN tagging on the WAN-facing interface. The Internet VLAN ID is usually something like 10, 100, or 832. Find yours from the ISP ONT:
 
-```bash
+```routeros
 /interface vlan add interface=sfp-sfpplus1 name=vlan-isp vlan-id=100
 ```
 
 If your ISP uses **VLAN stacking (QinQ)** — two VLAN tags — you need a VLAN interface on top of another VLAN:
 
-```bash
+```routeros
 /interface vlan add interface=sfp-sfpplus1 name=vlan-outer vlan-id=10
 /interface vlan add interface=vlan-outer name=vlan-inner vlan-id=100
 ```
@@ -178,7 +178,7 @@ Check your ISP's requirements — some only tag the outer VLAN and expect the in
 
 Many FTTH providers use PPPoE for authentication. Create the PPPoE client on the VLAN interface:
 
-```bash
+```routeros
 /interface pppoe-client add \
     name=pppoe-isp \
     interface=vlan-isp \
@@ -190,7 +190,7 @@ Many FTTH providers use PPPoE for authentication. Create the PPPoE client on the
 
 DHCP-based ISPs are simpler — just set the VLAN interface as a DHCP client:
 
-```bash
+```routeros
 /ip dhcp-client add interface=vlan-isp disabled=no
 ```
 
@@ -198,7 +198,7 @@ DHCP-based ISPs are simpler — just set the VLAN interface as a DHCP client:
 
 If your MikroTik is your core router and you use VLAN filtering, add the physical and bridge interfaces:
 
-```bash
+```routeros
 /interface bridge add name=bridge-local vlan-filtering=yes
 
 # Add SFP port and LAN ports to the bridge
@@ -218,7 +218,7 @@ This passes the WAN VLAN (100) and internal VLANs (10-50) cleanly through the br
 
 The SFP interface is connected directly to the ISP — it must be locked down tightly.
 
-```bash
+```routeros
 # Drop everything from WAN
 /ip firewall filter add chain=input in-interface=sfp-sfpplus1 action=drop
 
@@ -235,7 +235,7 @@ The SFP interface is connected directly to the ISP — it must be locked down ti
 
 And the NAT masquerade so your LAN devices can reach the internet:
 
-```bash
+```routeros
 /ip firewall nat add chain=srcnat out-interface=pppoe-isp action=masquerade
 ```
 
@@ -271,7 +271,7 @@ Some ISPs whitelist specific GPON serial number ranges or MAC addresses. Workaro
 
 Double-check that the VLAN interface exists on the correct parent. RouterOS boots interfaces asynchronously, but VLAN interfaces should come up. If they don't, add a delay script:
 
-```bash
+```routeros
 /system script add name=pppoe-delay source={
     :delay 5
     /interface pppoe-client enable pppoe-isp

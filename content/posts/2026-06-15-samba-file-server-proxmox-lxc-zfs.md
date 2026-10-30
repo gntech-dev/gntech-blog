@@ -17,7 +17,6 @@ keywords:
   - LXC container NAS file sharing Docker media server storage
   - Samba backup integration ZFS snapshot replication
 summary: "Run Samba inside a Proxmox LXC with direct ZFS dataset access for a sub-1GB RAM NAS. Covers privileged LXC setup, ZFS passthrough, user configuration, and Samba performance tuning for homelab file sharing."
-canonical: "https://blog.gntech.me/posts/samba-file-server-proxmox-lxc-zfs/"
 ---
 
 Every homelab needs centralized file storage. Windows machines need network shares for backups, media servers need a library location, and configuration files need a home you can reach from any device. Running a full NAS VM — TrueNAS, OMV, or Unraid — eats 4-8GB of RAM and adds unnecessary overhead for a container that only serves files.

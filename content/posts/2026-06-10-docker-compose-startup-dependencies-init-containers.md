@@ -17,7 +17,6 @@ keywords:
   - Docker compose healthcheck condition service_healthy
   - Docker compose startup order database migration pattern
 summary: "A practical guide to Docker Compose startup ordering — covering depends_on conditions, healthcheck-based readiness, init container patterns with wait-for-it, and real-world compose examples for multi-service homelab stacks."
-canonical: "https://blog.gntech.me/posts/docker-compose-startup-dependencies-init-containers/"
 ---
 
 You write a shiny `compose.yml`, run `docker compose up -d`, and everything starts at once. Postgres is still initializing when your web app tries to connect. The migration container runs before the database accepts queries. Redis is listed as a dependency, but your cache-dependent service crashes three times before it finds the port open.

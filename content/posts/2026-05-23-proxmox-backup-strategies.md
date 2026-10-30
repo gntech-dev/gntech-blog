@@ -17,7 +17,6 @@ keywords:
   - Proxmox container backup mode stop suspend snapshot
   - ZFS snapshot Proxmox send receive backup
 summary: "Design a bulletproof backup strategy for your Proxmox homelab — vzdump scheduling, Proxmox Backup Server deployment, 3-2-1 rule with off-site replication, and automated restore testing."
-canonical: "https://gntech.dev/posts/proxmox-backup-strategies/"
 ---
 
 "Backups are for people who can't rebuild from scratch" sounds

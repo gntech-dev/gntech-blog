@@ -18,7 +18,6 @@ keywords:
   - ZFS snapshot schedule retention policy Proxmox VMs
   - Proxmox disaster recovery ZFS replication restore
 summary: "Automate Proxmox VM backups using ZFS snapshot replication. Deploy sanoid for snapshot management, syncoid for push replication, and automate the entire workflow with systemd timers."
-canonical: "https://blog.gntech.me/posts/proxmox-zfs-snapshot-replication-backup/"
 ---
 
 If you run Proxmox on ZFS, you already have one of the best filesystems for virtualization. But running `zfs snapshot` by hand or relying solely on Proxmox's vzdump scheduler leaves gaps — manual effort, full-dump overhead, or recovery points that are too far apart.

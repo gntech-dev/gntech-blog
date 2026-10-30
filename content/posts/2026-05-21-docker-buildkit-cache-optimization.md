@@ -17,7 +17,6 @@ keywords:
   - multi-stage build cache optimization
   - Docker compose build cache shared
 summary: "Cut Docker build times by 80% using BuildKit cache mounts, inline/registry cache export, and optimized Dockerfile patterns — with real homelab examples for apt, pip, npm, and Go builds."
-canonical: "https://blog.gntech.me/posts/2026-05-21-docker-buildkit-cache-optimization/"
 ---
 
 If you build Docker images in your homelab — for self-hosted

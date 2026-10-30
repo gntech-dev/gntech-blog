@@ -17,7 +17,6 @@ keywords:
   - Virtual firewall network segmentation homelab security
   - OPNsense VLANs Proxmox bridge trunk port
 summary: "Deploy OPNsense as a virtualized firewall on Proxmox with VLAN segmentation, Suricata IDS/IPS, and WireGuard VPN. Real VM configs, bridge setup, firewall rules, and performance tuning."
-canonical: "https://blog.gntech.me/posts/opnsense-virtual-firewall-proxmox-homelab/"
 ---
 
 Firewalls are the single most important security device in any network. For years, dedicated hardware was the only serious option — a Protectli, a Netgate, or a MikroTik running the show. But if you already run Proxmox, virtualizing your firewall is cheaper, more flexible, and arguably more secure when done right.
@@ -310,7 +309,7 @@ Before putting this firewall into production, lock it down:
 To verify your hardening from outside, use a VPS or mobile hotspot (not on your network):
 
 ```bash
-nmap -sS -p 22,443,8443 <your-public-ip>
+nmap -sS -p 22,443,8443 "<your-public-ip>"
 # All should show filtered
 ```
 

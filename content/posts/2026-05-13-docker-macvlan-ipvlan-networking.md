@@ -15,7 +15,6 @@ keywords:
   - Docker multi-network compose
   - Proxmox MAC spoofing Docker
 summary: "Step-by-step Docker MACVLAN and IPVLAN guide — give containers real LAN IPs for Pi-hole, Home Assistant, Scrypted. Host communication fix, Proxmox gotcha, multi-network Compose examples."
-canonical: "https://blog.gntech.me/posts/docker-macvlan-ipvlan-networking/"
 ---
 
 By default, Docker containers sit on an isolated bridge network
@@ -319,7 +318,7 @@ If Docker is running inside a Proxmox VM, the Proxmox bridge
 
 ```bash
 # On the Proxmox host
-qm set <VMID> --net0 virtio,bridge=vmbr0,macspoof=1
+qm set "<VMID>" --net0 virtio,bridge=vmbr0,macspoof=1
 ```
 
 Alternatively, in the Proxmox UI: select the VM → Hardware → Network

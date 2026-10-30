@@ -17,7 +17,6 @@ keywords:
   - Proxmox qm cloud-init guide
   - Proxmox VM clone from template
 summary: "Create reusable Proxmox VM templates with cloud-init to deploy Ubuntu and Debian VMs in under 60 seconds. Covers image preparation, cloud-init user/SSH/package config, template creation, and CLI cloning."
-canonical: "https://gntech.dev/posts/proxmox-cloudinit-vm-templates/"
 ---
 
 If you run Proxmox VE, you've spun up a VM from an ISO at least once.
@@ -106,7 +105,7 @@ template.
 ```bash
 #!/bin/bash
 # create-proxmox-template.sh — run on Proxmox host
-# Usage: ./create-proxmox-template.sh <vm-id> <vm-name> <image-path>
+# Usage: ./create-proxmox-template.sh "<vm-id>" "<vm-name>" "<image-path>"
 
 VM_ID=${1:-9000}
 VM_NAME=${2:-ubuntu-2404-template}
@@ -418,7 +417,7 @@ For daily use, wrap the clone-and-configure steps into a script:
 ```bash
 #!/bin/bash
 # deploy-vm.sh — clone a template and configure cloud-init
-# Usage: ./deploy-vm.sh <template-id> <new-vm-id> <hostname> <ip/cidr> <gateway>
+# Usage: ./deploy-vm.sh "<template-id>" "<new-vm-id>" "<hostname>" <ip/cidr> "<gateway>"
 
 TEMPLATE_ID=${1:-9000}
 VM_ID=${2:-200}

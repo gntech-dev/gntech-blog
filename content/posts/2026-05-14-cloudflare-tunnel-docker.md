@@ -17,7 +17,6 @@ keywords:
   - secure selfhosted apps Cloudflare
   - Cloudflare Tunnel security best practices
 summary: "Run Cloudflare Tunnel in Docker to expose homelab services through Cloudflare's edge. No open firewall ports, automatic HTTPS, and per-service ingress rules via a single cloudflared container."
-canonical: "https://gntech.dev/posts/cloudflare-tunnel-docker/"
 ---
 
 Opening a firewall port for every homelab service is a liability. One
@@ -161,7 +160,7 @@ ingress:
 Place the tunnel credentials JSON in the same `config/` directory:
 
 ```bash
-cp /opt/cloudflared/<uuid>.json /opt/cloudflared/config/
+cp /opt/cloudflared/"<uuid>".json /opt/cloudflared/config/
 ```
 
 Your config directory should look like:

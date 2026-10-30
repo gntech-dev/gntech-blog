@@ -17,7 +17,6 @@ keywords:
   - Linux block device queue parameters tuning
   - Proxmox disk IO performance optimization
 summary: "A practical guide to Linux disk I/O performance tuning for homelab servers — IO scheduler selection for NVMe, SSD, and HDD, mount option optimization, real-time monitoring with iostat and ioping, and container IO throttling with cgroup v2."
-canonical: "https://gntech.dev/posts/linux-disk-io-performance-tuning/"
 ---
 
 Disk I/O is the most common bottleneck in a homelab. A misconfigured
@@ -379,7 +378,7 @@ services:
 
 ```bash
 # Check the cgroup IO limits directly
-cat /sys/fs/cgroup/system.slice/docker-<container-id>.scope/io.max
+cat /sys/fs/cgroup/system.slice/docker-"<container-id>".scope/io.max
 # Output: 8:0 rbps=104857600 wbps=52428800 riops=5000 wiops=3000
 ```
 
@@ -446,7 +445,7 @@ Pin IO threads to dedicated CPU cores to prevent vCPU scheduling
 from blocking disk operations:
 
 ```bash
-# In VM config /etc/pve/qemu-server/<VMID>.conf
+# In VM config /etc/pve/qemu-server/"<VMID>".conf
 args: -object iothread,id=iothread1 -device virtio-blk-pci,drive=drive0,iothread=iothread1
 ```
 

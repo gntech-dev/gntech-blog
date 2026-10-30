@@ -17,7 +17,6 @@ keywords:
   - Linux swap configuration Docker host performance tuning
   - Docker container OOM priority system stability best practices
 summary: "Prevent OOM killer crashes on your Docker homelab host. Configure systemd OOMD, set proper oom_score_adj values, enable earlyoom, and apply cgroups v2 memory limits for reliable container operation."
-canonical: "https://blog.gntech.me/posts/linux-oom-management-docker-homelab/"
 ---
 
 ## The OOM Problem on Docker Homelab Hosts

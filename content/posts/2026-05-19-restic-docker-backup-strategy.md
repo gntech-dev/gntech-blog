@@ -17,7 +17,6 @@ keywords:
   - restic MinIO S3 offsite backup
   - Docker container data backup strategy
 summary: "Complete guide to automating encrypted Docker volume backups with restic — local snapshots with deduplication, S3-compatible offsite storage, cron scheduling, retention policies, and disaster recovery for homelab containers."
-canonical: "https://gntech.dev/posts/restic-docker-backup-strategy/"
 ---
 
 Your Docker containers generate data — Postgres databases, Gitea

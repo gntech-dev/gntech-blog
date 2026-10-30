@@ -67,7 +67,7 @@ A Frigate LXC is a good LXC candidate because it needs:
 Create in Proxmox:
 
 ```bash
-pct create <CTID> local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
+pct create "<CTID>" local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
   --storage local-zfs \
   --net0 name=eth0,bridge=vmbr0,vlan=50,ip=dhcp \
   --unprivileged 1 \
@@ -87,13 +87,13 @@ Wait — this says Docker inside LXC. That's right — if you want Docker **and*
 For system-level services that don't benefit from containerization, skip Docker entirely:
 
 ```bash
-pct create <CTID> local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
+pct create "<CTID>" local:vztmpl/debian-12-standard_12.7-1_amd64.tar.zst \
   --storage local-zfs \
   --net0 name=eth0,bridge=vmbr0,vlan=10,ip=dhcp \
   --unprivileged 1
 
 # Inside: just install the service
-pct enter <CTID>
+pct enter "<CTID>"
 apt update && apt install -y nginx-light bind9
 systemctl enable --now nginx
 ```
@@ -181,7 +181,7 @@ pct create $CTID local:vztmpl/ubuntu-24.04-standard_24.04-2_amd64.tar.zst \
 
 pct start $CTID
 pct push $CTID ~/.ssh/id_ed25519.pub /root/.ssh/authorized_keys
-ssh root@<CT-IP>
+ssh root@"<CT-IP>"
 
 # Install Docker
 curl -fsSL https://get.docker.com | sh

@@ -18,7 +18,6 @@ keywords:
   - cloud to on-premises writeback
   - Entra ID writeback configuration
 summary: "Enable password writeback (SSPR), device writeback (Hybrid Entra Join), and group writeback (Microsoft 365 groups) from cloud to on-premises Active Directory using Entra Connect."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-writeback-cloud-on-premises/"
 cover:
   image: "https://upload.wikimedia.org/wikipedia/commons/2/26/Windows_Server_logo.svg"
   alt: "Windows Server logo"

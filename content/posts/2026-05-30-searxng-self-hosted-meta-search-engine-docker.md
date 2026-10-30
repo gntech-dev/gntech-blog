@@ -17,7 +17,6 @@ keywords:
   - SearXNG rate limit bot protection Valkey Redis configuration
   - SearXNG themes UI customization dark mode favicons
 summary: "Deploy SearXNG with Docker Compose for a privacy-focused self-hosted meta search engine. Covers reverse proxy setup with Traefik, search engine configuration, rate limiting, and theme customization."
-canonical: "https://blog.gntech.me/posts/searxng-self-hosted-meta-search-engine-docker/"
 ---
 
 ## Why Self-Host a Meta Search Engine
@@ -121,7 +120,7 @@ openssl rand -hex 48
 Then create `/opt/searxng/.env`:
 
 ```bash
-SEARXNG_SECRET_KEY=<paste the 96-character hex string>
+SEARXNG_SECRET_KEY="<paste the 96-character hex string>"
 ```
 
 ### What the Compose File Does
@@ -378,5 +377,5 @@ Set up search categories — images through Pixabay, code through GitHub and Sta
 ### See Also
 
 - [SearXNG Official Documentation](https://docs.searxng.org/)
-- [Docker Compose Production Patterns](/posts/docker-compose-production-patterns/)
-- [Traefik Middleware Security Hardening](/posts/traefik-middleware-security-hardening/)
+- [Docker Compose Production Patterns](/posts/2026-05-13-docker-compose-production-patterns/)
+- [Traefik Middleware Security Hardening](/posts/2026-05-18-traefik-middleware-security-hardening/)

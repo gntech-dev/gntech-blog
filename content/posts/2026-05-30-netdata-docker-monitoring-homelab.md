@@ -17,7 +17,6 @@ keywords:
   - Netdata per-second metrics auto-detection
   - Netdata Prometheus Grafana integration
 summary: "Complete guide to deploying Netdata with Docker Compose for real-time container and infrastructure monitoring in your homelab. Covers auto-detection, health alarms, notifications, parent-child streaming, and Prometheus integration."
-canonical: "https://blog.gntech.me/posts/netdata-docker-monitoring-homelab/"
 ---
 
 If your homelab has five containers running on a single host, you can
@@ -305,7 +304,7 @@ scrape_configs:
           host: srv1
 ```
 
-Then import the [Netdata Grafana dashboard](https://github.com/netdata/netdata/blob/master/src/web/gui/dashboard/dashboards/grafana/netdata-grafana-dashboard.json) into Grafana for pre-built visualizations of Netdata metrics alongside your existing Prometheus data.
+Build Grafana panels from the metrics your Netdata instance actually exports. The previously linked dashboard JSON is no longer available; do not assume an old dashboard matches your metric names or labels.
 
 ### Why Use Both?
 

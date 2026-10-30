@@ -162,7 +162,7 @@ cloudflared tunnel login
 # Create the tunnel (name it something descriptive)
 cloudflared tunnel create homelab
 
-# This creates ~/.cloudflared/<tunnel-id>.json with credentials
+# This creates ~/.cloudflared/"<tunnel-id>".json with credentials
 ```
 
 The `cloudflared tunnel login` command prints a URL. Visit it in a browser, authorize with your Cloudflare account, and the container saves a `cert.pem` to its config directory.
@@ -185,8 +185,8 @@ Back in the container shell, set up your DNS entries. Create or edit the config 
 ```bash
 mkdir -p /mnt/containers/cloudflared
 cat > /mnt/containers/cloudflared/config.yml << 'EOF'
-tunnel: <tunnel-id>
-credentials-file: /root/.cloudflared/<tunnel-id>.json
+tunnel: "<tunnel-id>"
+credentials-file: /root/.cloudflared/"<tunnel-id>".json
 
 ingress:
   # Grafana on internal monitoring host
@@ -271,7 +271,7 @@ If everything looks good, configure it to start automatically on container boot 
 ```bash
 cat > /mnt/containers/config/start.sh << 'SCRIPT'
 #!/bin/sh
-cloudflared tunnel run --token <your-token>
+cloudflared tunnel run --token "<your-token>"
 SCRIPT
 chmod +x /mnt/containers/config/start.sh
 ```

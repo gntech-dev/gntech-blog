@@ -17,7 +17,6 @@ keywords:
   - Docker BuildKit multi-arch container images homelab
   - Docker desktop buildx alternative CLI only buildx
 summary: "Run Docker Buildx on a single Linux host to produce amd64 plus arm64 images. Configure QEMU binfmt emulation, build with buildx bake, and push multi-manifest images to any registry."
-canonical: "https://blog.gntech.me/posts/docker-buildx-multi-architecture-images-homelab/"
 ---
 
 ## Why Multi-Architecture Docker Images Matter in Your Homelab
@@ -56,7 +55,7 @@ When a Docker client pulls the image, it reads the index, matches its own archit
 ## Prerequisites
 
 - Docker Engine 24.0 or later (BuildKit is built in)
-- A registry to push to (Docker Hub, GitHub Container Registry, or a [self-hosted registry with MinIO](/posts/minio-docker-object-storage/))
+- A registry to push to (Docker Hub, GitHub Container Registry, or a [self-hosted registry with MinIO](/posts/2026-06-01-minio-docker-object-storage/))
 - Linux kernel with `binfmt_misc` support (all modern kernels)
 
 ## Step 1 — Enable Cross-Platform Emulation with QEMU
@@ -205,7 +204,7 @@ docker inspect --format '{{.Architecture}}' ghcr.io/yourname/myapp:latest
 
 ## Integrating Multi-Arch Builds with Homelab CI/CD
 
-If you run [Gitea with Actions](/posts/gitea-docker-ci-cd-homelab/), add a workflow that builds and pushes multi-arch images on every tag:
+If you run [Gitea with Actions](/posts/2026-05-18-gitea-docker-ci-cd-homelab/), add a workflow that builds and pushes multi-arch images on every tag:
 
 ```yaml
 # .gitea/workflows/build.yaml
@@ -251,4 +250,4 @@ The same workflow works for GitHub Actions, Woodpecker, or any Drone-compatible 
 
 Docker Buildx turns your single-architecture homelab server into a multi-architecture build station. With one QEMU container, one builder, and one Dockerfile, you can produce images that run natively on everything from an x86_64 Proxmox host to an ARM-based Raspberry Pi cluster.
 
-The workflow is consistent whether you push to Docker Hub, GitHub Container Registry, or your own [self-hosted MinIO-backed registry](/posts/minio-docker-object-storage/). Combined with a Gitea Actions workflow, every tagged commit produces verified multi-arch images with zero manual effort.
+The workflow is consistent whether you push to Docker Hub, GitHub Container Registry, or your own [self-hosted MinIO-backed registry](/posts/2026-06-01-minio-docker-object-storage/). Combined with a Gitea Actions workflow, every tagged commit produces verified multi-arch images with zero manual effort.

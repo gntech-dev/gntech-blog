@@ -17,7 +17,6 @@ keywords:
   - Docker compose security context
   - container runtime security homelab
 summary: "Hardening Docker containers in your homelab isn't optional — it's how you prevent container escapes and privilege escalation. This guide covers non-root users, capability drops, read-only filesystems, and seccomp profiles with real Compose configs."
-canonical: "https://gntech.dev/posts/docker-container-security-hardening/"
 ---
 
 Most homelabs run Docker containers as root by default. The Dockerfile

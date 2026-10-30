@@ -17,7 +17,6 @@ keywords:
   - Vaultwarden Docker deployment homelab
   - self-hosted password manager Docker 2026
 summary: "Deploy Vaultwarden, a lightweight Bitwarden-compatible password server, with Docker Compose and Traefik in your homelab. Covers admin panel setup, automated backups, SMTP configuration, and security hardening."
-canonical: "https://gntech.dev/posts/vaultwarden-docker-deployment/"
 ---
 
 Bitwarden's recent announcement about eliminating the freemium tier,

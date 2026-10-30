@@ -17,7 +17,6 @@ keywords:
   - LibreNMS autodiscovery CIDR subnet configuration homelab
   - LibreNMS Oxidized config backup integration network device backups
 summary: "Deploy LibreNMS in Docker for complete homelab network monitoring. SNMP autodiscovery, alert rules, and dashboard setup for MikroTik routers, Proxmox hosts, and Linux servers."
-canonical: "https://blog.gntech.me/posts/librenms-docker-deployment-network-monitoring-homelab/"
 ---
 
 ## What LibreNMS Monitors and Why It Belongs in Your Homelab
@@ -123,7 +122,7 @@ LibreNMS reads the standard SNMP MIBs that RouterOS exposes. Start with SNMPv2c 
 
 **SNMPv2c (quick setup):**
 
-```bash
+```routeros
 # SSH into your MikroTik
 /system identity set name=router-core
 /snmp community set public addresses=10.0.20.0/24

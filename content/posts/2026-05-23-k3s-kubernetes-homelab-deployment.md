@@ -17,7 +17,6 @@ keywords:
   - lightweight Kubernetes single board computer cluster
   - Kubernetes homelab workload migration Docker Compose
 summary: "Deploy a production-grade K3s Kubernetes cluster in your homelab on Proxmox VMs — multi-node setup, Longhorn persistent storage, MetalLB load balancing, Traefik ingress, and migrating existing Docker Compose workloads."
-canonical: "https://gntech.dev/posts/k3s-kubernetes-homelab-deployment/"
 ---
 
 You have mastered Docker Compose. Your homelab runs a dozen stacks
@@ -102,7 +101,7 @@ IPs on that interface.
 # On each Proxmox host, for each K3s VM network interface:
 # Hardware → select NIC → enable "VLAN aware" and "Promiscuous"
 # Or via CLI:
-qm set <VMID> --net0 virtio,bridge=vmbr0,firewall=0
+qm set "<VMID>" --net0 virtio,bridge=vmbr0,firewall=0
 ```
 
 ---
@@ -161,7 +160,7 @@ server's IP and token:
 
 ```bash
 curl -sfL https://get.k3s.io | K3S_URL=https://10.0.30.10:6443 \
-  K3S_TOKEN=<YOUR_TOKEN> sh -s - agent \
+  K3S_TOKEN="<YOUR_TOKEN>" sh -s - agent \
   --node-ip=10.0.30.11 \
   --flannel-iface=eth0
 ```

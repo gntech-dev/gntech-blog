@@ -17,7 +17,6 @@ keywords:
   - Debian 13 systemd-networkd bridge VLAN trunk port setup
   - Linux systemd-networkd .network .netdev configuration examples
 summary: "Configure bridges, VLANs, and bond interfaces using systemd-networkd on Debian 13 and Ubuntu 24.04. Real configuration files for KVM/Proxmox bridges, VLAN trunking, and link aggregation."
-canonical: "https://blog.gntech.me/posts/systemd-networkd-homelab-networking-bridges-vlans-bonds/"
 ---
 
 ## Why systemd-networkd for Homelab Networking

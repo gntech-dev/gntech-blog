@@ -17,7 +17,6 @@ keywords:
   - systemd timer Docker container healthcheck
   - homelab task scheduling systemd service units
 summary: "Replace cron with systemd timer units for reliable, observable homelab task scheduling — persistent schedules, real journald logging, monotonic intervals, and hardened service units with practical backup, maintenance, and healthcheck examples."
-canonical: "https://gntech.dev/posts/systemd-timer-automation-homelab/"
 ---
 
 Cron has been Linux's go-to scheduler for fifty years. It works. But
@@ -69,7 +68,7 @@ service, the service does the work, and systemd tracks both.
 ```ini
 # /etc/systemd/system/docker-cleanup.service
 [Unit]
-Description=Clean up unused Docker images and volumes
+Description=Clean up Docker resources according to the reviewed cleanup script
 
 [Service]
 Type=oneshot
@@ -84,7 +83,7 @@ ExecStart=/usr/local/bin/docker-cleanup.sh
 Description=Run Docker cleanup daily at 3 AM
 
 [Timer]
-OnCalendar=daily
+OnCalendar=*-*-* 03:00:00
 Persistent=true
 RandomizedDelaySec=30m
 
@@ -106,7 +105,7 @@ Output:
 
 ```
 NEXT                        LEFT          LAST                        PASSED  UNIT                  ACTIVATES
-Mon 2026-05-26 03:00:00 EDT 13h left      Sun 2026-05-25 03:17:42 EDT 9h ago  docker-cleanup.timer   docker-cleanup.service
+Tue 2026-05-26 03:00:00 EDT 13h left      Mon 2026-05-25 03:17:42 EDT 9h ago  docker-cleanup.timer   docker-cleanup.service
 ```
 
 Compare that to `crontab -l` showing `0 3 * * * /usr/local/bin/docker-cleanup.sh`.
@@ -233,7 +232,7 @@ ExecStart=/usr/local/bin/zfs-snapshot-rotate.sh
 Description=Run ZFS snapshot rotation every 4 hours
 
 [Timer]
-OnCalendar=*:0/4
+OnCalendar=*-*-* 00/4:00:00
 Persistent=true
 RandomizedDelaySec=5m
 
@@ -245,22 +244,28 @@ The script (`/usr/local/bin/zfs-snapshot-rotate.sh`):
 
 ```bash
 #!/bin/bash
-# ZFS snapshot rotation — keep hourly for 24h, daily for 7d, weekly for 4w
+# Keep periodic snapshots for 24 hours and midnight snapshots for 7 days.
+set -euo pipefail
 POOL="tank"
-
-# Create hourly snapshot
+now=$(date +%s)
 zfs snapshot -r "${POOL}@auto-$(date +%Y%m%d-%H%M)"
 
-# Prune snapshots older than 24 hours if they are not daily patterns
-zfs list -H -o name -t snapshot -r "${POOL}" | grep auto- | while read snap; do
-    ts=$(echo "$snap" | grep -oP '\d{8}-\d{4}')
-    if [[ $(date -d "${ts:0:8} ${ts:9:2}:${ts:11:2}" +%s) -lt $(date -d '24 hours ago' +%s) ]]; then
-        # Keep if it matches daily midnight pattern
-        [[ "$snap" =~-[0-9]{8}-0000$ ]] && continue
+while IFS=$'\t' read -r snap created; do
+    # Only prune snapshots belonging to this naming scheme.
+    [[ "$snap" =~ @auto-[0-9]{8}-[0-9]{4}$ ]] || continue
+    age=$((now - created))
+    keep_seconds=86400
+    if [[ "$snap" =~ -0000$ ]]; then
+        keep_seconds=604800
+    fi
+    if (( age > keep_seconds )); then
         zfs destroy "$snap"
     fi
-done
+done < <(zfs list -Hp -o name,creation -t snapshot -r "$POOL")
 ```
+
+This deletes matching snapshots after their retention period. Review the generated names and retention requirements on a test dataset first. It does not implement weekly retention. Randomized timer delays can prevent an exact `0000` snapshot name; if you require a guaranteed daily tier, schedule it separately instead of relying on this naming convention.
+
 
 ### 2. Docker Prune with Health Notification
 
@@ -272,7 +277,7 @@ Wants=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=docker system prune -af --volumes
+ExecStart=docker image prune -f
 ExecStartPost=/usr/local/bin/notify-health.sh "Docker prune completed"
 
 # Sandboxing — Docker needs the socket but nothing else
@@ -458,7 +463,7 @@ cat > ~/.config/systemd/user/update-hosts.timer << 'EOF'
 Description=Update hosts file every 6 hours
 
 [Timer]
-OnCalendar=*:0/6
+OnCalendar=*-*-* 00/6:00:00
 Persistent=true
 
 [Install]

@@ -17,10 +17,9 @@ keywords:
   - Container layer size docker system df inspect
   - Docker storage driver overlay2 vs aufs devicemapper
 summary: "Everything about Docker's overlay2 storage driver — how overlay layers work, tracking disk usage by layer, recovering space from dangling layers, and performance tuning on ZFS-backed Proxmox hosts. Real commands, real output."
-canonical: "https://blog.gntech.me/posts/docker-overlay2-storage-driver-linux-guide/"
 ---
 
-Every Docker homelab eventually hits a storage wall. Containers stop writing. `docker-compose up` fails with "no space left on device". You check `df -h` and there's 40% free. The culprit? Docker's overlay2 storage driver and its layer-based architecture — a system where disk usage isn't always visible through traditional filesystem tools.
+Every Docker homelab eventually hits a storage wall. Containers stop writing. `docker compose up` fails with "no space left on device". You check `df -h` and there's 40% free. The culprit? Docker's overlay2 storage driver and its layer-based architecture — a system where disk usage isn't always visible through traditional filesystem tools.
 
 Docker overlay2 is the default storage driver on modern Linux distributions. It's fast, stable, and efficient thanks to overlay filesystem support built into the Linux kernel since version 4.0. But its copy-on-write layer model means container disk usage behaves differently than traditional filesystems. Understanding how overlay2 works is essential for any homelab running Docker on Proxmox, bare metal, or VPS.
 
@@ -65,7 +64,7 @@ docker inspect alpine:latest --format '{{.GraphDriver.Data}}'
 For a running container:
 
 ```bash
-docker inspect <container-name> --format '{{.GraphDriver.Data}}'
+docker inspect "<container-name>" --format '{{.GraphDriver.Data}}'
 ```
 
 You'll see something like:
@@ -238,11 +237,11 @@ When a single container reports "no space left" but everything else works:
 
 ```bash
 # Check the container's writable layer size
-sudo du -sh /var/lib/docker/overlay2/$(docker inspect <container> --format '{{.GraphDriver.Data.UpperDir}}' | xargs dirname | xargs basename)/diff
+sudo du -sh /var/lib/docker/overlay2/$(docker inspect "<container>" --format '{{.GraphDriver.Data.UpperDir}}' | xargs dirname | xargs basename)/diff
 
 # Check the container itself
-docker exec <container> df -h
-docker exec <container> df -i
+docker exec "<container>" df -h
+docker exec "<container>" df -i
 ```
 
 Sometimes a container fills its own layer with logs or temp files. If the container writes to a volume mount, the issue is on the host's filesystem handling that volume.

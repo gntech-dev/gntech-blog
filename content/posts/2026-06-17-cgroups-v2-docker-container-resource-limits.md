@@ -17,7 +17,6 @@ keywords:
   - cgroups v2 unified hierarchy Docker resource control
   - Docker compose deploy resources section cgroups
 summary: "Learn Linux cgroups v2 for Docker resource control: memory.max and memory.hard limits, CPU quotas, I/O throttling, PSI monitoring, and compose deploy.resources configs. Includes real container debugging and OOM prevention."
-canonical: "https://blog.gntech.me/posts/cgroups-v2-docker-container-resource-limits/"
 ---
 
 Every homelab running Docker eventually hits the wall where one misbehaving container — a database spike, a CI build, a Plex transcode — starves every other service. You throw a `--memory=512m` flag on the compose file and hope. But under the hood, what actually limits your containers is the **cgroups v2 unified hierarchy**.

@@ -17,7 +17,6 @@ keywords:
   - Proxmox remote management automated install token security
   - Unified Proxmox cluster management vCenter alternative homelab
 summary: "Proxmox Datacenter Manager 1.1 is out — with automated answer-file installations, unified Ceph monitoring across remotes, and centralized subscription management. Here's what's new and how to deploy it."
-canonical: "https://blog.gntech.me/posts/proxmox-datacenter-manager-1-1-automated-install-ceph-monitoring/"
 ---
 
 If you run more than one Proxmox VE cluster, you know the pain: bouncing between browser tabs, checking dashboards separately, logging into different nodes to verify Ceph health or manage subscriptions. For years, this was the gap in the Proxmox ecosystem — a missing centralized pane of glass for multi-cluster operations.

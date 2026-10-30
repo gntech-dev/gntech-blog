@@ -17,7 +17,6 @@ keywords:
   - Grafana Loki Docker log analysis alerting
   - Docker container log visualization dashboard
 summary: "Collect, analyze, and alert on Docker container logs with Grafana Loki and Grafana Alloy. A complete centralized logging stack for your homelab with real Compose configs and dashboards."
-canonical: "https://gntech.dev/posts/grafana-loki-centralized-docker-logging/"
 ---
 
 If you manage more than a handful of Docker containers, you already know the pain. SSH into a node, scroll through `docker logs -f`, grep for error strings, repeat. No central search. No retention policy. No correlation with metrics.
@@ -399,4 +398,4 @@ This Loki stack gives you centralized log search, retention policies, and alerti
 - Deploy a second Alloy instance on another Docker host and ship to the same Loki
 - Replace the filesystem backend with S3 for production-grade retention
 
-The full Compose file and configs are on [GitHub](https://github.com/gntech/homelab). Start with the patterns above and adapt them to your scale — whether that's 5 containers or 50.
+Use the Compose and configuration snippets above as a starting point and validate them against your Loki version. This article does not provide a separate downloadable repository.

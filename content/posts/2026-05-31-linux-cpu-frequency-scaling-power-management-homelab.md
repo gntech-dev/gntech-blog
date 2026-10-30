@@ -16,7 +16,6 @@ keywords:
   - cpufrequtils cpupower frequency-set governor selection
   - Linux power management performance vs power saving homelab
 summary: "Complete guide to Linux CPU frequency scaling and power management for 24/7 homelab servers. Covers cpupower governors, Intel and AMD p-state drivers, Turbo Boost control, C-states, and performance tuning tradeoffs with real commands."
-canonical: "https://blog.gntech.me/posts/linux-cpu-frequency-scaling-power-management-homelab/"
 ---
 
 ## Why CPU Frequency Scaling Matters in a Homelab
