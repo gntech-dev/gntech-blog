@@ -1,391 +1,216 @@
 ---
-title: "Docusaurus for Homelab Documentation — Site Setup Guide"
-description: "Build and deploy Docusaurus as a self-hosted documentation site for your homelab. From install to Docker deployment with full-text search, versioning, and GitOps publishing."
+title: "Docusaurus for Homelab Documentation — Setup and Docker Deployment"
+description: "Create a Docusaurus documentation site, organize runbooks, build static output, and serve it with Docker and Nginx."
 date: 2026-06-20T09:30:00-04:00
+lastmod: 2026-10-30
+draft: false
+aliases:
+  - /posts/2026-05-30-docusaurus-documentation-site-homelab/
 tags:
   - documentation
   - docker
   - homelab
   - selfhosting
   - gitops
-keywords:
-  - Docusaurus homelab documentation site setup guide Docker
-  - Self-hosted Docusaurus documentation GitOps deployment workflow
-  - Docusaurus search plugin Algolia DocSearch configuration
-  - Docusaurus versioning plugin documentation management best practices
-  - Docusaurus Docker Compose Nginx reverse proxy SSL deployment
-  - Docusaurus multi-stage build Dockerfile static site
-  - Homelab documentation site Docusaurus architecture guide
-summary: "Step-by-step guide to setting up Docusaurus for homelab documentation — from initial scaffolding to Docker deployment with full-text search, versioning, and automated GitOps publishing."
+summary: "One guide to a Git-based homelab documentation site: project setup, useful runbooks, static builds, Docker hosting, and optional search and versioning."
 ---
 
-Documenting your homelab is one of those tasks everyone puts off — until you need to remember why you configured that VLAN or where the WireGuard peer config lives. A proper documentation site solves this, and Docusaurus is an excellent choice for homelabbers who prefer static sites, Git workflows, and Markdown-driven content.
+Good infrastructure notes answer practical questions: which VLAN carries management traffic, how to restore a service, and what to check after changing a firewall rule.
 
-## Why Docusaurus for Homelab Documentation
+Docusaurus turns Markdown and MDX files into a static documentation site. You need Node.js and dependencies to build it; the resulting files can be served by a web server without running the Node application in production.
 
-Several tools exist for homelab documentation. Here is how they compare:
+This article combines the two earlier Docusaurus setup posts. It keeps one maintained walkthrough and corrects the earlier claims about built-in local search, automatic Traefik setup, and unconditional deployment times. The configuration below is an example, not a report of a verified deployment in my lab.
 
-| Feature | Docusaurus | BookStack | Outline | Wiki.js |
-|---------|-----------|-----------|---------|---------|
-| Content format | Markdown/MDX | WYSIWYG | Markdown | Markdown |
-| Storage | Git repo | MySQL/MariaDB | PostgreSQL | PostgreSQL |
-| Versioning | Built-in | Manual | Manual | Plugin |
-| Search | Local or Algolia | Built-in | Built-in | Elasticsearch |
-| Deployment | Static site (CDN/docker) | Docker + DB | Docker + DB | Docker + DB |
-| Customization | React/JSX | Templating | Limited | JS |
+## Before you begin
 
-Docusaurus wins on **portability** — your docs are plain Markdown files in a Git repo. No database, no WYSIWYG lock-in. You can edit in any editor, version with Git tags, and deploy to anything from a Docker container to Cloudflare Pages or GitHub Pages.
-
-## Installation and Project Scaffolding
-
-You need Node.js 18 or later and a Git repository.
-
-```
-npx create-docusaurus@latest my-lab-docs classic
-cd my-lab-docs && npx docusaurus start
-```
-
-This creates the project skeleton:
-
-```
-my-lab-docs/
-├── blog/                  # Optional blog section
-├── docs/                  # Your documentation (Markdown)
-│   ├── intro.md
-│   └── tutorial/
-├── src/
-│   ├── components/        # Custom React components
-│   ├── css/               # Custom styles
-│   └── pages/             # Standalone pages
-├── static/                # Static assets (images, files)
-├── docusaurus.config.js   # Main configuration
-├── sidebars.js            # Sidebar structure
-├── package.json
-└── Dockerfile             # You will add this
-```
-
-Run `npx docusaurus start` to preview at `http://localhost:3000`.
-
-## Configuration and Customization
-
-Edit `docusaurus.config.js` to set your site metadata:
-
-```js
-module.exports = {
-  title: 'GnTech Lab Docs',
-  tagline: 'Homelab documentation and runbooks',
-  url: 'https://docs.gntech.me',
-  baseUrl: '/',
-  organizationName: 'gntech',
-  projectName: 'lab-docs',
-
-  themeConfig: {
-    navbar: {
-      title: 'GnTech Lab',
-      logo: {
-        alt: 'GnTech Logo',
-        src: 'img/logo.svg',
-      },
-      items: [
-        { type: 'doc', docId: 'intro', position: 'left', label: 'Docs' },
-        { to: '/blog', label: 'Blog', position: 'left' },
-        {
-          href: 'https://github.com/gntech/lab-docs',
-          label: 'GitHub',
-          position: 'right',
-        },
-      ],
-    },
-    footer: {
-      style: 'dark',
-      links: [
-        { title: 'Docs', items: [
-          { label: 'Getting Started', to: '/docs/intro' },
-          { label: 'Networking', to: '/docs/networking/overview' },
-          { label: 'Proxmox', to: '/docs/proxmox/overview' },
-        ]},
-      ],
-    },
-  },
-};
-```
-
-### Custom CSS
-
-Override the Docusaurus theme colors in `src/css/custom.css`:
-
-```css
-:root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-light: #33925d;
-}
-
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-}
-```
-
-Docusaurus respects the system color scheme by default and switches seamlessly between light and dark modes.
-
-## Writing Documentation — Sidebars and MDX
-
-### Sidebar Configuration
-
-You have two options: auto-generated or manual sidebars.
-
-**Auto-generated** (simplest — just use the file structure):
-
-```js
-// sidebars.js
-module.exports = {
-  docs: [{ type: 'autogenerated', dirName: '.' }],
-};
-```
-
-**Manual** (full control):
-
-```js
-// sidebars.js
-module.exports = {
-  docs: [
-    {
-      type: 'category',
-      label: 'Getting Started',
-      items: ['intro', 'quickstart'],
-    },
-    {
-      type: 'category',
-      label: 'Networking',
-      items: [
-        'networking/overview',
-        'networking/vlan-topology',
-        'networking/mikrotik-firewall',
-        'networking/wireguard-vpn',
-      ],
-    },
-    {
-      type: 'category',
-      label: 'Proxmox',
-      items: [
-        'proxmox/overview',
-        'proxmox/zfs-pool-layout',
-        'proxmox/backup-strategy',
-      ],
-    },
-  ],
-};
-```
-
-### MDX Features for Homelab Docs
-
-Docusaurus uses MDX — Markdown with inline JSX. Useful features for technical docs:
-
-**Admonitions:**
-
-```md
-:::tip
-Always use non-root containers. Set `user: "1000:1000"` in your Compose files.
-:::
-
-:::caution
-Check switch-chip and RouterOS support before combining VLAN filtering, IGMP snooping, and hardware offloading.
-:::
-
-:::danger
-Never expose your Docker socket to untrusted containers.
-:::
-```
-
-**Tabs for multi-platform configs:**
-
-Docusaurus supports MDX tabs natively:
-
-````md
-import Tabs from '@theme/Tabs';
-import TabItem from '@theme/TabItem';
-
-<Tabs>
-<TabItem value="docker" label="Docker">
-  Run directly: `docker run -d --name=nginx nginx:alpine`
-</TabItem>
-<TabItem value="compose" label="Docker Compose">
-  Use Compose:
-  ```yaml
-  services:
-    nginx:
-      image: nginx:alpine
-  ```
-</TabItem>
-</Tabs>
-````
-
-**Mermaid diagrams for network topology:**
-
-````md
-```mermaid
-graph TD
-    A[Internet] --> B[MikroTik Router]
-    B --> C{VLAN Trunk}
-    C --> D[VLAN10 - Management]
-    C --> E[VLAN20 - Services]
-    C --> F[VLAN30 - IoT]
-    D --> G[Proxmox Host]
-    E --> H[Docker Host]
-    F --> I[IoT Devices]
-```
-````
-
-## Adding Search
-
-For a self-hosted homelab docs site, the local search plugin works best:
+Use a development machine with a Node.js version supported by the Docusaurus release you select, npm, and Git. For the container section, you also need Docker Engine and the Docker Compose plugin.
 
 ```bash
-npm install --save @easyops-cn/docusaurus-search-local
+node --version
+npm --version
+docker compose version
 ```
 
-Then add it to `docusaurus.config.js`:
+Check the current [installation requirements](https://docusaurus.io/docs/installation) before scaffolding. The commands intentionally use the current generator for a new project; preserve the resulting lockfile and record the selected versions. They are not a version-pinned reproduction of either original article.
 
-```js
-plugins: [
-  [
-    require.resolve('@easyops-cn/docusaurus-search-local'),
-    {
-      hashed: true,
-      language: ['en'],
-      highlightSearchTermsOnTargetPage: true,
-      explicitSearchResultPath: true,
-    },
-  ],
-],
-```
-
-For public documentation, Algolia DocSearch is also available (free for open-source projects).
-
-## Versioning Your Documentation
-
-Docusaurus versioning lets you tag releases of your docs to match infrastructure changes:
+## Create and build the project
 
 ```bash
-npx docusaurus docs:version 1.0
-npx docusaurus docs:version 2.0
+npx create-docusaurus@latest homelab-docs classic
+cd homelab-docs
+npm run build
+npm run start -- --host 127.0.0.1
 ```
 
-This creates `versioned_docs/version-1.0/` and `versioned_docs/version-2.0/`. Readers can switch versions from a dropdown in the navbar.
+Use the development address printed by the command, usually `http://localhost:3000`. Stop it with Ctrl+C when finished. Do not expose the development server as the production service.
 
-Use versioning when your infrastructure goes through significant changes — for example, after migrating from RouterOS 6 to 7, or upgrading Proxmox to a new major release. Each version retains its own sidebar configuration in `versioned_sidebars/`.
+The classic template includes documentation, theme configuration, and example content. Keep its generated presets and configuration structure. JavaScript and TypeScript templates use different filename extensions, so confirm which files were created.
 
-## Docker Deployment
+## Set the production URL
 
-A multi-stage Docker build produces a small, production-ready image:
+For a new scaffold, the following replaces the top-level site title, URL and base path. Change `docs.example.com` to your intended hostname. Back up the generated configuration first:
 
-### Dockerfile
+```bash
+config_file=docusaurus.config.js
+if [ ! -f "$config_file" ]; then
+    config_file=docusaurus.config.ts
+fi
+test -f "$config_file" || { echo 'Generated configuration not found'; exit 1; }
+cp -a "$config_file" "$config_file.bak-$(date +%Y%m%d-%H%M%S)"
+sed -i \
+  -e "s|^  title:.*|  title: 'Homelab Docs',|" \
+  -e "s|^  url:.*|  url: 'https://docs.example.com',|" \
+  -e "s|^  baseUrl:.*|  baseUrl: '/',|" \
+  "$config_file"
+sed -n '1,100p' "$config_file"
+```
 
-```dockerfile
-FROM node:20-alpine AS build
+These substitutions assume the generator uses the shown two-space indentation and property names. Inspect the printed configuration and confirm all three values changed. For hosting under a subpath, use the appropriate `baseUrl` instead of `/` and adjust the web server accordingly.
+
+Build again after configuration changes. Do not replace the entire generated configuration with a fragment for an optional plugin; that can remove the presets which provide the documentation pages.
+
+## Write a useful first runbook
+
+Start with one service and a recovery procedure. This creates a new page without replacing the template's introduction:
+
+```bash
+mkdir -p docs/runbooks
+cat > docs/runbooks/service-recovery.md <<'EOF'
+---
+title: Service recovery checklist
+sidebar_position: 1
+---
+
+# Service recovery checklist
+
+## Scope
+
+Record the service, host, dependencies, and supported versions here.
+
+## Before changing anything
+
+- Confirm the affected host and current symptoms.
+- Identify the latest usable backup and a recovery access path.
+- Record the current configuration.
+
+## Procedure
+
+Add the exact steps for this service, including prerequisites.
+
+## Verification
+
+Describe the expected result and how to check it.
+
+## Rollback
+
+Explain how to restore the previous state.
+EOF
+npm run build
+```
+
+This is a writing template, not an executable recovery procedure. Fill in the service-specific details before anyone relies on it.
+
+With an autogenerated sidebar covering the `docs` directory, the new page should appear in navigation. If your project uses a manual sidebar, add the document ID `runbooks/service-recovery` to that existing configuration. A sidebar entry pointing to a nonexistent document can fail the build.
+
+Useful sections for a growing lab include networking, virtualization, services, backups, and runbooks. Keep credentials and recovery keys out of the documentation repository. A static site has no authentication boundary simply because its content feels internal.
+
+## Build a static container image
+
+The container uses the Node major version already installed on your development machine. That version must also satisfy the generated project's requirements. For repeatable releases, pin the build and server images to reviewed versions or digests rather than relying indefinitely on mutable tags.
+
+```bash
+export NODE_IMAGE="node:$(node -p 'process.versions.node.split(".")[0]')-alpine"
+printf 'Build image: %s\n' "$NODE_IMAGE"
+cat > Dockerfile <<'EOF'
+ARG NODE_IMAGE
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
-COPY package*.json ./
+COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
+FROM nginx:stable-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
-```
-
-### nginx.conf
-
-```nginx
+EOF
+cat > .dockerignore <<'EOF'
+node_modules
+build
+.docusaurus
+.git
+.env
+*.log
+EOF
+cat > nginx.conf <<'EOF'
 server {
-    listen       80;
-    server_name  docs.gntech.me;
-    root   /usr/share/nginx/html;
-    index  index.html;
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
 
     location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Cache static assets
-    location /assets/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        try_files $uri $uri/ $uri.html =404;
     }
 }
-```
-
-### docker-compose.yml
-
-```yaml
+EOF
+cat > compose.yaml <<'EOF'
 services:
-  docusaurus:
-    build: .
-    container_name: lab-docs
+  docs:
+    build:
+      context: .
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:?Set NODE_IMAGE to a compatible Node image}
     restart: unless-stopped
     ports:
-      - "3000:80"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.docs.rule=Host(`docs.gntech.me`)"
-      - "traefik.http.routers.docs.entrypoints=websecure"
-      - "traefik.http.routers.docs.tls.certresolver=letsencrypt"
-      - "traefik.http.services.docs.loadbalancer.server.port=80"
+      - "127.0.0.1:3000:80"
+EOF
+docker compose config --quiet
+docker compose up -d --build
+docker compose exec -T docs nginx -t
 ```
 
-### Build and Deploy
+These commands create deployment files in the project root. Back up any existing files with those names before adapting this section to an established project. The example assumes npm and an existing `package-lock.json`; use the matching package manager if you generated the project differently.
+
+The site binds to the Docker host's loopback address. That is convenient for local testing or a proxy running on the host. A reverse proxy in another container cannot reach it through that container's own `127.0.0.1`.
+
+## Verify navigation and missing pages
 
 ```bash
-docker compose build
-docker compose up -d
+curl --fail --head http://127.0.0.1:3000/
+curl --silent --output /dev/null --write-out '%{http_code}\n' \
+  http://127.0.0.1:3000/this-page-does-not-exist
+docker compose logs --tail=50 docs
 ```
 
-The site is now running behind Traefik with automatic Let's Encrypt SSL.
+Expect the home request to succeed and the invented URL to return `404`. Open the runbook through the sidebar, then refresh that page directly. Check navigation and static assets in a browser too. An Nginx syntax check alone does not prove that the generated routes work.
 
-## GitOps Workflow
+The earlier catch-all `/index.html` fallback could return the homepage with a successful status for missing routes. This example instead checks generated directory and `.html` paths before returning a real 404.
 
-The real power of Docusaurus comes from treating your docs as code.
+## Add a reverse proxy deliberately
 
-### Gitea Actions Example
+The loopback deployment does not install Traefik or issue a TLS certificate. To use an existing containerized Traefik deployment, attach the docs container to its shared Docker network, remove the host port mapping if it is unnecessary, and configure a router and service for the docs container's port 80.
 
-```yaml
-# .gitea/workflows/deploy-docs.yml
-name: Build and Deploy Docs
-on:
-  push:
-    branches: [main]
+Confirm the proxy's actual Docker provider, network, entrypoint and certificate-resolver names. Labels copied from a guide do not create those prerequisites. Validate HTTPS and deep links through the real hostname after configuring the proxy.
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build
-      - name: Deploy to Docker host
-        run: |
-          docker compose build
-          docker compose up -d --force-recreate
-        env:
-          DOCKER_HOST: ssh://deploy@10.0.20.30
-```
+For a managed static host, deploy the generated `build` directory instead. Review that host's build settings and access controls; private repository storage does not automatically make the deployed site private.
 
-With this workflow, every push to `main` automatically rebuilds and redeploys the docs site. No manual steps, no SSH sessions — just `git push`.
+## Search, diagrams, and versioning
 
-### Cloudflare Pages Alternative
+**Search needs an integration.** Docusaurus does not ship a built-in Lunr search engine just because the classic template or sidebar is enabled. Choose an integration from the [search documentation](https://docusaurus.io/docs/search), such as Algolia DocSearch where eligible or a compatible local-search plugin. Confirm plugin compatibility with your Docusaurus release and test the production build, including navigation from a search result.
 
-If you prefer a managed CDN, connect your Git repo to Cloudflare Pages. Set the build command to `npm run build` and the output directory to `build`. Cloudflare handles SSL, edge caching, and global distribution automatically with zero infrastructure to maintain.
+**Mermaid needs configuration.** Follow the [Mermaid documentation](https://docusaurus.io/docs/markdown-features/diagrams) to install the matching theme package and merge its settings into the existing site configuration. A fenced diagram alone does not enable the integration.
 
-## Conclusion
+**Git history and published versions are different.** Git records every edit. Docusaurus documentation versioning creates reader-visible snapshots. Introduce snapshots when readers genuinely need multiple supported procedures; avoid creating a new public version for every lab edit. Follow the [versioning guide](https://docusaurus.io/docs/versioning) and add the version selector to navigation if you need one.
 
-Docusaurus gives you a professional documentation site with zero runtime dependencies. No database, no PHP, no WYSIWYG editor to fight with. Just Markdown files in a Git repo, with built-in search, versioning, and a clean dark-mode theme that your eyes will thank you for.
+## Publish changes through review
 
-For homelab environments where your infrastructure evolves frequently, Docusaurus excels because it forces you into a Git-based workflow — every update is tracked, reviewable, and deployable through CI/CD. Combined with Docker for self-hosting or Cloudflare Pages for global delivery, it is one of the lowest-maintenance documentation tools you can run.
+Keep the source, package lockfile, and deployment files in Git. Build proposed changes before merging them, review the rendered site, and deploy the approved revision. Keep the previous working image or deployment available for rollback.
 
-For more details, see the [official Docusaurus documentation](https://docusaurus.io/docs).
+The earlier article included a netcat listener that triggered rebuilds without authenticating webhook requests. Do not use that listener as a deployment mechanism. Use your hosting provider's Git integration or a CI workflow with deliberately configured deployment credentials and host verification. Deployment time depends on the build, image cache, runner and network; there is no fixed completion time promised here.
+
+## Validation limits
+
+This consolidated example has been reviewed for consistency and its Bash blocks can be syntax-checked without running them. It has not been built as a Docusaurus application or deployed against a live Docker host during this update. Check the current upstream requirements, build the generated project, and verify the served pages before adopting it.
