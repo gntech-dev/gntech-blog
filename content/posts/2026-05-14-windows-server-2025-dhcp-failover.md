@@ -16,7 +16,6 @@ keywords:
   - DHCP scope replication
   - Windows DHCP verification
 summary: "Step-by-step Windows Server 2025 DHCP failover guide: install DHCP, authorize servers in AD, create scopes, configure load-balance or hot-standby failover, replicate scopes, and verify leases."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-dhcp-failover/"
 cover:
   image: "/images/posts/windows-server-2025-dhcp-failover/dhcp-failover-topology.svg"
   alt: "Windows Server 2025 DHCP failover topology with DHCP01 and DHCP02 replicating a shared IPv4 scope"
@@ -36,18 +35,6 @@ replication and verification.
 
 ![Windows Server 2025 DHCP failover topology](/images/posts/windows-server-2025-dhcp-failover/dhcp-failover-topology.svg)
 
-> **Image placeholders to add later:**
->
-> - Screenshot: DHCP role install in Server Manager
-> - Screenshot: DHCP post-install authorization wizard
-> - Screenshot: DHCP console showing `DHCP01` and `DHCP02`
-> - Screenshot: new IPv4 scope wizard
-> - Screenshot: scope options with router, DNS servers, and DNS domain
-> - Screenshot: Configure Failover wizard relationship page
-> - Screenshot: load-balance or hot-standby mode selection
-> - Screenshot: failover relationship status healthy
-> - Screenshot: replicated scope visible on `DHCP02`
-> - Screenshot: client lease and `ipconfig /all` verification
 
 ## GUI vs Server Core Path
 
@@ -139,8 +126,6 @@ On each DHCP server:
 5. Install the role.
 6. Click the post-install notification to complete DHCP configuration.
 
-> **Image placeholder:** Add screenshot of the DHCP Server role selected in
-> Server Manager.
 
 ### Server Core / PowerShell
 
@@ -175,21 +160,15 @@ serve leases.
 3. Select **Authorize**.
 4. Refresh until the server icon shows authorized.
 
-> **Image placeholder:** Add screenshot of both DHCP servers authorized in the
-> DHCP console.
 
 ### Server Core / PowerShell
 
 Run from a domain admin session:
 
 ```powershell
-Add-DhcpServerInDC \
-  -DnsName "DHCP01.gntech.me" \
-  -IPAddress 10.0.20.20
+Add-DhcpServerInDC  -DnsName "DHCP01.gntech.me"  -IPAddress 10.0.20.20
 
-Add-DhcpServerInDC \
-  -DnsName "DHCP02.gntech.me" \
-  -IPAddress 10.0.20.21
+Add-DhcpServerInDC  -DnsName "DHCP02.gntech.me"  -IPAddress 10.0.20.21
 ```
 
 Verify:
@@ -216,35 +195,19 @@ replicate it to the partner.
 9. Set DNS domain `gntech.me`.
 10. Activate the scope.
 
-> **Image placeholder:** Add screenshot of the New Scope Wizard with the
-> address range configured.
->
-> **Image placeholder:** Add screenshot of DHCP scope options showing router,
-> DNS servers, and DNS suffix.
 
 ### Server Core / PowerShell
 
 Run on `DHCP01`:
 
 ```powershell
-Add-DhcpServerv4Scope \
-  -ComputerName "DHCP01.gntech.me" \
-  -Name "LAB-10.0.20.0" \
-  -StartRange 10.0.20.100 \
-  -EndRange 10.0.20.200 \
-  -SubnetMask 255.255.255.0 \
-  -State Active
+Add-DhcpServerv4Scope  -ComputerName "DHCP01.gntech.me"  -Name "LAB-10.0.20.0"  -StartRange 10.0.20.100  -EndRange 10.0.20.200  -SubnetMask 255.255.255.0  -State Active
 ```
 
 Set options:
 
 ```powershell
-Set-DhcpServerv4OptionValue \
-  -ComputerName "DHCP01.gntech.me" \
-  -ScopeId 10.0.20.0 \
-  -Router 10.0.20.1 \
-  -DnsServer 10.0.20.10,10.0.20.11 \
-  -DnsDomain "gntech.me"
+Set-DhcpServerv4OptionValue  -ComputerName "DHCP01.gntech.me"  -ScopeId 10.0.20.0  -Router 10.0.20.1  -DnsServer 10.0.20.10,10.0.20.11  -DnsDomain "gntech.me"
 ```
 
 Verify:
@@ -268,11 +231,6 @@ Get-DhcpServerv4OptionValue -ComputerName "DHCP01.gntech.me" -ScopeId 10.0.20.0
 8. Set shared secret.
 9. Finish the wizard.
 
-> **Image placeholder:** Add screenshot of the Configure Failover wizard with
-> `DHCP02` selected as the partner.
->
-> **Image placeholder:** Add screenshot of load-balance mode and shared secret
-> configuration.
 
 ### Server Core / PowerShell
 
@@ -284,15 +242,7 @@ $PlainSecret = [Runtime.InteropServices.Marshal]::PtrToStringAuto(
   [Runtime.InteropServices.Marshal]::SecureStringToBSTR($Secret)
 )
 
-Add-DhcpServerv4Failover \
-  -ComputerName "DHCP01.gntech.me" \
-  -Name "DHCP01-DHCP02-LAB" \
-  -PartnerServer "DHCP02.gntech.me" \
-  -ScopeId 10.0.20.0 \
-  -SharedSecret $PlainSecret \
-  -LoadBalancePercent 50 \
-  -AutoStateTransition $true \
-  -StateSwitchInterval 01:00:00
+Add-DhcpServerv4Failover  -ComputerName "DHCP01.gntech.me"  -Name "DHCP01-DHCP02-LAB"  -PartnerServer "DHCP02.gntech.me"  -ScopeId 10.0.20.0  -SharedSecret $PlainSecret  -LoadBalancePercent 50  -AutoStateTransition $true  -StateSwitchInterval 01:00:00
 ```
 
 Clear the plaintext variable when done:
@@ -320,26 +270,19 @@ options, reservations, policies, or exclusions, force replication.
 3. Select **Replicate Scope** or **Replicate Failover Scopes**.
 4. Confirm replication to the partner.
 
-> **Image placeholder:** Add screenshot of the DHCP replicate scope action.
 
 ### Server Core / PowerShell
 
 Replicate a specific scope:
 
 ```powershell
-Invoke-DhcpServerv4FailoverReplication \
-  -ComputerName "DHCP01.gntech.me" \
-  -ScopeId 10.0.20.0 \
-  -Force
+Invoke-DhcpServerv4FailoverReplication  -ComputerName "DHCP01.gntech.me"  -ScopeId 10.0.20.0  -Force
 ```
 
 Or replicate by relationship name:
 
 ```powershell
-Invoke-DhcpServerv4FailoverReplication \
-  -ComputerName "DHCP01.gntech.me" \
-  -Name "DHCP01-DHCP02-LAB" \
-  -Force
+Invoke-DhcpServerv4FailoverReplication  -ComputerName "DHCP01.gntech.me"  -Name "DHCP01-DHCP02-LAB"  -Force
 ```
 
 Verify the scope exists on both servers:
@@ -385,13 +328,9 @@ Get-DhcpServerv4Scope -ComputerName "DHCP02.gntech.me"
 ### 3. Options Are Correct
 
 ```powershell
-Get-DhcpServerv4OptionValue \
-  -ComputerName "DHCP01.gntech.me" \
-  -ScopeId 10.0.20.0
+Get-DhcpServerv4OptionValue  -ComputerName "DHCP01.gntech.me"  -ScopeId 10.0.20.0
 
-Get-DhcpServerv4OptionValue \
-  -ComputerName "DHCP02.gntech.me" \
-  -ScopeId 10.0.20.0
+Get-DhcpServerv4OptionValue  -ComputerName "DHCP02.gntech.me"  -ScopeId 10.0.20.0
 ```
 
 Expected:
@@ -405,9 +344,7 @@ Expected:
 ### 4. Failover Relationship Is Healthy
 
 ```powershell
-Get-DhcpServerv4Failover \
-  -ComputerName "DHCP01.gntech.me" \
-  -Name "DHCP01-DHCP02-LAB" |
+Get-DhcpServerv4Failover  -ComputerName "DHCP01.gntech.me"  -Name "DHCP01-DHCP02-LAB" |
   Format-List *
 ```
 
@@ -433,13 +370,9 @@ Verify:
 ### 6. Lease Visibility
 
 ```powershell
-Get-DhcpServerv4Lease \
-  -ComputerName "DHCP01.gntech.me" \
-  -ScopeId 10.0.20.0
+Get-DhcpServerv4Lease  -ComputerName "DHCP01.gntech.me"  -ScopeId 10.0.20.0
 
-Get-DhcpServerv4Lease \
-  -ComputerName "DHCP02.gntech.me" \
-  -ScopeId 10.0.20.0
+Get-DhcpServerv4Lease  -ComputerName "DHCP02.gntech.me"  -ScopeId 10.0.20.0
 ```
 
 Leases should replicate between partners.
@@ -514,10 +447,7 @@ Also verify DHCP relay/IP helper on routed VLANs.
 Force replication:
 
 ```powershell
-Invoke-DhcpServerv4FailoverReplication \
-  -ComputerName "DHCP01.gntech.me" \
-  -Name "DHCP01-DHCP02-LAB" \
-  -Force
+Invoke-DhcpServerv4FailoverReplication  -ComputerName "DHCP01.gntech.me"  -Name "DHCP01-DHCP02-LAB"  -Force
 ```
 
 ### DNS Updates Not Working

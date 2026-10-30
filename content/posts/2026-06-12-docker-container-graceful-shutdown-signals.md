@@ -17,10 +17,9 @@ keywords:
   - Docker container shutdown signal handling best practices production
   - docker-compose.yml graceful shutdown configuration examples
 summary: "Configure proper graceful shutdown for Docker containers in your homelab. Covers stop signals, stop_grace_period, init process management with tini/dumb-init, and SIGTERM trap handlers to prevent data corruption during restarts."
-canonical: "https://blog.gntech.me/posts/docker-container-graceful-shutdown-signals/"
 ---
 
-You run `docker-compose down` and wait. The terminal hangs for ten seconds, then spits you back to your prompt. Next time you start the stack, your database logs show "database system was not properly shut down." Your application containers have stale PID files. An incomplete write has corrupted a config file you need to regenerate from scratch.
+You run `docker compose down` and wait. The terminal hangs for ten seconds, then spits you back to your prompt. Next time you start the stack, your database logs show "database system was not properly shut down." Your application containers have stale PID files. An incomplete write has corrupted a config file you need to regenerate from scratch.
 
 This is the default Docker shutdown behavior at work: SIGTERM, a ten-second grace period, then SIGKILL. For many containers that's fine. For databases, caches, and stateful services, those ten seconds are a roll of the dice and you will lose.
 
@@ -52,7 +51,7 @@ docker inspect test-stop --format '{{.State.ExitCode}}'
 # 143 → received SIGTERM and exited on its own
 ```
 
-The same signal flow applies to `docker-compose down`, `docker compose restart`, and `docker service update` in Swarm mode. Every one of these operations follows the signal → wait → kill pattern.
+The same signal flow applies to `docker compose down`, `docker compose restart`, and `docker service update` in Swarm mode. Every one of these operations follows the signal → wait → kill pattern.
 
 ## Configuring StopSignal and stop_grace_period in Docker Compose
 
@@ -459,4 +458,4 @@ Docker container graceful shutdown follows a simple flow: SIGTERM, wait, then SI
 2. **Enable `init: true`** — Docker's built-in tini handles signal forwarding and zombie reaping
 3. **Use the right signal** — SIGQUIT for Nginx, SIGTERM for most other services; implement trap handlers in custom entrypoints
 
-Check your exit codes. If any container exits with code 137, your grace period is too short or your signal handling is broken. Fix it before the next `docker-compose down` saves your data, not destroys it.
+Check your exit codes. If any container exits with code 137, your grace period is too short or your signal handling is broken. Fix it before the next `docker compose down` saves your data, not destroys it.

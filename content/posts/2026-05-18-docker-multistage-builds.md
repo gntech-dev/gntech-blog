@@ -17,7 +17,6 @@ keywords:
   - Python slim Docker image production
   - Docker build cache optimization
 summary: "Master Docker multi-stage builds to shrink production images from 1.2GB to under 50MB. Covers Go, Python, and Node.js patterns with real Dockerfiles and build cache strategies."
-canonical: "https://blog.gntech.me/posts/docker-multistage-builds/"
 ---
 
 Docker images in the wild easily balloon past 1 GB. A `python:3.12`

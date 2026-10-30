@@ -17,7 +17,6 @@ keywords:
   - Proxmox ZFS recordsize tuning
   - ZFS compression lz4 vm storage
 summary: "Set deterministic ZFS ARC limits, add L2ARC without wasting RAM on metadata, and tune recordsize and compression for your Proxmox homelab VMs."
-canonical: "https://gntech.dev/posts/proxmox-zfs-arc-tuning/"
 ---
 
 Your Proxmox host has 64 GB of RAM. You allocated 48 GB to VMs. So

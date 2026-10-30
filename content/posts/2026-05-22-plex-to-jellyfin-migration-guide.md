@@ -17,7 +17,6 @@ keywords:
   - Sonarr Radarr Jellyfin integration homelab
   - self-hosted media server 2026 Docker stack
 summary: "Migrate from Plex to Jellyfin on Docker with this complete guide covering library setup, watch history transfer, hardware transcoding with Intel QSV or NVIDIA NVENC, Traefik reverse proxy, and full arrs stack integration for your homelab media server."
-canonical: "https://gntech.dev/posts/plex-to-jellyfin-migration-guide/"
 ---
 
 Plex raised prices, removed the lifetime pass as a purchase

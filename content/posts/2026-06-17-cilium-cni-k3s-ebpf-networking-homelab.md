@@ -17,7 +17,6 @@ keywords:
   - Cilium replace Flannel K3s default CNI eBPF
   - Cilium k3s L7 network policy HTTP API filtering
 summary: "Replace K3s default Flannel with Cilium CNI for accelerated eBPF networking, remove kube-proxy, gain Hubble observability, and enforce identity-based network policies in a lightweight homelab cluster."
-canonical: "https://blog.gntech.me/posts/cilium-cni-k3s-ebpf-networking-homelab/"
 ---
 
 K3s ships with Flannel as its default CNI and a bundled kube-proxy for service routing. It works out of the box, but for a homelab where you want deep visibility, granular security policies, and modern eBPF performance, both Flannel and kube-proxy leave room for improvement.

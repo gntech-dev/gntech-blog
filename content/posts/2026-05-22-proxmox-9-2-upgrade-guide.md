@@ -17,7 +17,6 @@ keywords:
   - pve8to9 checklist script upgrade
   - Proxmox custom CPU profiles datacenter
 summary: "Upgrade your homelab from Proxmox VE 8.x to 9.2 with this practical guide covering the new Dynamic Load Balancer, SDN WireGuard fabrics, kernel 7.0 migration, known LXC issues, and post-upgrade tuning."
-canonical: "https://gntech.dev/posts/proxmox-9-2-upgrade-guide/"
 ---
 
 If your homelab runs Proxmox VE, May 21, 2026 marks a major
@@ -103,7 +102,7 @@ Do not skip this. Back up all VMs and containers to external or
 NFS/SMB storage via the GUI or:
 
 ```bash
-vzdump <VMID> --storage backup-nfs --mode snapshot
+vzdump "<VMID>" --storage backup-nfs --mode snapshot
 ```
 
 Also back up critical host config:
@@ -407,7 +406,7 @@ use Veeam for backups, pin affected VMs to machine version
 `9.2+pve1`:
 
 ```bash
-qm set <VMID> --machine pc-q35-9.2+pve1
+qm set "<VMID>" --machine pc-q35-9.2+pve1
 ```
 
 ### /tmp is Now tmpfs

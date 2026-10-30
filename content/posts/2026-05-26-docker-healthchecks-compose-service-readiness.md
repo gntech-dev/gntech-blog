@@ -17,7 +17,6 @@ keywords:
   - curl wget healthcheck distroless container
   - Docker Compose startup order dependencies
 summary: "A practical guide to Docker healthchecks in Compose — define checks with test, interval, timeout, and start_period, use depends_on condition: service_healthy for ordered startup, and debug health state with docker inspect."
-canonical: "https://gntech.dev/posts/docker-healthchecks-compose-service-readiness/"
 ---
 
 Docker Compose starts all services in a stack simultaneously by

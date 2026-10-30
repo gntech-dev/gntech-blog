@@ -17,7 +17,6 @@ keywords:
   - Docker Compose staging production homelab docker-compose.yml
   - Docker Compose override file security production hardening
 summary: "Learn how Docker Compose override files let you manage dev, staging, and production deployments from a single base docker-compose.yml — with port mapping overrides, resource limits, volume mounts, and security hardening for your homelab."
-canonical: "https://blog.gntech.me/posts/docker-compose-override-files-multi-environment/"
 ---
 
 ## Why Docker Compose Override Files Matter in a Homelab
@@ -401,6 +400,6 @@ In my homelab, this pattern eliminated config drift between environments. Port m
 
 ### See Also
 
-- [Docker Compose Profiles — Selective Service Management for Homelab](/posts/docker-compose-profiles-homelab/)
-- [Docker Compose Environment Variables — .env, Substitution, and Secrets](/posts/docker-compose-env-variables/)
-- [Docker Compose Production Patterns](/posts/docker-compose-production-patterns/)
+- [Docker Compose Profiles — Selective Service Management for Homelab](/posts/2026-05-29-docker-compose-profiles-homelab/)
+- [Docker Compose Environment Variables — .env, Substitution, and Secrets](/posts/2026-05-24-docker-compose-env-variables/)
+- [Docker Compose Production Patterns](/posts/2026-05-13-docker-compose-production-patterns/)

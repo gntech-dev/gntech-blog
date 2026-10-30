@@ -17,7 +17,6 @@ keywords:
   - Self-hosted paperless document scanning workflow
   - Paperless-ngx reverse proxy Traefik Nginx setup
 summary: "Deploy Paperless-ngx with Docker Compose in your homelab. Covers OCR processing, ML-based document classification, consumption templates, automated ingestion, and Traefik reverse proxy integration."
-canonical: "https://blog.gntech.me/posts/paperless-ngx-docker-deployment-homelab/"
 ---
 
 Your homelab generates paperwork — invoices, ISP contracts, device manuals, tax documents, warranty cards. Paperless-ngx turns that pile of PDFs and scans into a fully searchable, auto-tagged digital archive with OCR, machine learning classification, and multi-user access. Deploying it with Docker Compose keeps the stack isolated, reproducible, and easy to upgrade.

@@ -17,7 +17,6 @@ keywords:
   - vendor-reset NVIDIA Proxmox
   - NVIDIA Error 43 fix virtualization
 summary: "Complete guide to GPU passthrough on Proxmox VE — from IOMMU enablement and VFIO binding through NVIDIA Error 43 fixes and the vendor-reset kernel module."
-canonical: "https://blog.gntech.me/posts/proxmox-gpu-passthrough-guide/"
 ---
 
 Passing a GPU to a Proxmox VM sounds intimidating — IOMMU groups,
@@ -474,7 +473,7 @@ PCI_ADDR="$1"    # e.g., "01:00.0"
 IDS="$2"         # e.g., "10de:2206,10de:1aef"
 
 if [ -z "$PCI_ADDR" ] || [ -z "$IDS" ]; then
-  echo "Usage: $0 <PCI_ADDR> <VFIO_IDS>"
+  echo "Usage: $0 "<PCI_ADDR>" <VFIO_IDS>"
   echo "Example: $0 01:00.0 10de:2206,10de:1aef"
   exit 1
 fi

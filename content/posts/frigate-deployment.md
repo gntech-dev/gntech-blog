@@ -12,6 +12,8 @@ categories:
   - monitoring
 ---
 
+> **Historical setup:** This article records the original lab deployment. Frigate configuration changes between releases; validate the configuration against the documentation for the exact image version you deploy. The example exposes several service ports and is intended for an isolated lab network. Restrict access at the host and router, and use the authenticated interface supported by your chosen release.
+
 Frigate is an open-source NVR built for real-time object detection with local processing. No cloud subscriptions, no vendor lock-in — just cameras, a GPU, and decent detection models.
 
 This is how I set it up on my Proxmox host, with a Tapo C100 camera, Intel GPU inference via OpenVINO, MQTT eventing, and Telegram notifications.
@@ -55,7 +57,7 @@ Storage:       ~17 GB zvol + 8.5 GB for recordings
 OS:            Debian Bookworm
 ```
 
-Key requirement: the LXC needs `/dev/dri/renderD128` passed through for Intel GPU access. In Proxmox, this means the LXC must be **privileged** (or use device cgroup), and you add to `/etc/pve/lxc/<CT_ID>.conf`:
+Key requirement: the LXC needs `/dev/dri/renderD128` passed through for Intel GPU access. Device access depends on LXC device permissions and, for an unprivileged container, UID/GID mappings. A privileged container is not inherently required. The following is a configuration fragment for the documented setup; review it against your Proxmox version before applying it to `/etc/pve/lxc/<CT_ID>.conf`:
 
 ```
 lxc.cgroup2.devices.allow: c 226:128 rwm
@@ -236,6 +238,8 @@ This means the Frigate container on VLAN 20 can pull RTSP from the camera on VLA
 
 ## Telegram Notifications
 
+The custom notifier source is not included in this post, so this section describes the original integration rather than a complete installation procedure. Do not expect the Compose example alone to create Telegram alerts.
+
 Frigate's built-in notifications are disabled. Instead, a custom Python notifier (`frigate-notifier`) subscribes to MQTT events at topic prefix `frigate` and pushes detection clips and snapshots to a Telegram chat.
 
 The notifier:
@@ -256,7 +260,7 @@ This gives real-time alerts when someone approaches the house, with video eviden
 | Clips/Snapshots | `/media/frigate/clips/` | 7 days |
 | Cache | tmpfs (1 GB) | Ephemeral |
 
-Storage is modest — ~150 MB for a few days with one camera at 720p. A dedicated disk or larger zvol would matter at scale.
+Size recording storage from the measured bitrate and recorded hours. A continuous 1 Mbit/s stream uses about 10.8 GB per day before filesystem overhead; resolution alone does not determine storage use. Motion-only retention depends on activity. The small storage allocation above is a historical lab example, not a multi-day capacity recommendation.
 
 ---
 

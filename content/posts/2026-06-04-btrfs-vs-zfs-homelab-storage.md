@@ -17,7 +17,6 @@ keywords:
   - Btrfs send receive incremental snapshot backup
   - Proxmox ZFS Btrfs filesystem choice recommendation
 summary: "Compare Btrfs and ZFS for homelab storage on Proxmox and Docker. Architecture, memory, snapshots, compression, and practical recommendations."
-canonical: "https://blog.gntech.me/posts/btrfs-vs-zfs-homelab-storage/"
 ---
 
 ## Btrfs vs ZFS for Homelab Storage — Which Filesystem Should You Choose?

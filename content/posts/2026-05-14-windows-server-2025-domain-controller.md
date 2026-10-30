@@ -16,7 +16,6 @@ keywords:
   - dcdiag repadmin verification
   - homelab Active Directory setup
 summary: "Step-by-step Windows Server 2025 domain controller deployment: static IP, AD DS installation, DNS configuration, domain promotion, OU/user setup, client join testing, and post-install verification."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-domain-controller/"
 cover:
   image: "/images/posts/windows-server-2025-domain-controller/ad-ds-lab-topology.svg"
   alt: "Windows Server 2025 domain controller topology with AD DS, DNS, clients, and verification tools"
@@ -36,18 +35,6 @@ troubleshoot later.
 
 ![Windows Server 2025 AD DS lab topology](/images/posts/windows-server-2025-domain-controller/ad-ds-lab-topology.svg)
 
-> **Image placeholders to add later:**
->
-> - Screenshot: Server Manager dashboard before AD DS installation
-> - Screenshot: static IP and DNS settings on `DC01`
-> - Screenshot: Add Roles and Features wizard with **Active Directory Domain Services** selected
-> - Screenshot: AD DS post-deployment warning / **Promote this server to a domain controller**
-> - Screenshot: Deployment Configuration page for new forest `gntech.me`
-> - Screenshot: DNS Options / Additional Options pages during promotion
-> - Screenshot: final prerequisites check before install
-> - Screenshot: Active Directory Users and Computers showing created OUs
-> - Screenshot: DNS Manager showing `_msdcs` and SRV records
-> - Screenshot: successful `dcdiag`, `repadmin`, and client domain join verification
 
 ## GUI vs Server Core Path
 
@@ -131,20 +118,14 @@ Get-NetAdapter
 Set the address:
 
 ```powershell
-New-NetIPAddress \
-  -InterfaceAlias "Ethernet" \
-  -IPAddress 10.0.20.10 \
-  -PrefixLength 24 \
-  -DefaultGateway 10.0.20.1
+New-NetIPAddress  -InterfaceAlias "Ethernet"  -IPAddress 10.0.20.10  -PrefixLength 24  -DefaultGateway 10.0.20.1
 ```
 
 Set temporary DNS to itself. Before AD DS is installed this looks odd,
 but the DNS role will be installed during domain controller promotion.
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 127.0.0.1
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 127.0.0.1
 ```
 
 Verify:
@@ -180,8 +161,6 @@ On Windows Server 2025 Desktop Experience:
 6. Accept the required management tools.
 7. Continue through the wizard and click **Install**.
 
-> **Image placeholder:** Add screenshot of Server Manager role selection with
-> **Active Directory Domain Services** checked.
 
 The role install does not make the server a domain controller yet. It only
 installs the AD DS binaries and management tools.
@@ -227,28 +206,15 @@ After role installation, Server Manager shows a notification flag.
 9. Run the prerequisites check.
 10. Click **Install** and let the server reboot.
 
-> **Image placeholder:** Add screenshot of the Deployment Configuration page
-> showing **Add a new forest** and `gntech.me`.
->
-> **Image placeholder:** Add screenshot of the prerequisites check passing
-> before clicking **Install**.
 
 ### Server Core / PowerShell: Promote with `Install-ADDSForest`
 
 For a new lab forest:
 
 ```powershell
-$SafeModePassword = Read-Host \
-  -Prompt "Enter Directory Services Restore Mode password" \
-  -AsSecureString
+$SafeModePassword = Read-Host  -Prompt "Enter Directory Services Restore Mode password"  -AsSecureString
 
-Install-ADDSForest \
-  -DomainName "gntech.me" \
-  -DomainNetbiosName "GNTECH" \
-  -InstallDns \
-  -SafeModeAdministratorPassword $SafeModePassword \
-  -NoRebootOnCompletion:$false \
-  -Force
+Install-ADDSForest  -DomainName "gntech.me"  -DomainNetbiosName "GNTECH"  -InstallDns  -SafeModeAdministratorPassword $SafeModePassword  -NoRebootOnCompletion:$false  -Force
 ```
 
 The server reboots automatically.
@@ -276,9 +242,7 @@ After promotion, set the server NIC DNS to the DC IP. Avoid leaving only
 `127.0.0.1` on the NIC because it makes later troubleshooting less clear.
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10
 ```
 
 Verify:
@@ -304,8 +268,6 @@ queries to upstream resolvers.
 3. Open the **Forwarders** tab.
 4. Add `1.1.1.1` and `9.9.9.9`, or your internal resolver.
 
-> **Image placeholder:** Add screenshot of DNS Manager forwarders configured on
-> `DC01`.
 
 ### Server Core / PowerShell
 
@@ -330,8 +292,6 @@ On Desktop Experience:
 4. Create `Servers`, `Workstations`, `Users`, `Groups`, and `Service Accounts`.
 5. Right-click `Users` → **New → User** to create `test.user`.
 
-> **Image placeholder:** Add screenshot of Active Directory Users and Computers
-> showing the OU layout after creation.
 
 ### Server Core / PowerShell: Create OUs and Users
 
@@ -358,16 +318,7 @@ Create a test user:
 ```powershell
 $Password = Read-Host "Password for test.user" -AsSecureString
 
-New-ADUser \
-  -Name "Test User" \
-  -GivenName "Test" \
-  -Surname "User" \
-  -SamAccountName "test.user" \
-  -UserPrincipalName "test.user@gntech.me" \
-  -Path "OU=Users,$BaseDN" \
-  -AccountPassword $Password \
-  -Enabled $true \
-  -ChangePasswordAtLogon $true
+New-ADUser  -Name "Test User"  -GivenName "Test"  -Surname "User"  -SamAccountName "test.user"  -UserPrincipalName "test.user@gntech.me"  -Path "OU=Users,$BaseDN"  -AccountPassword $Password  -Enabled $true  -ChangePasswordAtLogon $true
 ```
 
 Verify:
@@ -383,18 +334,13 @@ Reverse DNS is not mandatory for every lab, but it helps with clean
 logging and diagnostics.
 
 ```powershell
-Add-DnsServerPrimaryZone \
-  -NetworkId "10.0.20.0/24" \
-  -ReplicationScope "Domain"
+Add-DnsServerPrimaryZone  -NetworkId "10.0.20.0/24"  -ReplicationScope "Domain"
 ```
 
 Create or verify the PTR record for the DC:
 
 ```powershell
-Add-DnsServerResourceRecordPtr \
-  -Name "10" \
-  -ZoneName "20.0.10.in-addr.arpa" \
-  -PtrDomainName "dc01.gntech.me"
+Add-DnsServerResourceRecordPtr  -Name "10"  -ZoneName "20.0.10.in-addr.arpa"  -PtrDomainName "dc01.gntech.me"
 ```
 
 Check it:
@@ -411,9 +357,7 @@ verify the existing record instead of duplicating it.
 On a Windows 11/Windows Server client, set DNS to the DC:
 
 ```powershell
-Set-DnsClientServerAddress \
-  -InterfaceAlias "Ethernet" \
-  -ServerAddresses 10.0.20.10
+Set-DnsClientServerAddress  -InterfaceAlias "Ethernet"  -ServerAddresses 10.0.20.10
 ```
 
 Verify DNS before joining:
@@ -426,10 +370,7 @@ Resolve-DnsName _ldap._tcp.dc._msdcs.gntech.me -Type SRV
 Join the domain:
 
 ```powershell
-Add-Computer \
-  -DomainName "gntech.me" \
-  -Credential "GNTECH\Administrator" \
-  -Restart
+Add-Computer  -DomainName "gntech.me"  -Credential "GNTECH\Administrator"  -Restart
 ```
 
 After reboot, log in as:
@@ -616,10 +557,7 @@ New-ADGroup -Name "GG-Server-Admins" -GroupScope Global -GroupCategory Security 
 ### Enable the Recycle Bin
 
 ```powershell
-Enable-ADOptionalFeature \
-  -Identity 'Recycle Bin Feature' \
-  -Scope ForestOrConfigurationSet \
-  -Target 'gntech.me'
+Enable-ADOptionalFeature  -Identity 'Recycle Bin Feature'  -Scope ForestOrConfigurationSet  -Target 'gntech.me'
 ```
 
 Verify:

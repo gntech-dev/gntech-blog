@@ -15,7 +15,6 @@ keywords:
   - HBA passthrough Proxmox
   - IOMMU groups configuration
 summary: "Complete Proxmox VE PCIe passthrough guide — GPU for Jellyfin transcoding, NVMe direct access, SAS HBA for NAS VMs. Kernel configs, vfio-pci, IOMMU groups, and working Proxmox VM settings."
-canonical: "https://blog.gntech.me/posts/proxmox-pcie-passthrough/"
 ---
 
 PCIe passthrough is how you take a single Proxmox host and get
@@ -233,7 +232,7 @@ In the Proxmox web UI, go to the VM → Hardware → Add → PCI Device.
 The equivalent `qm` command:
 
 ```bash
-qm set <VMID> \
+qm set "<VMID>" \
   -hostpci0 01:00,pcie=1,rombar=1 \
   -machine q35 \
   -cpu host
@@ -298,7 +297,7 @@ lspci | grep Non-Volatile
 # Select the NVMe controller, check PCI-Express and All Functions
 
 # CLI:
-qm set <VMID> -hostpci1 02:00.0,pcie=1
+qm set "<VMID>" -hostpci1 02:00.0,pcie=1
 ```
 
 ### HBA Passthrough
@@ -314,7 +313,7 @@ lspci | grep -i 'SAS\|LSI\|Avago\|Broadcom'
 # The HBA must be in IT mode (initiator target — no RAID firmware)
 # for the VM to see individual disks
 
-qm set <VMID> -hostpci2 03:00.0,pcie=1
+qm set "<VMID>" -hostpci2 03:00.0,pcie=1
 ```
 
 **Why HBA passthrough over disk passthrough:** A single PCIe slot gives

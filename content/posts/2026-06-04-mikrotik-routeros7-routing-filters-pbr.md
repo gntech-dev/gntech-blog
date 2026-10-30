@@ -16,7 +16,6 @@ keywords:
   - RouterOS 7 route selection routing-mark mangle tos
   - MikroTik network traffic steering policy routing CLI
 summary: "Configure MikroTik RouterOS 7 routing filters for BGP, OSPF, and policy-based routing. Real CLI examples for route maps, mangle rules, routing marks, and traffic steering."
-canonical: "https://blog.gntech.me/posts/mikrotik-routeros7-routing-filters-pbr/"
 ---
 
 ## Introduction to MikroTik RouterOS 7 Routing Filters

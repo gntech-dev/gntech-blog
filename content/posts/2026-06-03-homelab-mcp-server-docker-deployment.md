@@ -17,7 +17,6 @@ keywords:
   - Self-hosted AI infrastructure monitoring tool
   - Model Context Protocol homelab automation setup
 summary: "Deploy the Homelab MCP server in Docker to manage your homelab infrastructure through Claude Desktop. Monitor Docker containers, Ollama AI models, Pi-hole DNS, and network devices using natural language commands."
-canonical: "https://blog.gntech.me/posts/homelab-mcp-server-docker-deployment/"
 ---
 
 ## What Is MCP and Why Your Homelab Needs It
@@ -260,7 +259,7 @@ The Homelab MCP server has access to your Docker socket, which is effectively ro
 - **Use a read-only API key for Pi-hole and Unifi.** Do not use admin credentials. Homelab MCP only queries data — it does not modify configurations.
 - **Keep `.env` out of version control.** Add it to `.gitignore`. It contains API keys and credentials for your infrastructure.
 - **Run on a management VLAN.** Place the Docker host in a dedicated management VLAN (VLAN 99 or similar) with strict ACLs limiting which services the MCP container can reach.
-- **Audit the Docker socket.** The container runs `docker_get_containers` against your entire local Docker API. Consider running a [Docker Socket Proxy](https://gntech.dev/posts/docker-socket-proxy/) for granular access control instead of mounting `/var/run/docker.sock` directly.
+- **Audit the Docker socket.** The container runs `docker_get_containers` against your entire local Docker API. Consider running a [Docker Socket Proxy](/posts/2026-05-14-docker-socket-proxy/) for granular access control instead of mounting `/var/run/docker.sock` directly.
 - **Monitor access logs.** Claude Desktop conversations run locally, but if you use Claude Pro or Teams, your queries transit Anthropic's servers. Do not include secrets in prompts.
 
 ## Troubleshooting

@@ -8,287 +8,133 @@ tags:
   - firewall
   - ufw
   - security
+lastmod: 2026-10-30T12:00:00-04:00
 ---
 
-You set up UFW. You configured default deny incoming, opened only ports
-22 and 443. You checked `ufw status verbose` — everything looks right.
+Publishing a Docker port can make it reachable even when UFW says incoming traffic is denied. Docker routes published bridge-network traffic through NAT and forwarding rules; UFW's host `INPUT` policy does not provide the access control you might expect.
 
-Then you spin up a Postgres container publishing port 5432, and suddenly
-port 5432 is open to the whole internet. Your UFW rules didn't stop it.
+This guide separates two jobs: limiting where a port is published, and filtering which clients can reach it. Binding to a LAN address reduces exposure, but does **not** make UFW's host-input rules control forwarded container traffic.
 
-This isn't a bug. Docker modifies iptables directly in ways that bypass
-user-level firewall tools like UFW. Every `docker run -p` creates a raw
-iptables DNAT rule that sits *above* UFW's INPUT chain. The result:
-containers are exposed regardless of your UFW policy.
+## 1. Check the Existing Rules
 
-This post covers why this happens and three actual fixes.
-
----
-
-## Why Docker Ignores UFW
-
-Docker's `dockerd` manages a `DOCKER` chain in iptables. When you publish
-a container port, Docker inserts a DNAT rule that translates the host port
-to the container IP. The packet flow looks like this:
-
-```
-Internet → PREROUTING (DNAT: host:5432 → container:5432)
-         → FORWARD (filter rules)
-         → container:5432
-
-Notice: UFW's INPUT chain is never reached for forwarded traffic.
-```
-
-UFW controls INPUT and FORWARD *user* chains. Docker inserts its nat
-rules in PREROUTING, which fires before FORWARD/INPUT filtering. Docker
-also opens FORWARD by default via its `DOCKER-USER` chain.
-
-The result: any published port is reachable from any network interface,
-including WAN.
-
----
-
-## Verify the Problem
-
-Check if Docker's iptables rules override UFW:
+Run on the Docker host with administrator access:
 
 ```bash
-# List nat rules — Docker's DNAT entries go in PREROUTING
-sudo iptables -t nat -L PREROUTING -n --line-numbers
-
-# Check FORWARD policy — Docker opens it wide
-sudo iptables -L FORWARD -n -v
-
-# UFW status — will show active but won't reflect Docker ports
+docker version
+docker ps --format 'table {{.Names}}\t{{.Ports}}'
 sudo ufw status verbose
+sudo iptables -S DOCKER-USER
+sudo iptables -t nat -S DOCKER
 ```
 
-If you see `Chain FORWARD (policy DROP)` but Docker has added rules accepting
-all forwarded traffic from its bridge, that's the hole.
+The rules below apply to Docker's **iptables backend**, including iptables-nft compatibility mode. If Docker uses its native nftables backend, use the [nftables guide](/posts/2026-06-06-docker-nftables-firewall-backend-homelab/) instead. Do not create a fake `DOCKER-USER` chain to hide a backend mismatch.
 
----
+## 2. Avoid Publishing Ports You Do Not Need
 
-## Solution 1: Docker-User Chain (Partial Fix, Simplest)
-
-Docker provides a `DOCKER-USER` chain that fires before Docker's own
-`DOCKER` FORWARD rules. You can add restrictions here.
-
-**Block all forwarded traffic except from specific subnets:**
-
-```bash
-# Flush default DOCKER-USER rules
-sudo iptables -F DOCKER-USER
-
-# Allow only your LAN subnet (adjust to your network)
-sudo iptables -I DOCKER-USER -i docker0 -s 10.0.0.0/16 -j ACCEPT
-sudo iptables -I DOCKER-USER -i docker0 -s 192.168.0.0/16 -j ACCEPT
-
-# Drop everything else forwarded to Docker
-sudo iptables -I DOCKER-USER -i docker0 ! -s 10.0.0.0/16 -j DROP
-```
-
-Make these persistent after reboot:
-
-```bash
-# Debian/Ubuntu
-sudo apt install iptables-persistent
-sudo netfilter-persistent save
-```
-
-**Limitation:** This only restricts FORWARD chain traffic. Published ports
-still appear as DNAT entries visible to the WAN interface on the host.
-It's better than nothing but not a proper fix.
-
----
-
-## Solution 2: Disable Docker's iptables (Drastic, Breaks Swarm/Overlay)
-
-Set this in `/etc/docker/daemon.json`:
-
-```json
-{
-  "iptables": false,
-  "ip6tables": false
-}
-```
-
-Then restart Docker:
-
-```bash
-sudo systemctl restart docker
-```
-
-Now Docker won't touch iptables at all. UFW rules apply normally.
-
-**What breaks:**
-
-- Containers can't reach the internet through NAT (no MASQUERADE rule)
-- Published ports (`-p 80:80`) won't work — all DNAT rules are gone
-- Docker Swarm overlay networks fail
-- Inter-container DNS (embedded DNS resolver) may fail
-- `docker-compose` networking between services on the same network stops working
-
-This is the sledgehammer approach. Only use it if you're running Docker
-in a non-routed development VM where you don't need port publishing.
-
----
-
-## Solution 3: UFW-Docker Script (The Right Fix)
-
-The `ufw-docker` approach by chaifeng on GitHub gives UFW full control
-over Docker's forwarded traffic by inserting UFW rules *after* Docker's
-DNAT but before FORWARD accepts everything.
-
-It works by modifying the DOCKER-USER chain to hand control to UFW:
-
-```bash
-#!/bin/bash
-# /opt/scripts/ufw-docker-fix.sh
-# Run once after Docker starts, or add as a systemd override
-
-# Reset DOCKER-USER to UFW-controlled defaults
-sudo iptables -F DOCKER-USER
-sudo iptables -A DOCKER-USER -j RETURN
-
-# Default: block all forwarded traffic to containers
-# unless UFW explicitly allows it
-sudo iptables -I DOCKER-USER -i docker0 -j DOCKER-USER-RETURN
-
-# Allow established/related
-sudo iptables -A DOCKER-USER -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
-
-# Default deny for DOCKER-USER
-sudo iptables -A DOCKER-USER -j DROP
-```
-
-But the better approach is to use the `ufw-after-docker` integration.
-Install it as a systemd oneshot:
-
-```ini
-# /etc/systemd/system/ufw-docker-fix.service
-[Unit]
-Description=UFW Docker integration fix
-After=docker.service network.target
-Requires=docker.service
-
-[Service]
-Type=oneshot
-RemainAfterExit=yes
-ExecStart=/opt/scripts/ufw-docker-fix.sh
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now ufw-docker-fix
-```
-
----
-
-## Solution 3b: Per-Port UFW Control (Best for Most Homelabs)
-
-Instead of blanket blocking all Docker forwarded traffic, control it
-per-port using UFW rules that match the Docker-proxy binding address.
-
-When Docker publishes a port, it binds to `0.0.0.0:PORT` by default.
-The trick is to **only bind to internal IPs**, then use UFW as normal.
-
-**Step 1: Bind containers only to your LAN IP, not 0.0.0.0**
+Services on the same Compose network can communicate by service name without `ports`. A database used only by an application normally needs no host-published port:
 
 ```yaml
-# compose.yml
 services:
-  postgres:
-    image: postgres:16
-    ports:
-      - "10.0.20.50:5432:5432"  # bind to LAN IP only, not 0.0.0.0
+  database:
+    image: postgres:17
+    environment:
+      POSTGRES_PASSWORD_FILE: /run/secrets/database_password
+    secrets:
+      - database_password
+    volumes:
+      - database_data:/var/lib/postgresql/data
+
+secrets:
+  database_password:
+    file: ./database_password.txt
+
+volumes:
+  database_data:
 ```
 
-This means the port is only reachable on the LAN interface. The WAN
-interface (public IP) doesn't bind the port, so no DNAT hole exists.
+Create the password file securely before starting this example. Keep it out of Git. Do not replace an existing database deployment with this sample or change its PostgreSQL major version without a migration plan.
 
-**Step 2: Verify binding**
+For a service used only by software on the host, bind to loopback:
+
+```yaml
+ports:
+  - "127.0.0.1:8080:80"
+```
+
+For LAN clients, bind to an address actually assigned to the host:
+
+```yaml
+ports:
+  - "10.0.20.50:8080:80"
+```
+
+A LAN binding is **not a source allowlist**. Routed clients may still reach it. Apply a forwarding policy when source restrictions are required, and check IPv6 exposure separately. Docker releases before 28.0.0 also have a documented localhost-publishing caveat for peers on the same layer-2 segment; update older installations.
+
+## 3. Filter One Published Port with DOCKER-USER
+
+This example protects **TCP port 8080 published on 10.0.20.50**, allowing new connections only from `10.0.10.0/24` arriving on `ens18`. Replace all three values before running it.
+
+Use the incoming physical interface, **not** `docker0`. At this hook, destination NAT has already happened, so `--ctorigdst` and `--ctorigdstport` match the original host address and published port.
+
+First save the existing IPv4 rules:
 
 ```bash
-sudo ss -tlnp | grep docker
-# Should show: 10.0.20.50:5432    (not 0.0.0.0:5432)
+sudo sh -c 'iptables-save > /root/iptables-before-blog-filter.rules'
 ```
 
-**Step 3: Use UFW to control LAN access**
+Add a dedicated chain without flushing any existing policy:
 
 ```bash
-# Allow specific services through
-sudo ufw allow from 10.0.0.0/16 to 10.0.20.50 port 5432 proto tcp
-
-# Block everything else
-sudo ufw default deny incoming
+sudo iptables -N GNTECH-WEB8080
+sudo iptables -A GNTECH-WEB8080 -s 10.0.10.0/24 -j RETURN
+sudo iptables -A GNTECH-WEB8080 -j DROP
+sudo iptables -I DOCKER-USER 1 -i ens18 -p tcp \
+  -m conntrack --ctstate NEW \
+  --ctorigdst 10.0.20.50 --ctorigdstport 8080 \
+  -j GNTECH-WEB8080
 ```
 
-This is the cleanest approach for a homelab environment. You keep Docker's
-internal networking intact, override the default `0.0.0.0` bind to
-your internal IP, and let UFW handle the rest.
+Run this setup once. If the chain exists, inspect it instead of running the commands again. The jump only handles new connections to this one published endpoint; other forwarding rules remain in force. Existing connections are unaffected.
 
----
+This example covers IPv4 only. If the service is reachable through IPv6, configure and test an equivalent IPv6 policy or remove its IPv6 publication. Conntrack matching can have a performance cost.
 
-## The Catch: Docker's Port Publishing Default
+## 4. Verify from Allowed and Blocked Clients
 
-By default, Docker publishes to `0.0.0.0`. This is the root cause.
-You can change the default behavior with a daemon config:
-
-```json
-{
-  "ip": "10.0.20.50"
-}
-```
-
-This makes `-p 8080:80` bind to `10.0.20.50:8080` instead of
-`0.0.0.0:8080`. Any published port without an explicit IP will now
-only listen on your LAN interface.
-
-**Important:** This only affects port publishing, not container-internal
-networking or Docker bridge connectivity. It's the single config change
-that fixes the UFW bypass for most homelabs.
-
----
-
-## Verification Checklist
-
-After applying any fix:
+On the host:
 
 ```bash
-# 1. Check that published ports don't expose to 0.0.0.0
-sudo ss -tlnp | grep -E 'docker|compose'
-# Expect: 10.0.x.x:PORT     not 0.0.0.0:PORT
-
-# 2. Scan from outside your LAN (use a phone hotspot or cloud shell)
-# Install nmap and scan your public IP:
-# nmap -p 5432,8080 <PUBLIC_IP>
-
-# 3. Check that UFW still blocks what it should
-sudo ufw status verbose
-
-# 4. Verify Docker's iptables integration is sane
-sudo iptables -L DOCKER-USER -n -v
+sudo iptables -nvL DOCKER-USER --line-numbers
+sudo iptables -nvL GNTECH-WEB8080 --line-numbers
+docker ps --format 'table {{.Names}}\t{{.Ports}}'
 ```
 
----
+From an allowed client and then a client outside the permitted subnet:
 
-## Summary
+```bash
+curl --connect-timeout 5 http://10.0.20.50:8080/
+```
 
-| Solution | Effort | Keeps Docker NAT | UFW Control | Homelab Recommended |
-|----------|--------|-------------------|-------------|---------------------|
-| DOCKER-USER FORWARD rules | Low | ✅ | Partial | ⚠️ |
-| `iptables: false` | Low | ❌ Breaks | Full | ❌ |
-| Bind to LAN IP + UFW | Medium | ✅ | Full | ✅ |
-| ufw-docker script | Medium | ✅ | Full | ✅ |
+The allowed request should reach the application; the blocked request should time out. Use a **new connection** for each check. Verify container DNS, outbound access, and application health too. A host-local curl or an `ss` listing alone does not prove that external access is blocked.
 
-For a typical homelab where containers need internet access but
-databases/config dashboards should stay LAN-only, the cleanest fix is:
+## 5. Persistence and Rollback
 
-1. Set `"ip": "10.0.20.50"` in `/etc/docker/daemon.json`
-2. Explicitly bind multi-interface services to `0.0.0.0` when needed
-3. Add DOCKER-USER FORWARD restrictions as a safety net
+The commands above are runtime rules. Integrate them into your existing firewall manager so they load after Docker creates `DOCKER-USER`, without duplicating rules. Verify again after reboot and after a Docker restart. Avoid blindly saving and replaying all of Docker's dynamically generated rules.
 
-Your UFW rules will finally mean what they say.
+To remove only this example:
+
+```bash
+sudo iptables -D DOCKER-USER -i ens18 -p tcp \
+  -m conntrack --ctstate NEW \
+  --ctorigdst 10.0.20.50 --ctorigdstport 8080 \
+  -j GNTECH-WEB8080
+sudo iptables -F GNTECH-WEB8080
+sudo iptables -X GNTECH-WEB8080
+```
+
+Do not disable Docker's `iptables` or `ip6tables` options as a UFW fix. Those options disable rules Docker needs for networking; they do not transfer container access control to UFW automatically.
+
+## References
+
+- [Docker: packet filtering, firewalls, and UFW](https://docs.docker.com/engine/network/packet-filtering-firewalls/)
+- [Docker: iptables chains and original-destination matching](https://docs.docker.com/engine/network/firewall-iptables/)
+- [Docker: port publishing and localhost caveat](https://docs.docker.com/engine/network/port-publishing/)

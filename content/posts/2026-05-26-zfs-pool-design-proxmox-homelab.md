@@ -17,7 +17,6 @@ keywords:
   - ZFS monitoring arcstat zpool iostat zdb
   - OpenZFS lz4 zstd compression benchmark
 summary: "A practical guide to ZFS pool design and performance tuning for Proxmox homelabs — topology selection, ashift, recordsize, compression, ARC sizing, and real-world monitoring with arcstat and zpool iostat."
-canonical: "https://blog.gntech.me/posts/zfs-pool-design-proxmox-homelab/"
 ---
 
 ZFS on Proxmox is not set-and-forget. The defaults work, but they

@@ -17,7 +17,6 @@ keywords:
   - Zigbee2MQTT Docker Proxmox smart home automation integration
   - Home Assistant local voice pipeline AI automation homelab 2026
 summary: "Deploy Home Assistant Core with Docker Compose on your Proxmox homelab. Complete guide covering Zigbee2MQTT, USB passthrough, MQTT broker, Traefik reverse proxy, and automated backups."
-canonical: "https://blog.gntech.me/posts/home-assistant-docker-deployment-proxmox/"
 ---
 
 ## Why Self-Host Home Automation with Home Assistant on Docker

@@ -17,7 +17,6 @@ keywords:
   - Docker rootless systemd socket activation
   - secure container runtime homelab
 summary: "Complete guide to running Docker in rootless mode — no root daemon, no privileged containers. Covers installation, networking workarounds, Docker Compose, Proxmox LXC compatibility, and production readiness."
-canonical: "https://blog.gntech.me/posts/docker-rootless-mode/"
 ---
 
 Docker's default installation runs the daemon as root. Every container
@@ -406,27 +405,29 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now port-redirect.service
 ```
 
-**C) Reverse proxy with CAP_NET_BIND_SERVICE:**
+**C) Rootful reverse proxy to a rootless service:**
 
-Run a reverse proxy (Caddy, Traefik, Nginx) in a rootful Docker with
-only `CAP_NET_BIND_SERVICE` to bind low ports, then proxy to rootless
-containers on high ports:
+A reverse proxy on the rootful daemon can publish ports 80 and 443 and reach a separately exposed rootless application through the host gateway. This bridges two daemon contexts and requires an explicit upstream bind address:
 
 ```bash
-# Run Caddy as rootful container with minimal capability
+cat > Caddyfile <<'EOF'
+example.com {
+  reverse_proxy host.docker.internal:8080
+}
+EOF
 docker run -d \
   --name caddy \
-  --cap-add=NET_BIND_SERVICE \
+  --add-host=host.docker.internal:host-gateway \
   -p 80:80 \
   -p 443:443 \
-  -v ./Caddyfile:/etc/caddy/Caddyfile \
+  -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" \
+  -v caddy_data:/data \
+  -v caddy_config:/config \
   caddy:latest
-
-# Caddyfile
-example.com {
-  reverse_proxy localhost:8080
-}
 ```
+
+This Caddy container uses the rootful daemon's normal default capabilities; `--cap-add` alone would not reduce that set. The upstream must be reachable through the host gateway address. A rootless service bound only to host loopback is not reachable through this path; choose its bind address and firewall rules deliberately. Inside a container, `localhost` refers to that container, not the host. Replace `example.com` with your domain and verify both daemons' selected contexts before running the example.
+
 
 Option B (iptables redirect) is the simplest for homelabs and does
 not require any additional containers.

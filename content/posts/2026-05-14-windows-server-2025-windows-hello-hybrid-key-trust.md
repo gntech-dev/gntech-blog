@@ -18,7 +18,6 @@ keywords:
   - msDS-KeyCredentialLink attribute
   - passwordless authentication hybrid
 summary: "Deploy Windows Hello for Business in hybrid key trust mode: enterprise PKI setup, DC certificates, GPO policy, user enrollment, PIN configuration, and verification."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-windows-hello-hybrid-key-trust/"
 cover:
   image: "https://upload.wikimedia.org/wikipedia/commons/2/26/Windows_Server_logo.svg"
   alt: "Windows Server logo"

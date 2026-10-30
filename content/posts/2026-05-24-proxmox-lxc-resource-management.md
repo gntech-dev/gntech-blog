@@ -17,7 +17,6 @@ keywords:
   - Proxmox container resource contention prevention
   - LXC resource limits homelab Proxmox VE 8
 summary: "Master Proxmox LXC resource management — configure CPU pinning with cgroups, set memory and swap limits, throttle disk I/O, and apply ZFS quotas to prevent noisy-neighbor contention in your homelab containers."
-canonical: "https://gntech.dev/posts/proxmox-lxc-resource-management/"
 ---
 
 Your Proxmox host runs ten LXCs — a Pi-hole, a database container,

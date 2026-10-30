@@ -17,7 +17,6 @@ keywords:
   - Self-hosted containers on MikroTik router without Linux host
   - RouterOS container application auto configuration firewall NAT
 summary: "Deploy containers on your MikroTik router in minutes using the new Apps catalog. Automatic firewall rules, NAT, and veth interfaces — no manual Docker setup required."
-canonical: "https://blog.gntech.me/posts/mikrotik-routeros-container-apps-deployment/"
 ---
 
 If you have run containers on MikroTik before, you know the drill: enable device mode, configure a bridge, set up veth interfaces, write firewall rules, configure NAT, mount storage, and pull images by hand. It works, but it is a lot of steps for what should be simple.

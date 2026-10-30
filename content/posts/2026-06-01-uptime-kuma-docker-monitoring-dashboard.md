@@ -17,7 +17,6 @@ keywords:
   - Docker container monitor uptime push proxy types
   - Uptime Kuma SQLite backup persistence volumes
 summary: "Deploy Uptime Kuma with Docker Compose for real-time homelab monitoring. Configure Traefik reverse proxy, Telegram notifications, status pages, and SQLite-backed persistence in minutes."
-canonical: "https://blog.gntech.me/posts/uptime-kuma-docker-monitoring-dashboard/"
 ---
 
 ## Why Uptime Kuma for Homelab Monitoring

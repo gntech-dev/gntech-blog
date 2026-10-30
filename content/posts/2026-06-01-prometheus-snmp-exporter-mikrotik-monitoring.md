@@ -17,7 +17,6 @@ keywords:
   - Grafana SNMP dashboard MikroTik router switch monitoring
   - Docker Compose snmp-exporter Prometheus monitoring stack
 summary: "Deploy Prometheus SNMP Exporter with Docker Compose to collect bandwidth, CPU, memory, and interface metrics from MikroTik routers and network devices. Configure SNMP v2c/v3, generate the exporter config, and visualize everything in Grafana."
-canonical: "https://blog.gntech.me/posts/prometheus-snmp-exporter-mikrotik-monitoring/"
 ---
 
 ## Why SNMP Monitoring Matters for Homelab Networking

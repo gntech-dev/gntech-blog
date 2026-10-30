@@ -114,9 +114,9 @@ Docker Compose automatically loads `.env` from the same directory as the compose
 TZ=America/Santo_Domingo
 FRIGATE_VERSION=stable
 MQTT_USER=frigate
-MQTT_PASSWORD=<secret>
-CAMERA_USER=<secret>
-CAMERA_PASSWORD=<secret>
+MQTT_PASSWORD="<secret>"
+CAMERA_USER="<secret>"
+CAMERA_PASSWORD="<secret>"
 ```
 
 The compose file references these with `${VAR}` syntax:

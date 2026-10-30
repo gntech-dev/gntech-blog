@@ -16,7 +16,6 @@ keywords:
   - Docker cron container automated database dumps
   - Homelab database backup retention policy automation
 summary: "Automate PostgreSQL and MySQL database backups in Docker Compose with cron-driven pg_dump and mysqldump, retention pruning, healthchecks monitoring, and S3 off-site upload. Production-ready configs included."
-canonical: "https://blog.gntech.me/posts/docker-database-backup-automation-pgdump-cron/"
 ---
 
 ## Why Volume-Only Backups Are Not Enough

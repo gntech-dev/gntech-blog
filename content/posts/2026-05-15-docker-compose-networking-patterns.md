@@ -17,7 +17,6 @@ keywords:
   - Docker network isolation
   - cross-compose container communication
 summary: "Learn how Docker Compose networking really works — bridge networks, DNS-based service discovery, cross-stack communication, and real-world network isolation patterns for homelab deployments."
-canonical: "https://gntech.dev/posts/docker-compose-networking-patterns/"
 ---
 
 Every homelab running Docker Compose eventually runs into the same

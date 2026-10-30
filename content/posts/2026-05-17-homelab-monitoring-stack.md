@@ -18,7 +18,6 @@ keywords:
   - homelab observability stack 2026
   - Prometheus alert rules homelab configuration
 summary: "Deploy a complete homelab observability stack with Prometheus, Grafana, Loki, Grafana Alloy, and Alertmanager using Docker Compose. Includes pre-configured dashboards, alert rules, and log aggregation for Docker hosts."
-canonical: "https://gntech.dev/posts/homelab-monitoring-stack/"
 ---
 
 You have a dozen containers running on your Proxmox host, a MikroTik
@@ -704,14 +703,16 @@ curl -s http://localhost:9090/api/v1/rules | jq '.data.groups[].rules[] | {name:
 docker compose restart alloy
 ```
 
-**Clean old Loki data to reclaim disk space:**
+**Reclaim Loki disk space through retention:**
+
+Use the compactor and retention settings supported by your Loki version and storage backend. Verify retention is active in the logs and allow its deletion process to complete. Deleting chunk files manually can leave the index inconsistent and permanently remove log data.
 
 ```bash
-# The retention period in loki-config.yml handles this automatically
-# Manual cleanup if needed:
-docker compose exec loki rm -rf /loki/chunks/!(index*)
-docker compose restart loki
+docker compose logs --tail=100 loki
+df -h
 ```
+
+See the [Loki retention documentation](https://grafana.com/docs/loki/latest/operations/storage/retention/) before changing storage policies.
 
 ---
 

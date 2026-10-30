@@ -17,7 +17,6 @@ keywords:
   - Proxmox LXC cgroup resource limits docker
   - Docker in LXC production homelab 2026
 summary: "Run Docker containers inside Proxmox LXC with full performance. Covers nesting, overlay2 on ZFS, privileged vs unprivileged tradeoffs, cgroup resource limits, and security hardening for production homelab workloads."
-canonical: "https://gntech.dev/posts/docker-proxmox-lxc-guide/"
 ---
 
 The "Docker in LXC" debate is one of the oldest in the Proxmox

@@ -17,7 +17,6 @@ keywords:
   - Prometheus Alertmanager Docker container alert configuration
   - Self-hosted infrastructure monitoring Docker Compose homelab
 summary: "Deploy Prometheus, Grafana, cAdvisor, and node_exporter via Docker Compose for full homelab monitoring. Real configs for metrics collection, dashboards, and alerting."
-canonical: "https://blog.gntech.me/posts/docker-monitoring-prometheus-grafana-homelab/"
 ---
 
 When your homelab has a dozen containers across multiple Compose stacks, `docker stats` stops cutting it. You need persistent metrics, historical data, and visual dashboards to understand what your containers are actually doing.

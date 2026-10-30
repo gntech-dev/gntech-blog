@@ -17,7 +17,6 @@ keywords:
   - Docker compose ntfy setup authentication access control
   - Unified notification system homelab monitoring stack
 summary: "Deploy ntfy.sh on Docker for push notifications across your entire homelab. From Uptime Kuma to Prometheus Alertmanager, get real-time mobile alerts for everything with a single HTTP POST."
-canonical: "https://blog.gntech.me/posts/ntfy-self-hosted-push-notification-server-homelab/"
 ---
 
 Your homelab runs monitoring checks, backups, health probes, and automation workflows — each one generating output that you need to see. The typical approach is checking dashboards, tailing logs, or waiting for an email that might land in spam. In 2026, with homelabs running dozens of services, reactive monitoring is dead. You need push notifications that reach your pocket instantly.

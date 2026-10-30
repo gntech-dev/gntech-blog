@@ -17,7 +17,6 @@ keywords:
   - Proxmox host network performance optimization
   - network performance benchmarking iperf3 ethtool stats
 summary: "Optimize Linux network performance on Proxmox and Docker hosts with ethtool ring buffer tuning, irqbalance configuration, multiqueue RSS/RPS, and tc traffic shaping — with real benchmarks and systemd persistence."
-canonical: "https://blog.gntech.me/posts/linux-network-performance-tuning-homelab/"
 ---
 
 ## Why Stock Linux Network Settings Leave Performance on the Table
@@ -262,13 +261,13 @@ For Proxmox VMs, enable virtio multiqueue in the VM configuration:
 
 ```bash
 # Per-vCPU queue pairs: set to match vCPU count
-qm set <VMID> --args "-device virtio-net-pci,netdev=net0,mq=on,vectors=8"
+qm set "<VMID>" --args "-device virtio-net-pci,netdev=net0,mq=on,vectors=8"
 ```
 
 Or for new VMs, include `multifunction=on`:
 
 ```bash
-qm set <VMID> --numa 0 --args "-device virtio-net-pci,netdev=hostnet0,mq=on,vectors=12"
+qm set "<VMID>" --numa 0 --args "-device virtio-net-pci,netdev=hostnet0,mq=on,vectors=12"
 ```
 
 Now match the queue count inside the VM:

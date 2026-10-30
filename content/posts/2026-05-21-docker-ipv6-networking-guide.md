@@ -17,7 +17,6 @@ keywords:
   - Docker container IPv6 NDP proxy macvlan
   - IPv6 Docker firewall ip6tables configuration
 summary: "Complete guide to enabling IPv6 in Docker — from daemon configuration and address pools to Compose networks, Traefik reverse proxy, and IPv6 firewall rules for your homelab."
-canonical: "https://blog.gntech.me/posts/2026-05-21-docker-ipv6-networking-guide/"
 ---
 
 IPv4 exhaustion is not theoretical. RIPE NCC, APNIC, and LACNIC

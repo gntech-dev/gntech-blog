@@ -15,7 +15,6 @@ keywords:
   - TCP BBR buffer
   - Docker sysctl settings
 summary: "Complete Linux sysctl kernel tuning guide for homelab servers. Network buffers, BBR congestion control, OOM management, fs.inotify limits, and Docker-specific sysctl configs."
-canonical: "https://blog.gntech.me/posts/linux-sysctl-kernel-tuning-for-homelabs/"
 ---
 
 The Linux kernel ships with conservative defaults. They're chosen to work
@@ -149,7 +148,7 @@ Test it yourself:
 iperf3 -s
 
 # On sender
-iperf3 -c <RECEIVER_IP> -t 30 -P 4
+iperf3 -c "<RECEIVER_IP>" -t 30 -P 4
 ```
 
 ---
@@ -534,7 +533,7 @@ Run specific benchmarks before and after tuning:
 **Network throughput:**
 
 ```bash
-iperf3 -c <SERVER_IP> -t 30 -P 4
+iperf3 -c "<SERVER_IP>" -t 30 -P 4
 ```
 
 **Connection rate (use a dedicated test host):**
@@ -553,7 +552,7 @@ wrk -t 4 -c 200 -d 30s http://your-server/
 # TCP latency test with netperf
 netserver -p 16604
 # On client:
-netperf -H <SERVER_IP> -p 16604 -t TCP_RR -l 30
+netperf -H "<SERVER_IP>" -p 16604 -t TCP_RR -l 30
 ```
 
 **Inotify limit test (run Docker compose up on a stack with 20+ services):**

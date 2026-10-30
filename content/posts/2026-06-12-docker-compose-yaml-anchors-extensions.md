@@ -17,7 +17,6 @@ keywords:
   - Docker Compose compose profiles YAML fragments homelab
   - docker compose dry config cleanup reusable deploy config
 summary: "Stop copying config between services. Use YAML anchors, x-blocks, and fragment merging to write clean, DRY docker-compose files for your homelab. Practical patterns with real examples."
-canonical: "https://blog.gntech.me/posts/docker-compose-yaml-anchors-extensions/"
 ---
 
 Si tu `docker-compose.yml` tiene más de 15 servicios —como cualquier homelab que lleve un par de años creciendo— probablemente te duele mantenerlo. Cada nuevo servicio copia los mismos bloques de logging, restart policy, redes, y recursos. Cuando decides cambiar el driver de logging de json-file a local, toca editar 12 servicios uno por uno. Y en algún momento alguien se olvida de uno y los logs no rotan.

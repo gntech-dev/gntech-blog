@@ -16,7 +16,6 @@ keywords:
   - Docker daemon.json global DNS configuration
   - Docker embedded DNS resolver 127.0.0.11 setup
 summary: "Master Docker container DNS for your homelab — configure custom resolvers like Pi-hole, enable internal service discovery with Docker Compose network aliases, set global DNS via daemon.json, and troubleshoot container DNS failures step by step."
-canonical: "https://blog.gntech.me/posts/docker-container-dns-homelab-guide/"
 ---
 
 You set up Pi-hole on your homelab network. Ad blocking works on every

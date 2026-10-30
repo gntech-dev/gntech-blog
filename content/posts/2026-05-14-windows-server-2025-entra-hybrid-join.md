@@ -17,7 +17,6 @@ keywords:
   - hybrid joined device troubleshooting
   - SSO cloud resources on-prem domain join
 summary: "Configure Microsoft Entra hybrid join for on-premises domain-joined devices: SCP via GPO or Entra Connect, automatic registration startup via Scheduled Task, verification with dsregcmd, and troubleshooting registration failures."
-canonical: "https://blog.gntech.me/posts/windows-server-2025-entra-hybrid-join/"
 cover:
   image: "https://upload.wikimedia.org/wikipedia/commons/2/26/Windows_Server_logo.svg"
   alt: "Windows Server logo"

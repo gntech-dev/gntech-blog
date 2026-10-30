@@ -17,7 +17,6 @@ keywords:
   - PBS offsite backup strategy
   - Proxmox VE client integration
 summary: "Deploy Proxmox Backup Server in your homelab — bare-metal, LXC, or Docker-based setup with ZFS datastores, client config, verification schedules, and offsite sync for a complete 3-2-1 backup strategy."
-canonical: "https://gntech.dev/posts/proxmox-backup-server-deployment/"
 ---
 
 If you run Proxmox VE, you need Proxmox Backup Server. PBS is not
@@ -404,7 +403,7 @@ On the primary PBS:
 
 ```bash
 proxmox-backup-manager sync add \
-  --remote <remote-pbs-ip>:8007 \
+  --remote "<remote-pbs-ip>":8007 \
   --remote-datastore offsite-store \
   --local-datastore backup-store \
   --owner root@pam \

@@ -17,7 +17,6 @@ keywords:
   - Caddy HTTP/3 QUIC Docker container
   - Caddy reverse proxy homelab vs Traefik Nginx
 summary: "Set up Caddy as a Docker reverse proxy for your homelab — automatic Let's Encrypt HTTPS with zero config, reusable Caddyfile snippets, zero-downtime reloads, Cloudflare DNS-01 wildcards, HTTP/3 support, and production security hardening."
-canonical: "https://gntech.dev/posts/caddy-reverse-proxy-docker/"
 ---
 
 Caddy is the only reverse proxy that gives you automatic HTTPS without plugins, sidecars, or 50 lines of YAML. Point it at a domain, and it provisions a Let's Encrypt certificate, redirects HTTP to HTTPS, sets up OCSP stapling, and renews before expiry — all on first request. No certbot cron, no Traefik middlewares, no Nginx SSL blocks.

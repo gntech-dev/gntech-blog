@@ -17,7 +17,6 @@ keywords:
   - Traefik dynamic YAML middleware configuration
   - harden reverse proxy security score A+
 summary: "Complete guide to Traefik middleware security hardening with real-world configs — security headers, rate limiting, IP whitelisting, basic auth, redirect schemes, and chaining middlewares for an A+ security rating."
-canonical: "https://blog.gntech.me/posts/traefik-middleware-security-hardening/"
 ---
 
 Traefik's automatic TLS and Docker service discovery make it the

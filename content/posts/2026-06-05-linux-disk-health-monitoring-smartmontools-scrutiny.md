@@ -17,7 +17,6 @@ keywords:
   - Proactive hard drive failure prevention homelab
   - SMART short long self-test scheduling schedule
 summary: "Monitor disk health proactively with smartmontools and Scrutiny. Covers smartd alert configuration, reading SMART attributes, and deploying a Scrutiny Docker dashboard for centralized multi-host disk health tracking."
-canonical: "https://blog.gntech.me/posts/linux-disk-health-monitoring-smartmontools-scrutiny/"
 ---
 
 ## Why Disk Health Monitoring Matters in Your Homelab
@@ -376,6 +375,6 @@ Disk health monitoring is the cheapest insurance policy for your homelab data. W
 Three layers — smartd for push alerts, Scrutiny for daily review, and Prometheus/Grafana for historical tracking — cover every failure scenario. No excuses. Five minutes of setup saves you the headache of an unplanned rebuild at 2 AM.
 
 **Related guides:**
-- [ZFS Snapshot Strategies for Your Homelab](/posts/zfs-snapshot-strategies/)
-- [Proxmox Backup Server Deployment Guide](/posts/proxmox-backup-server-deployment/)
-- [Restic Docker Backup Strategy](/posts/restic-docker-backup-strategy/)
+- [ZFS Snapshot Strategies for Your Homelab](/posts/2026-05-08-zfs-snapshot-strategies/)
+- [Proxmox Backup Server Deployment Guide](/posts/2026-05-15-proxmox-backup-server-deployment/)
+- [Restic Docker Backup Strategy](/posts/2026-05-19-restic-docker-backup-strategy/)

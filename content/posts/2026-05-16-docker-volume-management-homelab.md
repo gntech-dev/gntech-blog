@@ -17,7 +17,6 @@ keywords:
   - Docker volume backup and restore
   - Docker compose volume configuration
 summary: "Learn when to use Docker named volumes vs bind mounts for homelab containers. Covers volume drivers, NFS-backed storage, backup automation, and practical data persistence patterns for production-like Docker deployments."
-canonical: "https://gntech.dev/posts/docker-volume-management-homelab/"
 ---
 
 Every Docker container running in your homelab generates data — database
@@ -438,7 +437,7 @@ docker volume ls --filter label=project=monitoring
 docker volume prune --filter "label!=backup" --filter "label!=keep"
 ```
 
-**Include volumes in your docker-compose down strategy:**
+**Include volumes in your docker compose down strategy:**
 
 ```yaml
 # This does NOT remove volumes (safe for daily down/up)

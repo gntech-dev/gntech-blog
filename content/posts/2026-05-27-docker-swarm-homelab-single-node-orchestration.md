@@ -17,7 +17,6 @@ keywords:
   - Docker Swarm vs Docker Compose homelab orchestration
   - Docker Swarm Prometheus monitoring Docker metrics
 summary: "Deploy Docker Swarm in single-node mode for orchestration in your homelab — initialize the cluster, convert Compose files to stacks, deploy Portainer and Traefik, and manage persistent storage with NFS."
-canonical: "https://gntech.dev/posts/docker-swarm-homelab-single-node-orchestration/"
 ---
 
 If you already run Docker Compose on a single Proxmox LXC or
@@ -538,6 +537,6 @@ have.
 
 ---
 
-*Related reading: [Docker Compose patterns for homelab](/posts/docker-compose-patterns/),
-[Docker Trivy vulnerability scanning](/posts/docker-trivy-vulnerability-scanning/),
-[Traefik middleware security hardening](/posts/traefik-middleware-security-hardening/).*
+*Related reading: [Docker Compose patterns for homelab](/posts/2026-05-08-docker-compose-patterns/),
+[Docker Trivy vulnerability scanning](/posts/2026-05-26-docker-trivy-vulnerability-scanning/),
+[Traefik middleware security hardening](/posts/2026-05-18-traefik-middleware-security-hardening/).*

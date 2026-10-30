@@ -17,7 +17,6 @@ keywords:
   - Ansible idempotent configuration management server setup
   - Ansible requirements.yml collections ansible-galaxy dependencies
 summary: "Learn to automate your homelab with Ansible — inventory management, playbook layout, roles, vault secrets, and Proxmox integration for reproducible server deployments."
-canonical: "https://gntech.dev/posts/ansible-homelab-automation/"
 ---
 
 If you manage more than three Linux servers in your homelab, you
@@ -789,7 +788,7 @@ connection plugin lets you apply configs to RouterOS devices:
 Note: RouterOS modules use the RouterOS API, not SSH. Ensure the
 API service is enabled and restricted to your Ansible host's IP:
 
-```bash
+```routeros
 /ip service set api-ssl address=10.0.20.20
 ```
 
@@ -1005,7 +1004,4 @@ Key takeaways from this guide:
 6. **Tag aggressively** — tags let you run targeted slices of
    your automation without executing the full playbook.
 
-The complete structure at
-[github.com/gntech/ansible-homelab](https://github.com/gntech/ansible-homelab)
-is a usable starting point — adapt the roles, swap in your own
-variable values, and start automating today.
+Use the directory structure and snippets in this article as a starting point. Adapt the roles and variables, then validate them in a test inventory. A complete downloadable repository is not provided with this post.

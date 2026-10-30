@@ -17,7 +17,6 @@ keywords:
   - MinIO multi-drive erasure coding deployment
   - Docker S3 storage backup and migration
 summary: "Deploy MinIO with Docker Compose for self-hosted S3-compatible object storage. Covers single-node and multi-drive setups, Traefik reverse proxy, bucket policies, and backup strategies."
-canonical: "https://blog.gntech.me/posts/minio-docker-object-storage/"
 ---
 
 ## Why MinIO for Homelab Object Storage

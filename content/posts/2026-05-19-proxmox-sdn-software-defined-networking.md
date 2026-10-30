@@ -17,7 +17,6 @@ keywords:
   - Proxmox virtual network isolation containers
   - Proxmox centralized bridge management
 summary: "Complete guide to Proxmox SDN — configure centralized virtual networks with VXLAN overlays, VNets, subnets, and integrated DHCP across your multi-node cluster."
-canonical: "https://gntech.dev/posts/proxmox-sdn-software-defined-networking/"
 ---
 
 If you manage a Proxmox cluster with multiple nodes, you have

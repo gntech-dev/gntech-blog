@@ -17,7 +17,6 @@ keywords:
   - Docker DHI rootless by default non-root containers
   - Docker Hardened Images SBOM SLSA provenance container security
 summary: "Swap your standard Docker Hub images for Docker Hardened Images (DHI) to cut CVEs by up to 95%. Step-by-step Compose migration for Postgres, Redis, Nginx, and your full homelab stack."
-canonical: "https://blog.gntech.me/posts/docker-hardened-images-homelab-migration/"
 ---
 
 ## Why Docker Hardened Images in Your Homelab
@@ -34,7 +33,7 @@ Docker Hardened Images (DHI) solve this. Released as a paid product in May 2025 
 
 Each DHI ships with a **Software Bill of Materials (SBOM)** and **SLSA Level 3 provenance** — cryptographic proof of how the image was built, signed, and that it hasn't been tampered with.
 
-This is not a "rebuild your own containers" guide — that's covered in the [Docker Image Security Hardening and Distroless post](/posts/docker-image-security-hardening-distroless/). This is about swapping the images you already pull for their hardened counterparts. Drop-in, no Dockerfile changes, immediate CVE reduction.
+This is not a "rebuild your own containers" guide — that's covered in the [Docker Image Security Hardening and Distroless post](/posts/2026-06-05-docker-image-security-hardening-distroless/). This is about swapping the images you already pull for their hardened counterparts. Drop-in, no Dockerfile changes, immediate CVE reduction.
 
 ## Prerequisites — Install Docker Scout
 
@@ -276,9 +275,8 @@ Run `docker compose up -d` — only the services defined in the override file wi
 
 Docker Hardened Images are the easiest security improvement you can make to your homelab Docker stack today. Swap the `image:` line in your compose file, re-scan with Docker Scout, and watch your CVE count drop by 90% or more. No Dockerfile changes, no rebuilds, no downtime.
 
-Pair DHI with the techniques from the [distroless and multi-stage build guide](/posts/docker-image-security-hardening-distroless/) for the images Docker doesn't offer as hardened — then run everything rootless, distroless, and near-zero CVE.
+Pair DHI with the techniques from the [distroless and multi-stage build guide](/posts/2026-06-05-docker-image-security-hardening-distroless/) for the images Docker doesn't offer as hardened — then run everything rootless, distroless, and near-zero CVE.
 
 **Resources:**
 - [Docker Hardened Images Documentation](https://docs.docker.com/dhi/)
-- [Docker Hardened Images on Docker Hub](https://hub.docker.com/u/dockerhardened)
 - [Docker Scout CLI](https://docs.docker.com/scout/)

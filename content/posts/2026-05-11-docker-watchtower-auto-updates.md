@@ -140,7 +140,7 @@ docker inspect $(docker ps -q) \
 # /traefik → true
 # /postgres → false
 # /valkey → false
-# /prometheus → <no value> (inherits default = true)
+# /prometheus → "<no value>" (inherits default = true)
 ```
 
 Labels without explicit value default to `true` in Watchtower, so only

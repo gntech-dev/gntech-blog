@@ -17,7 +17,6 @@ keywords:
   - RouterOS 7 CAPsMAN VLAN troubleshooting
   - MikroTik VLAN trunk WiFi access points
 summary: "A complete guide to configuring MikroTik CAPsMAN with VLANs in RouterOS 7 — local forwarding mode, bridge VLAN filtering, provisioning rules for multiple SSIDs, DHCP per VLAN, and real troubleshooting for the common mistakes that break CAPsMAN VLAN setups."
-canonical: "https://gntech.dev/posts/mikrotik-capsman-vlan-configuration/"
 ---
 
 CAPsMAN is MikroTik's centralized wireless management — one router
@@ -71,7 +70,7 @@ VLAN Layout:
 The CAPsMAN controller runs on the main router. Start by creating the
 VLAN interfaces and enabling the CAPsMAN service.
 
-```bash
+```routeros
 # Create VLAN interfaces on the bridge that connects to the switch
 /interface vlan
 add interface=bridge name=VLAN10 vlan-id=10
@@ -106,7 +105,7 @@ add address=192.168.30.0/24 dns-server=192.168.88.1,1.1.1.1 gateway=192.168.30.1
 The bridge itself becomes a VLAN trunk. Enable VLAN filtering on it so
 only tagged VLANs pass through:
 
-```bash
+```routeros
 /interface bridge vlan
 add bridge=bridge tagged=bridge,ether1,ether2 vlan-ids=10,20,30
 
@@ -250,7 +249,7 @@ CAP's `/system identity`).
 
 On each MikroTik AP, enable CAP mode:
 
-```bash
+```routeros
 # On the AP — run this via SSH or MAC-telnet
 /interface wireless cap
 set enabled=yes \
@@ -294,7 +293,7 @@ filtering to pass tagged traffic.
 
 On a MikroTik switch (CRS or CSS series):
 
-```bash
+```routeros
 # Create the bridge with VLAN filtering
 /interface bridge
 add name=bridge1 vlan-filtering=yes
@@ -349,7 +348,7 @@ the config works, then narrow it down.
 
 The DHCP server isn't reachable through the VLAN. Check:
 
-```bash
+```routeros
 # On the CAPsMAN router, verify DHCP is running
 /ip dhcp-server print
 /ip dhcp-server lease print
@@ -361,7 +360,7 @@ The DHCP server isn't reachable through the VLAN. Check:
 If DHCP discovery packets never reach the router, the switch isn't
 forwarding the VLAN. Double-check bridge VLAN filtering:
 
-```bash
+```routeros
 # On the switch, verify VLAN membership
 /interface bridge vlan print
 /interface bridge port print
@@ -373,7 +372,7 @@ Every trunk port must appear in the `tagged=` list for each VLAN.
 
 UDP ports 5246 and 5247 must be open between CAP and CAPsMAN router:
 
-```bash
+```routeros
 # Check firewall on CAPsMAN router
 /ip firewall filter print
 
@@ -387,7 +386,7 @@ add chain=input protocol=udp dst-port=5246-5247 action=accept \
 
 Firewall rules must block inter-VLAN routing. On the CAPsMAN router:
 
-```bash
+```routeros
 # Block Guest VLAN 20 from reaching Staff VLAN 10 and IoT VLAN 30
 /ip firewall filter
 add chain=forward src-address=192.168.20.0/24 dst-address=192.168.10.0/24 action=drop \
@@ -432,7 +431,7 @@ the VLANs.
 
 After everything is configured, run through this checklist:
 
-```bash
+```routeros
 # 1. Check CAPsMAN sees all APs
 /caps-man remote-cap print
 # Expected: one entry per AP, state=running

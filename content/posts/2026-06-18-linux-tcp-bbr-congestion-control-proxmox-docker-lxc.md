@@ -17,7 +17,6 @@ keywords:
   - Linux network performance tuning homelab Proxmox Docker
   - TCP BBR fq pacing qdisc Linux sysctl tuning
 summary: "Enable TCP BBR congestion control on your Proxmox host, Docker containers, and LXC guests. Step-by-step sysctl config, kernel module loading, and iperf3 benchmarks showing real-world throughput gains for homelab and remote streaming."
-canonical: "https://blog.gntech.me/posts/linux-tcp-bbr-congestion-control-proxmox-docker-lxc/"
 ---
 
 If you run a homelab with Proxmox, Docker, or LXC containers, the single highest-impact, lowest-effort network performance tuning you can do is switching your TCP congestion control algorithm from the default CUBIC to BBR (Bottleneck Bandwidth and Round-trip propagation time). No hardware changes, no wiring upgrades, no VLAN rework — just a few sysctl lines and you get 2x-5x better throughput on long-distance or lossy links.

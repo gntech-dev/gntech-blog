@@ -16,7 +16,6 @@ keywords:
   - AppArmor Proxmox confinement profiles
   - automatic security updates Proxmox unattended-upgrades
 summary: "A comprehensive Proxmox VE hardening guide covering firewall rules, TOTP 2FA, Fail2ban, SSH lockdown, AppArmor, and unattended upgrades — secure your hypervisor beyond default settings."
-canonical: "https://blog.gntech.me/posts/proxmox-security-hardening/"
 ---
 
 Every week someone posts on r/Proxmox asking about security best

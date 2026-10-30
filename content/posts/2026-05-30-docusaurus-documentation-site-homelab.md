@@ -17,7 +17,6 @@ keywords:
   - Docusaurus versioned documentation best practices
   - static site generator infrastructure documentation
 summary: "Deploy a self-hosted Docusaurus documentation site to document your homelab infrastructure. Covers Docker deployment, Traefik reverse proxy, Markdown organization, version-controlled docs, and auto-build with GitHub webhooks."
-canonical: "https://blog.gntech.me/posts/docusaurus-documentation-site-homelab/"
 ---
 
 Your homelab started with one Proxmox node and a single Docker container.

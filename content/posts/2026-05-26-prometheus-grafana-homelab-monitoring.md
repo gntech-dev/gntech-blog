@@ -20,7 +20,6 @@ keywords:
   - Alertmanager email Slack webhook homelab alerts
   - Prometheus data retention and storage configuration
 summary: "A practical guide to deploying a full Prometheus and Grafana monitoring stack in your homelab with Docker Compose — collect CPU, RAM, disk, network, and Docker container metrics from every host, visualize with pre-built dashboards, and get alerts when things go wrong."
-canonical: "https://gntech.dev/posts/prometheus-grafana-homelab-monitoring/"
 ---
 
 You have five services running in Docker. Some are critical —
@@ -712,7 +711,7 @@ curl -s 'http://localhost:9090/api/v1/query?query=up'
 On Proxmox LXC containers, cAdvisor needs cgroup v2 access:
 
 ```bash
-# In LXC config (/etc/pve/lxc/<CT_ID>.conf), add:
+# In LXC config (/etc/pve/lxc/"<CT_ID>".conf), add:
 lxc.cgroup2: ""
 ```
 

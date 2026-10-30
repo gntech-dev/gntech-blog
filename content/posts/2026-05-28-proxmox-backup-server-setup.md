@@ -17,7 +17,6 @@ keywords:
   - Proxmox encrypted backup configuration
   - Proxmox disaster recovery testing
 summary: "Step-by-step guide to deploying Proxmox Backup Server (PBS) on a homelab — from installation to automation, encryption, remote sync, and restore testing."
-canonical: "https://blog.gntech.me/posts/2026-05-28-proxmox-backup-server-setup/"
 ---
 
 # Proxmox Backup Server Setup: PBS Deployment Guide for Homelab

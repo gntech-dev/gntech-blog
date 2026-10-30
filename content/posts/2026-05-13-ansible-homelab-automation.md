@@ -15,7 +15,6 @@ keywords:
   - ansible-vault secrets
   - Linux server configuration automation
 summary: "Practical Ansible homelab automation guide — playbook structure, Docker container deployment with community.docker, ansible-vault secrets, Jinja2 templates, Git workflow, and full project template."
-canonical: "https://blog.gntech.me/posts/ansible-homelab-automation/"
 ---
 
 If you manage more than two Linux servers in your homelab, you've

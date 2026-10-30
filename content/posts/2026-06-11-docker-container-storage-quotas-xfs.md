@@ -17,7 +17,6 @@ keywords:
   - Linux disk quota management Docker volumes bind mounts
   - Dockerd daemon.json overlay2.size storage cap configuration
 summary: "Set up XFS project quotas and Docker overlay2 size limits to prevent any single container from filling your homelab storage. Covers daemon.json config, XFS prjquota, per-container size caps, and volume quota strategies."
-canonical: "https://blog.gntech.me/posts/docker-container-storage-quotas-xfs/"
 ---
 
 One container writes logs at an insane rate. A database import fills every available sector. A media scanner generates thumbnails until the disk shows zero bytes free. Your Proxmox host locks up. VMs freeze. SSH stops responding. You reboot and scramble to free space.

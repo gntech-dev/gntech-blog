@@ -17,7 +17,6 @@ keywords:
   - Docker container non-root user best practices
   - Dockerfile optimization for small secure images
 summary: "Harden your Docker images with multi-stage builds, distroless base images, and runtime security options. A practical guide to reducing image size and CVEs in your homelab."
-canonical: "https://blog.gntech.me/posts/docker-image-security-hardening-distroless/"
 ---
 
 ## Why Docker Image Security Matters in Your Homelab

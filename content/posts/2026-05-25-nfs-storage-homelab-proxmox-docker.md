@@ -17,7 +17,6 @@ keywords:
   - NFS LXC bind mount unprivileged container
   - centralized homelab storage NFS export
 summary: "Set up centralized NFS shared storage for your Proxmox homelab with Docker volume mounts, LXC bind mounts, and performance tuning — practical configs for backup storage, media libraries, and container data."
-canonical: "https://gntech.dev/posts/nfs-storage-homelab-proxmox-docker/"
 ---
 
 A homelab with three Proxmox nodes, a dozen LXC containers, and
@@ -80,16 +79,16 @@ chmod 755 /srv/nfs
 
 Edit `/etc/exports`:
 
-```bash
+```text
 # /etc/exports — NFS exports file
 
-# Backups: restricted to Proxmox subnet, async for performance
+# Backups: restricted to Proxmox subnet, synchronous writes
 /srv/nfs/backups   10.0.20.0/24(rw,sync,no_subtree_check,no_root_squash)
 
 # Media: read-mostly, allow cross-subnet
 /srv/nfs/media     10.0.0.0/16(rw,sync,no_subtree_check,no_root_squash)
 
-# Containers: Docker/LXC data, async for write-heavy DBs
+# Containers: Docker/LXC data, synchronous writes
 /srv/nfs/containers 10.0.20.0/24(rw,sync,no_subtree_check,no_root_squash)
 ```
 
@@ -197,7 +196,7 @@ nfs: nfs-backups
 ```
 
 - `hard` — retry indefinitely on server outage (preferred for backups;
-  use `soft` for non-critical data)
+  avoid `soft` for application data because timeouts can surface as I/O errors)
 - `intr` — allow interrupt of hung operations (Linux 5.x+, signals work
   with `hard` mounts)
 - `timeo=600` — 60-second timeout before retry
@@ -276,13 +275,13 @@ volumes:
     driver: local
     driver_opts:
       type: nfs4
-      o: "addr=10.0.20.10,nolock,soft,rw,vers=4.2,noatime"
+      o: "addr=10.0.20.10,hard,rw,vers=4.2,noatime"
       device: ":/srv/nfs/media"
   jellyfin-config:
     driver: local
     driver_opts:
       type: nfs4
-      o: "addr=10.0.20.10,nolock,soft,rw,vers=4.2"
+      o: "addr=10.0.20.10,hard,rw,vers=4.2"
       device: ":/srv/nfs/containers/jellyfin"
 ```
 
@@ -292,7 +291,7 @@ volumes:
 docker volume create \
   --driver local \
   --opt type=nfs4 \
-  --opt o=addr=10.0.20.10,nolock,soft,rw,vers=4.2,noatime \
+  --opt o=addr=10.0.20.10,hard,rw,vers=4.2,noatime \
   --opt device=:/srv/nfs/media \
   media-shared
 
@@ -304,11 +303,13 @@ docker run -d \
 
 ### NFS Volume Options for Docker
 
+Use hard mounts for application data. Soft mounts can return I/O errors during outages and can cause data corruption; they are not a general Docker performance recommendation. See the [Linux NFS manual](https://man7.org/linux/man-pages/man5/nfs.5.html).
+
 | Option            | Purpose                               | Recommended     |
 |-------------------|---------------------------------------|-----------------|
-| `nolock`          | Disable NFS locking (Docker doesn't support `lockd`) | Always set     |
-| `soft`            | Report I/O error instead of hanging   | Docker volumes  |
-| `vers=4.2`        | Use NFSv4.2 for best performance      | Always          |
+| NFSv4 locking | Integrated into NFSv4; separate NLM is not used | Do not add `nolock` as a universal Docker requirement |
+| `hard`            | Retry requests during server outages | Application data; plan for blocked I/O during outages |
+| `vers=4.2`        | Request NFSv4.2 | Only when both endpoints support it |
 | `noatime`         | Skip access time updates              | Media/read-only |
 | `rsize=1048576`   | Read buffer size (1 MB)               | 1GbE+ networks  |
 | `wsize=1048576`   | Write buffer size (1 MB)              | 1GbE+ networks  |
@@ -346,13 +347,13 @@ volumes:
     driver: local
     driver_opts:
       type: nfs4
-      o: "addr=10.0.20.10,nolock,soft,rw,vers=4.2,noatime"
+      o: "addr=10.0.20.10,hard,rw,vers=4.2,noatime"
       device: ":/srv/nfs/media"
   config:
     driver: local
     driver_opts:
       type: nfs4
-      o: "addr=10.0.20.10,nolock,soft,rw,vers=4.2"
+      o: "addr=10.0.20.10,hard,rw,vers=4.2"
       device: ":/srv/nfs/containers/jellyfin"
 ```
 
@@ -370,7 +371,7 @@ but older clients may negotiate smaller. Set them explicitly:
 
 ```bash
 # /etc/fstab mount
-10.0.20.10:/srv/nfs/media    /mnt/media   nfs4   rsize=1048576,wsize=1048576,noatime,nolock,vers=4.2   0 0
+10.0.20.10:/srv/nfs/media    /mnt/media   nfs4   rsize=1048576,wsize=1048576,noatime,vers=4.2   0 0
 ```
 
 On 1GbE networks (125 MB/s theoretical), 1 MB buffers are optimal.
@@ -552,7 +553,7 @@ configure the Docker host to mount NFS volumes early:
 
 ```bash
 # /etc/fstab — mount on boot so Docker always sees it
-10.0.20.10:/srv/nfs/containers   /mnt/nfs-containers   nfs4   _netdev,noatime,nolock,vers=4.2   0 0
+10.0.20.10:/srv/nfs/containers   /mnt/nfs-containers   nfs4   _netdev,noatime,vers=4.2   0 0
 ```
 
 The `_netdev` option tells systemd to wait for networking before
@@ -566,7 +567,7 @@ mounting.
 workloads where a tiny data loss window on crash is acceptable
 (e.g., media libraries, download directories):
 
-```bash
+```text
 # /etc/exports
 /srv/nfs/media  10.0.0.0/16(rw,async,no_subtree_check,no_root_squash)
 ```
@@ -584,10 +585,13 @@ apt install nfs-kernel-server
 mkdir -p /srv/nfs/{backups,media,containers}
 chown nobody:nogroup /srv/nfs
 
-# ----- Exports (/etc/exports) -----
+# ----- Exports (review paths and permitted clients first) -----
+mkdir -p /etc/exports.d
+cat > /etc/exports.d/homelab.exports <<'EOF'
 /srv/nfs/backups    10.0.20.0/24(rw,sync,no_subtree_check,no_root_squash)
 /srv/nfs/media      10.0.0.0/16(rw,async,no_subtree_check,no_root_squash)
 /srv/nfs/containers 10.0.20.0/24(rw,sync,no_subtree_check,no_root_squash)
+EOF
 
 # ----- Apply -----
 exportfs -ra
@@ -595,13 +599,13 @@ systemctl enable --now nfs-server
 ufw allow from 10.0.0.0/16 to any port nfs
 
 # ----- Client Mount Test -----
-mount -t nfs4 -o vers=4.2,noatime,nolock 10.0.20.10:/srv/nfs/media /mnt/media
+mount -t nfs4 -o vers=4.2,noatime 10.0.20.10:/srv/nfs/media /mnt/media
 df -h /mnt/media
 
 # ----- Docker Verify -----
 docker volume create --driver local \
   --opt type=nfs4 \
-  --opt o=addr=10.0.20.10,nolock,soft,rw,vers=4.2 \
+  --opt o=addr=10.0.20.10,hard,rw,vers=4.2 \
   --opt device=:/srv/nfs/containers test-nfs
 docker run --rm -v test-nfs:/data alpine ls -la /data
 

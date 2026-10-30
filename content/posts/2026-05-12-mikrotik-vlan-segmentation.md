@@ -78,7 +78,7 @@ You create one bridge, add all ports, and tag/untag VLANs at the bridge
 level. The switch chip handles forwarding at wire speed instead of
 routing through the CPU.
 
-```bash
+```routeros
 # Create the bridge with VLAN filtering enabled
 /interface bridge add name=bridge1 fast-forward=yes
 /interface bridge set bridge1 vlan-filtering=yes
@@ -107,7 +107,7 @@ VLAN 1 is the **default native VLAN** on virtually all switches and routers. It 
 
 Best practice: **disable VLAN 1 entirely** on the bridge and assign an explicit PVID to every port.
 
-```bash
+```routeros
 # Remove VLAN 1 from the bridge VLAN table (prevents untagged VLAN 1 traffic)
 /interface bridge vlan remove [find vlan-ids=1]
 
@@ -129,7 +129,7 @@ For our setup:
 - `ether3-ether5` → access ports (untagged) for direct devices
 - `sfp1` → trunk to another switch or AP
 
-```bash
+```routeros
 # Trunk port
 /interface bridge port add bridge=bridge1 interface=ether2
 
@@ -163,7 +163,7 @@ VLANs.
 Each VLAN needs a routed interface on the bridge so the router can
 assign IP addresses, serve DHCP, and apply firewall rules.
 
-```bash
+```routeros
 /interface vlan add name=vlan10-mgmt   vlan-id=10 interface=bridge1
 /interface vlan add name=vlan20-servers vlan-id=20 interface=bridge1
 /interface vlan add name=vlan30-iot     vlan-id=30 interface=bridge1
@@ -175,7 +175,7 @@ assign IP addresses, serve DHCP, and apply firewall rules.
 
 ## 3. IP Addresses and DHCP
 
-```bash
+```routeros
 # Assign gateway IPs
 /ip address add address=10.0.10.1/24  interface=vlan10-mgmt
 /ip address add address=10.0.20.1/24  interface=vlan20-servers
@@ -219,7 +219,7 @@ top-down, first match wins. The default action for forward chain is
 
 First, ensure internet works. This is standard MASQUERADE on the WAN:
 
-```bash
+```routeros
 /ip firewall nat add chain=srcnat out-interface=ether1 action=masquerade
 ```
 
@@ -227,7 +227,7 @@ First, ensure internet works. This is standard MASQUERADE on the WAN:
 
 The strategy: allow only what's needed, drop everything else.
 
-```bash
+```routeros
 # Allow established/related connections (essential for return traffic)
 /ip firewall filter add chain=forward connection-state=established,related action=accept
 
@@ -314,7 +314,7 @@ manages them centrally. Each SSID is mapped to a VLAN.
 **AP side (one-time):** Set each AP to CAP mode and point it at the
 router:
 
-```bash
+```routeros
 /interface wireless cap set discovery-interfaces=bridge1 enabled=yes
 ```
 
@@ -326,7 +326,7 @@ and hits the IoT firewall rules automatically.
 
 ## 6. Verifying It Works
 
-```bash
+```routeros
 # Check bridge VLAN table
 /interface bridge vlan print
 
@@ -371,7 +371,7 @@ expected and fine on an RB5009 (up to ~5 Gbps inter-VLAN routing).
 
 Check hardware offloading:
 
-```bash
+```routeros
 /interface bridge port print detail where hardware-offload=yes
 ```
 
@@ -387,7 +387,7 @@ untagged VLANs more cleanly when every port has an explicit PVID.
 
 ## Summary
 
-```bash
+```routeros
 # Quick checklist after setup
 # 1. Bridge VLAN filtering enabled?
 /interface bridge print detail where name=bridge1

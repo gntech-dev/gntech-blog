@@ -17,7 +17,6 @@ keywords:
   - Docker to Podman migration alias docker podman
   - Podman pod networking multi-container homelab
 summary: "Run containers without a root daemon. Migrate your homelab from Docker to Podman for true rootless operation, systemd-native container management, and drop-in docker CLI compatibility."
-canonical: "https://blog.gntech.me/posts/podman-rootless-containers-docker-alternative-homelab/"
 ---
 
 Tu homelab probablemente corre Docker. Y Docker funciona bien — hasta que un container comprometido escala a root via el daemon de Docker, o un CVE como el reciente `CVE-2026-31431` en Docker Engine te hace reconsiderar tu postura de seguridad. Docker corre como root, y si alguien rompe el container, el daemon es el único muro entre ese container y tu host.
@@ -252,7 +251,7 @@ podman run --rm hello-world
 
 # Paso 3: Migrar un stack docker-compose
 cd /opt/stacks/mi-app-no-critica
-docker-compose down
+docker compose down
 podman-compose up -d
 
 # Paso 4: Verificar logs y conectividad

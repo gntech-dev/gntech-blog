@@ -18,7 +18,6 @@ keywords:
   - Unbound recursive resolver Docker
   - Pi-hole v6 Docker configuration
 summary: "Deploy Pi-hole v6 with Unbound as a recursive DNS resolver using Docker Compose. Covers ad blocking, privacy-focused recursive resolution, local DNS records for homelab services, MikroTik router integration, and query monitoring."
-canonical: "https://gntech.dev/posts/pihole-unbound-recursive-dns/"
 ---
 
 Every device on your network sends DNS queries — dozens per minute, even
@@ -348,7 +347,7 @@ DNS settings (most IoT devices use the router's DHCP-provided DNS).
 
 **Set Pi-hole as the system DNS on RouterOS:**
 
-```bash
+```routeros
 # Via CLI on your MikroTik
 /ip dns set servers=10.0.20.10 allow-remote-requests=no
 ```
@@ -362,7 +361,7 @@ DNS settings (most IoT devices use the router's DHCP-provided DNS).
 
 **Force all devices to use Pi-hole via DHCP:**
 
-```bash
+```routeros
 # Set Pi-hole as the DNS server in your DHCP server config
 /ip dhcp-server network set [find address=10.0.20.0/24] \
   dns-server=10.0.20.10
@@ -379,7 +378,7 @@ DNS settings (most IoT devices use the router's DHCP-provided DNS).
 Some devices (Chromecast, Samsung TVs, certain IoT) use hardcoded DNS
 like 8.8.8.8 or DNS-over-HTTPS. MikroTik can hijack those:
 
-```bash
+```routeros
 # Redirect all port 53 UDP traffic to Pi-hole
 /ip firewall nat add chain=dstnat \
   protocol=udp dst-port=53 \
@@ -398,7 +397,7 @@ still get filtered through your blocklists.
 
 **Block DNS-over-HTTPS (DoH) at the firewall level:**
 
-```bash
+```routeros
 # Block known DoH providers at the firewall
 /ip firewall filter add chain=forward \
   dst-address-list=doh-providers \

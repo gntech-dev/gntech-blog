@@ -17,7 +17,6 @@ keywords:
   - DNS-01 ACME challenge step-ca homelab
   - internal PKI certificate management Docker
 summary: "Run your own internal Certificate Authority with step-ca in Docker, issue TLS certificates via ACME, integrate with Traefik for automatic renewal, and distribute the root CA to all your devices — no more self-signed certificate warnings."
-canonical: "https://gntech.dev/posts/step-ca-acme-internal-certificates/"
 ---
 
 Public TLS certificates from Let's Encrypt work great for internet-facing
@@ -249,7 +248,7 @@ from your internal CA.
 ## Integrating with Traefik
 
 If you run [Traefik](https://traefik.io/traefik/) as your reverse proxy
-(covered in our [Traefik setup guide](/posts/traefik-reverse-proxy-docker/)),
+(covered in our [Traefik setup guide](/posts/2026-05-09-traefik-reverse-proxy-docker/)),
 adding the internal CA as an ACME certificate provider is
 straightforward.
 
@@ -452,7 +451,7 @@ curl -k https://10.0.20.30:9000/health
 # {"status":"ok"}
 ```
 
-Add step-ca to your [monitoring stack](/posts/homelab-monitoring-stack/):
+Add step-ca to your [monitoring stack](/posts/2026-05-17-homelab-monitoring-stack/):
 
 ```yaml
 # prometheus scrape config via blackbox exporter

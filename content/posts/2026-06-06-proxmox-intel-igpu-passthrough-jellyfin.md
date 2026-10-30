@@ -17,7 +17,6 @@ keywords:
   - Proxmox VM GPU passthrough performance tuning tips
   - Intel Arc A380 transcoding Jellyfin Proxmox passthrough
 summary: "Passthrough an Intel iGPU through Proxmox to a VM for Jellyfin hardware transcoding. Configure IOMMU, bind vfio-pci, verify groups, and tune performance."
-canonical: "https://blog.gntech.me/posts/proxmox-intel-igpu-passthrough-jellyfin/"
 ---
 
 ## Why GPU Passthrough Matters for Your Homelab

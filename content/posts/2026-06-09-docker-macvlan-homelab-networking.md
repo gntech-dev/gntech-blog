@@ -17,7 +17,6 @@ keywords:
   - Docker VLAN segmentation homelab security
   - Docker macvlan vs bridge networking performance
 summary: "Give your containers their own IPs on any VLAN with Docker MACVLAN and IPVLAN. A practical guide with docker-compose configs, routing tweaks, and real-world homelab use cases."
-canonical: "https://blog.gntech.me/posts/docker-macvlan-homelab-networking/"
 ---
 
 If you run Docker in your homelab, your containers probably sit behind the default `bridge` network, hidden behind a NAT on `172.17.0.0/16`. That works fine for casual setups, but the moment you need VLAN segmentation — keeping your IoT containers on VLAN 30, your reverse proxy on VLAN 10, and your databases isolated on VLAN 40 — the bridge driver becomes a bottleneck.
@@ -420,4 +419,4 @@ Here is the cheat sheet:
 
 Start with one service on a dedicated VLAN and expand from there. Your network will thank you — and so will your future self when the "what IP does this container have?" question has a straightforward answer.
 
-*Related: [Linux Bridge Networking Debugging for Docker and Proxmox](/posts/linux-bridge-networking-debugging-docker-proxmox/), [systemd-networkd for Homelab Networking](/posts/systemd-networkd-homelab-networking-bridges-vlans-bonds/)*
+*Related: [Linux Bridge Networking Debugging for Docker and Proxmox](/posts/2026-06-07-linux-bridge-networking-debugging-docker-proxmox/), [systemd-networkd for Homelab Networking](/posts/2026-06-07-systemd-networkd-homelab-networking-bridges-vlans-bonds/)*

@@ -17,7 +17,6 @@ keywords:
   - qdm12 Gluetun docker compose WireGuard OpenVPN config
   - Homelab Docker container VPN split tunneling best practices
 summary: "Route specific Docker containers through a WireGuard VPN while keeping the rest of your stack on the local network. Full Gluetun Docker Compose setup with kill switch, qBittorrent integration, and Traefik compatibility."
-canonical: "https://blog.gntech.me/posts/gluetun-vpn-gateway-docker-wireguard/"
 ---
 
 ## Why Split-Tunnel VPN in Docker

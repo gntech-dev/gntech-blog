@@ -17,7 +17,6 @@ keywords:
   - container cross-host connectivity docker
   - docker-compose network connectivity issues
 summary: "A practical guide to diagnosing and fixing Docker container networking problems — DNS timeouts, port conflicts, bridge network isolation, cross-host communication, and the netshoot toolkit for homelab deployments."
-canonical: "https://gntech.dev/posts/docker-network-troubleshooting-guide/"
 ---
 
 Docker networking is the number one source of "it works on my machine"
@@ -47,7 +46,7 @@ everything: `tcpdump`, `dig`, `nslookup`, `curl`, `ping`, `mtr`,
 
 ```bash
 # Launch netshoot sharing the target container's network stack
-docker run -it --rm --net container:<container-name> nicolaka/netshoot
+docker run -it --rm --net container:"<container-name>" nicolaka/netshoot
 ```
 
 Once inside, every tool sees the same network interfaces, routing
@@ -107,7 +106,7 @@ docker run --rm alpine cat /etc/resolv.conf
 # Expected: "nameserver 127.0.0.11" (Docker's internal resolver)
 
 # Check if the container is on a user-defined network
-docker inspect <container> --format '{{json .NetworkSettings.Networks}}'
+docker inspect "<container>" --format '{{json .NetworkSettings.Networks}}'
 # If only "bridge" appears, you're on the default bridge — no DNS.
 ```
 
@@ -223,7 +222,7 @@ services:
    reserves its IP. Restart or remove it:
 
 ```bash
-docker rm -f <old-container>  # Force remove
+docker rm -f "<old-container>"  # Force remove
 ```
 
 3. **Traefik/NGINX reverse proxy is listening there.** Your reverse
@@ -329,7 +328,7 @@ Then from another host: `curl http://10.0.20.30:3000`.
 docker swarm init --advertise-addr 10.0.20.30
 
 # On other nodes
-docker swarm join --token <token> 10.0.20.30:2377
+docker swarm join --token "<token>" 10.0.20.30:2377
 
 # Create overlay network that spans all nodes
 docker network create --driver overlay --attachable homelab-overlay
@@ -386,11 +385,11 @@ echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
 # Verify Docker's iptables rules exist
 docker network inspect bridge --format '{{json .IPAM.Config}}'
 # Ensure iptables is not fully blocking Docker bridge traffic
-iptables -I DOCKER-USER -i br-<id> -j ACCEPT
+iptables -I DOCKER-USER -i br-"<id>" -j ACCEPT
 ```
 
 If you use UFW, it overrides Docker's iptables rules. See the
-[Docker UFW fix](https://gntech.dev/posts/docker-ufw-firewall-fix/)
+[Docker UFW fix](/posts/2026-05-10-docker-ufw-firewall-fix/)
 for the permanent solution:
 
 ```bash
@@ -554,19 +553,19 @@ depends_on:
 # ----- Container-Level Diagnostics -----
 
 # Check all network interfaces inside a container
-docker exec <container> ip addr show
+docker exec "<container>" ip addr show
 
 # Check routing table
-docker exec <container> ip route
+docker exec "<container>" ip route
 
 # Check DNS resolution
-docker exec <container> nslookup google.com
+docker exec "<container>" nslookup google.com
 
 # Check firewall rules inside container (if any)
-docker exec <container> iptables -L -n 2>/dev/null || echo "No iptables inside"
+docker exec "<container>" iptables -L -n 2>/dev/null || echo "No iptables inside"
 
 # Check open ports inside container
-docker exec <container> ss -tlnp
+docker exec "<container>" ss -tlnp
 
 # ----- Docker-Level Diagnostics -----
 
@@ -580,7 +579,7 @@ docker network inspect app-net
 docker network inspect app-net --format '{{range .Containers}}{{.Name}} {{.IPv4Address}}{{"\n"}}{{end}}'
 
 # Check container's network settings
-docker inspect <container> --format '{{json .NetworkSettings.Networks}}' | jq
+docker inspect "<container>" --format '{{json .NetworkSettings.Networks}}' | jq
 
 # Test DNS from Docker's perspective
 docker run --rm --network app-net alpine nslookup db
@@ -602,22 +601,22 @@ tcpdump -i docker0 -n port 8080
 # ----- Full Network Audit for a Down Container -----
 
 # Step 1: Is the container running?
-docker ps -a --filter name=<name>
+docker ps -a --filter name="<name>"
 
 # Step 2: What network is it on?
-docker inspect <name> --format '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s: %s\n" $k $v.IPAddress}}{{end}}'
+docker inspect "<name>" --format '{{range $k,$v := .NetworkSettings.Networks}}{{printf "%s: %s\n" $k $v.IPAddress}}{{end}}'
 
 # Step 3: Can it reach the gateway?
-docker exec <name> ping -c 2 $(docker inspect <name> --format '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}')
+docker exec "<name>" ping -c 2 $(docker inspect "<name>" --format '{{range .NetworkSettings.Networks}}{{.Gateway}}{{end}}')
 
 # Step 4: Can it resolve DNS?
-docker exec <name> nslookup google.com
+docker exec "<name>" nslookup google.com
 
 # Step 5: Can it reach the specific target?
-docker exec <name> nc -zv target-service 5432
+docker exec "<name>" nc -zv target-service 5432
 
 # Step 6: Restart DNS resolver inside container (without restarting it)
-docker exec <name> sh -c 'echo "nameserver 1.1.1.1" > /etc/resolv.conf'
+docker exec "<name>" sh -c 'echo "nameserver 1.1.1.1" > /etc/resolv.conf'
 ```
 
 ---

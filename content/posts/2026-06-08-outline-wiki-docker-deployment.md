@@ -16,7 +16,6 @@ keywords:
   - Outline Redis PostgreSQL Docker Compose configuration
   - Outline wiki OIDC SAML SSO homelab documentation
 summary: "Deploy Outline wiki on your homelab with Docker Compose. Complete guide covering PostgreSQL, Redis, OIDC auth with Authentik, S3/MinIO storage, and Traefik reverse proxy."
-canonical: "https://blog.gntech.me/posts/outline-wiki-docker-deployment/"
 ---
 
 ## What Is Outline and Why Self-Host It
@@ -429,4 +428,4 @@ Outline fills the gap for homelab documentation that is collaborative, real-time
 
 Start populating your Outline wiki with infrastructure documentation, network diagrams, service runbooks, and configuration references. Over time it becomes the single source of truth for your homelab operations.
 
-For full configuration options, see the [Outline self-hosting documentation](https://www.getoutline.com/self-hosting).
+For full configuration options, see the [Outline self-hosting documentation](https://docs.getoutline.com/s/hosting).

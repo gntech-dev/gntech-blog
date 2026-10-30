@@ -17,7 +17,6 @@ keywords:
   - KVM virtio disk controller tuning homelab best practices
   - Proxmox qemu command line drive iothread options Proxmox VE
 summary: "Compare VirtIO-blk vs VirtIO-SCSI single disk controllers in Proxmox, benchmark IO threads and aio modes with fio, and choose the right cache settings for your homelab VMs."
-canonical: "https://blog.gntech.me/posts/proxmox-vm-disk-performance-benchmark/"
 ---
 
 Crear una VM en Proxmox es fácil. Conseguir que rinda al máximo en disco no lo es. Cuatro ajustes —el controlador de disco, el IO thread, el modo aio, y el modo de caché— determinan si tu VM obtiene 200 mil IOPS o 600 mil en el mismo hardware. La diferencia es real, medible, y muchas VM en homelab corren con valores por defecto que dejan hasta un 40 % de rendimiento sobre la mesa.

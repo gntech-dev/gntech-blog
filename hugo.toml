@@ -148,3 +148,15 @@ buildFuture = true
 [services]
   [services.rss]
     limit = 20
+
+# Keep Spanish content out of the English mount to prevent duplicate output paths.
+[[module.mounts]]
+  source = "content"
+  target = "content"
+  lang = "en"
+  excludeFiles = ["es/**"]
+
+[[module.mounts]]
+  source = "content/es"
+  target = "content"
+  lang = "es"

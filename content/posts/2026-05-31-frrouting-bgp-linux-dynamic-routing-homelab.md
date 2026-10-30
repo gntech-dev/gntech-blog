@@ -17,7 +17,6 @@ keywords:
   - dynamic routing protocol FRRouting installation configuration
   - Linux FRR BGP community tagging route-maps
 summary: "Deploy FRRouting on Linux for BGP dynamic routing in your homelab. Covers FRR installation, iBGP/eBGP peering with MikroTik, route filtering, prefix-lists, and OSPF-to-BGP redistribution with production-ready configs."
-canonical: "https://blog.gntech.me/posts/frrouting-bgp-linux-dynamic-routing-homelab/"
 ---
 
 ## Why Run BGP in Your Homelab

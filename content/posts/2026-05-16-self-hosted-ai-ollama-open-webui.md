@@ -17,7 +17,6 @@ keywords:
   - self-hosted AI model management
   - Ollama Docker deployment
 summary: "Deploy Ollama and Open WebUI on your homelab hardware for private, self-hosted AI inference. Covers Docker Compose setup, GPU acceleration, model management, remote access, and production hardening tips."
-canonical: "https://gntech.dev/posts/self-hosted-ai-ollama-open-webui/"
 ---
 
 Running large language models locally in your homelab isn't just a

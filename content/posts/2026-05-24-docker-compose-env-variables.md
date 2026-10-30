@@ -17,7 +17,6 @@ keywords:
   - Docker Compose multiple environment files
   - Docker Compose variable default error handling
 summary: "Master Docker Compose environment variables — understand .env file scoping, variable substitution syntax with defaults and errors, env_file vs environment blocks, and when to use Docker secrets over env vars for sensitive data in homelab deployments."
-canonical: "https://gntech.dev/posts/docker-compose-env-variables/"
 ---
 
 Every Docker Compose user hits the wall eventually. You define

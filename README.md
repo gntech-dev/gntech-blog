@@ -77,3 +77,15 @@ Push to `master` — Cloudflare Pages auto-builds and deploys.
 ## License
 
 Content and code are private unless otherwise noted.
+
+## Content audit
+
+After editing articles, build the site and check the rendered article links and source snippets:
+
+```bash
+hugo --destination public --printPathWarnings
+python3 tools/audit-content.py --site public
+git diff --check
+```
+
+The audit script needs Python 3.9+ and Bash. It parses shell examples without executing them. Technical procedures still need version-appropriate documentation review and lab validation. See [the October 2026 audit report](docs/content-audit-2026-10-30.md) for coverage and limitations.

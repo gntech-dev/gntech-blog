@@ -17,7 +17,6 @@ keywords:
   - Mozilla SOPS encrypted env files
   - Docker secret injection compose file
 summary: "Practical guide to managing Docker secrets in homelab environments — from basic .env patterns to Docker Secrets, SOPS/age encryption, and programmatic vault integration. Includes real compose examples and secret rotation workflows."
-canonical: "https://gntech.dev/posts/docker-compose-secrets-management/"
 ---
 
 Every Docker Compose stack you deploy needs credentials. Database

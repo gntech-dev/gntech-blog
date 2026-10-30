@@ -17,7 +17,6 @@ keywords:
   - automated SSL certificate management self-hosted services
   - acme.sh Traefik nginx deploy hook renewal scripts
 summary: "Automate Let's Encrypt SSL/TLS certificates in your homelab using acme.sh and Docker. Includes DNS-01 wildcard certs, auto-renewal, and integration with Traefik, Nginx Proxy Manager, and Caddy."
-canonical: "https://blog.gntech.me/posts/acme-sh-letsencrypt-certificates-homelab-docker/"
 ---
 
 You run ten self-hosted services and every single one needs a valid TLS certificate. Certbot needs port 80 open and stops working when Traefik is already listening there. Wildcard certificates require DNS plugins most clients do not bundle. Renewal scripts break when you migrate containers between hosts.

@@ -16,7 +16,6 @@ keywords:
   - Docker container runtime homelab performance optimization
   - runc crun Docker daemon.json configuration guide
 summary: "Compare runc and crun container runtimes for Docker on Linux. Benchmark startup times, memory profiles, and io_uring performance. Switch runtimes in ~60 seconds with a daemon.json change."
-canonical: "https://blog.gntech.me/posts/container-runtimes-runc-vs-crun-docker/"
 ---
 
 Docker feels snappy for everyday use. `docker run alpine echo hello` returns in under a second, containers start almost instantly, and the whole experience feels polished. But underneath that polish sits the **OCI runtime** — the actual software that creates the cgroups, sets up namespaces, mounts the filesystem, and launches the process.
@@ -195,7 +194,7 @@ You don't have to go all-in on crun. Use it selectively where it matters most:
 docker run --runtime crun nginx
 
 # Docker Compose — set runtime per service
-docker compose up -d <service-name>  # if configured
+docker compose up -d "<service-name>"  # if configured
 ```
 
 ```yaml

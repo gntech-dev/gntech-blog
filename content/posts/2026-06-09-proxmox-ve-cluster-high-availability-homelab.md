@@ -17,7 +17,6 @@ keywords:
   - Proxmox cluster quorum split-brain prevention
   - Homelab high availability Proxmox cluster step-by-step
 summary: "A step-by-step guide to building a Proxmox VE cluster with high availability for your homelab — covering corosync setup, quorum with QDevice, HA groups, live migration, and fencing."
-canonical: "https://blog.gntech.me/posts/proxmox-ve-cluster-high-availability-homelab/"
 ---
 
 If you started your homelab on a single Proxmox host, you already know the pain: planned maintenance means shutting everything down, a hardware failure takes out every VM and container, and there is no live migration without a second node.

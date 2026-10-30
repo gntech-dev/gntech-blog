@@ -17,7 +17,6 @@ keywords:
   - systemd MemoryMax CPUQuota resource limits
   - systemd service template homelab
 summary: "Hardening systemd service units in your homelab isn't just for production servers — it's how you prevent one compromised service from taking down your entire host. This guide covers sandboxing, capability drops, filesystem isolation, and resource limits with real unit files you can use today."
-canonical: "https://gntech.dev/posts/systemd-service-hardening/"
 ---
 
 Docker gets all the security attention, but most homelabs run plenty of

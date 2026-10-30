@@ -16,7 +16,6 @@ keywords:
   - RouterOS 7.23 new features app platform container
   - MikroTik RouterOS 7.23 download install steps
 summary: "RouterOS 7.23 stable is out with HTTPS-default upgrades, improved MLAG bridge MAC synchronization, WiFi VLAN fixes, and DHCP snooping message-type recognition. This guide covers the changelog, key fixes, and step-by-step upgrade steps for your MikroTik devices."
-canonical: "https://blog.gntech.me/posts/mikrotik-routeros-7-23-stable-upgrade-guide/"
 ---
 
 MikroTik released RouterOS 7.23 to the stable channel on May 25, 2026, bringing several important fixes and security improvements. This release focuses on upgrade security, bridge reliability for MLAG deployments, and WiFi VLAN handling. RouterOS 7.24beta1 followed on May 26 with additional app platform and container improvements, confirming that RouterOS development continues at a steady pace.

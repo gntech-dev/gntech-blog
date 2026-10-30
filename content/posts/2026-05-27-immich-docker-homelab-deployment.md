@@ -17,7 +17,6 @@ keywords:
   - Immich Traefik reverse proxy configuration SSL
   - self-hosted Google Photos alternative open source 2026
 summary: "Deploy Immich as a self-hosted Google Photos alternative with Docker Compose — PostgreSQL, Redis, hardware-accelerated transcoding, ML-based search, and Traefik reverse proxy for secure remote access."
-canonical: "https://gntech.dev/posts/immich-docker-homelab-deployment/"
 ---
 
 Google Photos is convenient until you hit the 15 GB cap or realise

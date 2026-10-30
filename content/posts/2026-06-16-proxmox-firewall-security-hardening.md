@@ -17,7 +17,6 @@ keywords:
   - Proxmox host firewall logging network segmentation
   - Proxmox VE firewall IPSet management best practices
 summary: "Harden Proxmox VE with datacenter firewalls, dynamic IPSets for trusted management networks, cluster-wide security, fail2ban for web UI brute-force protection, and firewall log auditing."
-canonical: "https://blog.gntech.me/posts/proxmox-firewall-security-hardening/"
 ---
 
 The built-in Proxmox VE firewall is one of the most effective security layers you can enable, yet it's frequently overlooked in homelab deployments. A default Proxmox installation leaves the web UI (port 8006) and SSH accessible to every device on the LAN — and worse, if your host has a public IP or a forwarded port, accessible from the entire internet.
@@ -198,7 +197,7 @@ Proxmox's web UI (pveproxy) logs authentication failures to `/var/log/pveproxy/a
 ```bash
 cat > /etc/fail2ban/filter.d/pveproxy.conf << 'EOF'
 [Definition]
-failregex = ^<HOST> - .* "(GET|POST) /api2/.*(login|auth|ticket).* HTTP/1\.[01]" 401 .*$
+failregex = ^"<HOST>" - .* "(GET|POST) /api2/.*(login|auth|ticket).* HTTP/1\.[01]" 401 .*$
 ignoreregex =
 EOF
 ```

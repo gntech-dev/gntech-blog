@@ -17,7 +17,6 @@ keywords:
   - Grafana Alloy log collection
   - Alloy config docker discovery
 summary: "Grafana Alloy is the official Promtail replacement with EOL in March 2026. This guide covers a complete Docker logging stack with Alloy, Loki, and Grafana — including Alloy config syntax, Docker auto-discovery, host log collection, and the migration path from Promtail."
-canonical: "https://gntech.dev/posts/grafana-alloy-log-collection/"
 ---
 
 Grafana deprecated Promtail as of March 2, 2026. If you're still
@@ -28,7 +27,7 @@ that handles logs, metrics, and traces in a single binary with a
 component-based pipeline architecture.
 
 The older monitoring setup on this blog from May 9 ([Homelab Monitoring
-Stack](/posts/homelab-monitoring-stack/)) used Promtail for log shipping.
+Stack](/posts/2026-05-09-homelab-monitoring-stack/)) used Promtail for log shipping.
 This post updates that stack with Alloy, including a complete
 docker-compose deployment, Alloy's River config syntax, Docker container
 auto-discovery, and host log tailing — all feeding into the same Loki

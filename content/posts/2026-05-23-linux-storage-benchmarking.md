@@ -16,7 +16,6 @@ keywords:
   - sequential vs random IO test fio
   - Proxmox storage performance baseline
 summary: "Learn to benchmark storage in your homelab using fio, ioping, hdparm, and dd — raw disks, ZFS pools, NFS mounts, and Docker volumes. Includes repeatable test scripts and how to interpret results for real-world workloads."
-canonical: "https://gntech.dev/posts/linux-storage-benchmarking/"
 ---
 
 Your Proxmox host has NVMe, SATA SSDs, and maybe spinning rust
