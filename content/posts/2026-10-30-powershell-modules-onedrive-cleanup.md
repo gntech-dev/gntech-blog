@@ -2,7 +2,7 @@
 title: "PowerShell Modules Filled My OneDrive — How to Clean Up Safely"
 description: "Find PowerShell modules in OneDrive, copy them to local storage, verify imports, and prevent future installs from filling your synced Documents folder."
 date: 2026-10-30T13:00:00-04:00
-draft: true
+draft: false
 tags:
   - powershell
   - windows
