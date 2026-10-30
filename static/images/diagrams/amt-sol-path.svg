@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1010" viewBox="0 0 1000 1010" role="img" aria-labelledby="title desc">
+  <title id="title">Intel AMT SOL: two authentication boundaries and two ways to leave</title>
+  <desc id="desc">The SOL client authenticates to Intel AMT over the management network. AMT carries serial input and output to Linux ttyS0 in this example. A serial getty presents Linux login; successful Linux authentication starts a shell. Exit ends the Linux session; the client's disconnect control ends SOL. Boot redirection is separate.</desc>
+  <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2563eb"/></marker></defs>
+  <rect width="1000" height="1010" rx="20" fill="#f8fafc"/>
+  <g font-family="sans-serif" text-anchor="middle" fill="#0f172a">
+    <text x="500" y="48" font-size="28" font-weight="700">One console path, two separate logins</text>
+    <rect x="225" y="80" width="550" height="85" rx="14" fill="#fff" stroke="#64748b" stroke-width="2"/>
+    <text x="500" y="115" font-size="24" font-weight="700">SOL client on the administrator's machine</text>
+    <text x="500" y="145" font-size="19">Use its Disconnect control to close SOL</text>
+    <path d="M500 167 V235" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="520" y="207" text-anchor="start" font-size="19">Management network</text>
+    <rect x="125" y="250" width="750" height="110" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="500" y="287" font-size="25" font-weight="700">1. Intel AMT authentication</text>
+    <text x="500" y="321" font-size="20">Firmware-managed SOL connection</text>
+    <text x="500" y="347" font-size="18">Independent of normal host network services</text>
+    <path d="M500 362 V429" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="520" y="402" text-anchor="start" font-size="19">Serial input / output</text>
+    <rect x="225" y="443" width="550" height="85" rx="14" fill="#fff" stroke="#64748b" stroke-width="2"/>
+    <text x="500" y="478" font-size="24" font-weight="700">Linux serial device: ttyS0</text>
+    <text x="500" y="509" font-size="19">Example only — discover the correct device first</text>
+    <path d="M500 530 V597" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="520" y="571" text-anchor="start" font-size="19">serial-getty presents login</text>
+    <rect x="125" y="611" width="750" height="95" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+    <text x="500" y="649" font-size="25" font-weight="700">2. Linux account authentication</text>
+    <text x="500" y="681" font-size="20">Use a Linux console account, not the AMT login</text>
+    <path d="M500 708 V775" stroke="#2563eb" stroke-width="3" marker-end="url(#arrow)"/>
+    <rect x="225" y="789" width="550" height="90" rx="14" fill="#fff" stroke="#64748b" stroke-width="2"/>
+    <text x="500" y="826" font-size="24" font-weight="700">Authenticated Linux shell</text>
+    <text x="500" y="857" font-size="20">Run exit until you return to the login prompt</text>
+    <text x="500" y="925" font-size="21" font-weight="700">Log out first. Then disconnect the SOL client.</text>
+    <text x="500" y="957" font-size="19">Client escape sequences vary; ~. is not universal.</text>
+    <text x="500" y="988" font-size="18">Firmware, bootloader and kernel boot-output redirection are separate.</text>
+  </g>
+</svg>
