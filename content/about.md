@@ -1,60 +1,47 @@
 ---
 title: "About"
-description: "About this blog, the person behind it, and the automation that writes it"
+description: "Gerlin Nolasco, the GnTech homelab, and how these practical infrastructure guides are prepared."
 date: 2026-05-08
-lastmod: 2026-05-10
+lastmod: 2026-10-30
+translationKey: about
 ---
 
-Hi, I'm **Gerlin Nolasco** — the person behind **GnTech**.
+Hi, I'm **Gerlin Nolasco**, the person behind **GnTech**.
 
-GnTech is my personal tech space where I document, test, and share practical knowledge about **networking, homelab infrastructure, servers, virtualization, automation, cybersecurity basics, and self-hosted services**.
+I document the infrastructure I build, troubleshoot, and maintain: Proxmox hosts, MikroTik networks, Linux and Windows systems, Docker services, and remote administration tools. The goal is to turn a real problem into a guide another person can understand and follow.
 
-This blog is focused on real-world learning. Most of the content comes from things I personally build, break, fix, and improve in my own lab environment.
+## What you'll find here
 
-My goal with GnTech is simple: create useful technical notes, guides, and project write-ups that can help others understand complex topics in a clear and practical way. I believe the best way to learn technology is by building it yourself. That is why this blog is not just theory — it is based on hands-on experience, troubleshooting, and continuous improvement.
+- **Virtualization and storage:** Proxmox VE, VMs, LXC, ZFS, and backups.
+- **Networking:** MikroTik, VLANs, routing, VPNs, and management access.
+- **Self-hosting:** Docker Compose, reverse proxies, monitoring, and service maintenance.
+- **Troubleshooting:** the symptoms, diagnostic steps, changes, and verification behind a fix.
+- **Useful older hardware:** practical experiments such as my ThinkPad T420 administration laptop.
 
----
+Browse the [projects](/projects/) for a starting point, use [search](/search/) for a specific problem, or explore the [archives](/archives/).
 
-### What You'll Find Here
+## The lab behind the posts
 
-- **Networking & Routing** — MikroTik RouterOS, VLAN segmentation, IPv6, GPON/FTTH
-- **Virtualization** — Proxmox VE, container orchestration, VM management
-- **Self-Hosting** — Docker services, Cloudflare Tunnels, monitoring stacks, backup strategies
-- **Security** — Firewall design, VLAN isolation, IoT hardening, secure remote access
-- **Automation** — AI-assisted ops, scripting, Telegram bots, cron workflows
-- **Infrastructure** — Linux and Windows Server, storage, rack hardware, cabling
+My work spans a home lab and hosted infrastructure. Proxmox provides the virtualization layer; MikroTik handles routing and segmentation; Docker and LXC host services. Monitoring, backups, and recovery access are part of the work too.
 
----
+The lab changes over time. Each guide describes its own environment; an older hardware list or diagram should not be treated as a live inventory. I keep public examples focused on the details needed to explain the procedure.
 
-### The Homelab Stack
+## How posts are prepared
 
-- **Router:** MikroTik hAP ax S (R1) — Edge gateway, ROS 7.22.1
-- **Wi-Fi / Switch:** MikroTik hAP ac² (R2) — Secondary AP, downstream switch
-- **Servers:** Proxmox cluster: G3 (i5-7500T), G4 (Ryzen 2400GE), G1 (i3-4030U), H1 (Xeon E-2276G remote)
-- **Containers:** Docker, LXC
-- **Automation:** OpenClaw Gateway (Zeny IA)
-- **Monitoring:** Uptime Kuma, Grafana dashboards
-- **Cameras:** Frigate NVR, Tapo C100
-- **VPN:** WireGuard via MikroTik DDNS
-- **WAN:** Claro GPON FTTH via PPPoE on VLAN 100
+AI assists with drafting, organizing explanations, preparing illustrations, and checking examples. I review proposed changes through GitHub pull requests before merging them. Merging a publication-ready post triggers the site's normal Cloudflare Pages deployment.
 
----
+Automated checks can catch build problems, missing assets, broken internal links, and some syntax errors. They cannot establish that a command works on a particular machine or that a procedure is safe for every environment.
 
-### About This Blog
+The articles should distinguish observed lab results from proposed examples and explain relevant validation limits. A syntax check is not a hardware test. Check prerequisites and versions, preserve a recovery path, and verify the result in your own environment.
 
-This site runs on [Hugo](https://gohugo.io/) with the [PaperMod](https://github.com/adityatelange/hugo-PaperMod) theme, served through Cloudflare Pages.
+Generated illustrations are identified as illustrations. Real screenshots and command output, when included, serve a different purpose: showing what was actually observed.
 
-The interesting part? Posts are drafted automatically by an AI assistant (Zeny IA) every morning at 07:00 AST. A new topic is picked based on what's already covered, the draft is written with proper Hugo front matter, verified with a clean Hugo build, then sent to my Telegram with inline Approve/Skip buttons. If I tap Approve, it commits and deploys automatically.
+## About the site
 
-This is both a blog and a living experiment in AI-assisted infrastructure documentation.
+GnTech runs on [Hugo](https://gohugo.io/) with the [PaperMod theme](https://github.com/adityatelange/hugo-PaperMod), hosted on Cloudflare Pages. The blog is available in English and Spanish; translation coverage grows as guides are reviewed.
 
----
+## Connect
 
-### Connect With Me
-
-- GitHub: [gntech-dev](https://github.com/gntech-dev)
-- LinkedIn: [gnolascohernandez](https://www.linkedin.com/in/gnolascohernandez/)
-
----
-
-**GnTech — Building, learning, and documenting technology one lab at a time.**
+- [GitHub: gntech-dev](https://github.com/gntech-dev)
+- [LinkedIn: Gerlin Nolasco](https://www.linkedin.com/in/gnolascohernandez/)
+- [Subscribe through RSS](/index.xml)
