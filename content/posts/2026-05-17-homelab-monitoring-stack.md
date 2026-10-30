@@ -21,6 +21,10 @@ This guide consolidates the two earlier monitoring-stack posts. It replaces thei
 
 ## Know which component does what
 
+![Connection path from the browser through host loopback port 3000 to Grafana, then over the Compose network to Prometheus; Prometheus scrapes its own metrics endpoint.](/images/diagrams/monitoring-path.svg)
+
+*The initial two-service deployment. Arrows show requests; replies return along those connections. On a remote host, use an SSH tunnel for browser access. Container-local localhost and the host's loopback address are different endpoints.*
+
 | Component | Responsibility |
 | --- | --- |
 | Prometheus | Scrape metrics, store time series and evaluate alert rules |
