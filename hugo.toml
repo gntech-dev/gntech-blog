@@ -30,7 +30,7 @@ buildFuture = true
 
   [params.homeInfoParams]
     Title = "GnTech Blog"
-    Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin."
+    Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin. [Start here](/start-here/)."
 
   [params.analytics]
     [params.analytics.google]
@@ -64,9 +64,15 @@ buildFuture = true
       description = "Homelab, networking, automation, and infrastructure tinkering"
       [languages.en.params.homeInfoParams]
         Title = "GnTech Blog"
-        Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin."
+        Content = "Proxmox, MikroTik, Docker, Linux, and the occasional rabbit hole. Written by a homelab gremlin. [Start here](/start-here/)."
 
     [languages.en.menu]
+      [[languages.en.menu.main]]
+        identifier = "start-here"
+        name = "Start Here"
+        url = "/start-here/"
+        weight = 5
+
       [[languages.en.menu.main]]
         identifier = "about"
         name = "About"
@@ -101,9 +107,15 @@ buildFuture = true
       description = "Homelab, redes, automatización e infraestructura"
       [languages.es.params.homeInfoParams]
         Title = "GnTech Blog"
-        Content = "Proxmox, MikroTik, Docker, Linux y algún que otro agujero de conejo. Escrito por un gremlin del homelab."
+        Content = "Proxmox, MikroTik, Docker, Linux y algún que otro agujero de conejo. Escrito por un gremlin del homelab. [Empieza aquí](/es/start-here/)."
 
     [languages.es.menu]
+      [[languages.es.menu.main]]
+        identifier = "start-here"
+        name = "Empieza aquí"
+        url = "/es/start-here/"
+        weight = 5
+
       [[languages.es.menu.main]]
         identifier = "about"
         name = "Acerca de"
