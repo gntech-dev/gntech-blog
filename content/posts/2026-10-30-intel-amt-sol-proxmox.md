@@ -2,6 +2,7 @@
 title: "Intel AMT Serial over LAN on Proxmox: Setup, Login, and Disconnect"
 description: "Identify the Intel AMT serial device, enable a Proxmox Linux login console, and understand how to log out and disconnect without confusing client escape sequences."
 date: 2026-10-30T14:00:00-04:00
+lastmod: 2026-10-30
 draft: false
 tags:
   - proxmox
@@ -24,6 +25,10 @@ While configuring my Proxmox mini PCs, I reached a Linux login prompt through SO
 That small mistake reveals an important distinction: the Linux shell, the login program, and the SOL client each interpret different commands. This guide covers setting up the Linux login console and leaving it cleanly.
 
 ## What this setup provides
+
+![SOL connection path from the administrator's client through Intel AMT authentication, the Linux serial device and serial getty, to separate Linux authentication and a shell.](/images/diagrams/amt-sol-path.svg)
+
+*AMT authentication opens the management connection; Linux authentication opens a host session. Serial input and output travel in both directions. Log out of Linux before using the client's Disconnect control. The example ttyS0 must be confirmed on your hardware.*
 
 There are three separate pieces:
 
