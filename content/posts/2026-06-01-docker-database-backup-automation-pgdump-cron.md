@@ -19,7 +19,8 @@ The old combined PostgreSQL/MySQL script is replaced with one explicit PostgreSQ
 |---|---|
 | Technical review | Official PostgreSQL and Docker references reviewed on October 31, 2026. |
 | Static checks | Bash syntax and embedded Compose structure checked. |
-| Runtime | Docker/PostgreSQL unavailable here; no dump, database restore, or scheduler execution performed. |
+| Runtime | [Recovery lab run 41244956545](https://github.com/gntech-dev/gntech-blog/actions/runs/41244956545) passed on October 31, 2026: dump, isolated restore, marker assertion, repeated-restore failure, and stopped-source backup failure. Scheduler execution was not tested. |
+| Tested versions | GitHub-hosted Ubuntu 24.04.5 amd64; Docker 28.0.4; Compose 2.38.2; PostgreSQL 16.15. Image digest: `sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab`. |
 | Scope | Disposable PostgreSQL 16 lab, not a production deployment or point-in-time recovery solution. |
 
 The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. Scheduler execution, off-site recovery, and production data remain outside this test.
