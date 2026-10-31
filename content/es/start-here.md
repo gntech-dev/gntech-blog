@@ -22,9 +22,9 @@ Las guías técnicas enlazadas en estas rutas están en **inglés**. Esta págin
 
 Empieza por la red para comprender cómo se conectan el host y las máquinas virtuales. Después prepara despliegues repetibles y planifica los respaldos.
 
-1. [Puentes, VLAN y topología del host (inglés)](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — entiende la red antes de modificarla.
-2. [Plantillas de máquinas virtuales con cloud-init (inglés)](/posts/2026-05-16-proxmox-cloudinit-vm-templates/) — prepara configuraciones reutilizables.
-3. [Proxmox Backup Server (inglés)](/posts/2026-05-08-proxmox-backup-server-setup/) — conoce el servicio de respaldos y sus almacenes de datos.
+1. [Puentes, VLAN y topología del host (inglés)](https://blog.gntech.me/posts/2026-05-08-proxmox-networking-bridges-vlans/) — entiende la red antes de modificarla.
+2. [Plantillas de máquinas virtuales con cloud-init (inglés)](https://blog.gntech.me/posts/2026-05-16-proxmox-cloudinit-vm-templates/) — prepara configuraciones reutilizables.
+3. [Proxmox Backup Server (inglés)](https://blog.gntech.me/posts/2026-05-08-proxmox-backup-server-setup/) — conoce el servicio de respaldos y sus almacenes de datos.
 
 **Objetivo práctico:** dibuja el recorrido de red del host a una máquina virtual, crea una máquina de pruebas y comprueba la recuperación antes de confiar en un respaldo.
 
@@ -32,9 +32,9 @@ Empieza por la red para comprender cómo se conectan el host y las máquinas vir
 
 Estas guías requieren acceso al router y conocer las interfaces que vas a cambiar. Conserva una conexión de recuperación al modificar el acceso de administración o el filtrado VLAN.
 
-1. [Construcción de R1 (inglés)](/posts/r1-router-deployment/) — conoce las piezas de un router segmentado.
-2. [Segmentación por VLAN (inglés)](/posts/2026-05-12-mikrotik-vlan-segmentation/) — recorre el enrutamiento, DHCP y aislamiento.
-3. [Redes en Proxmox (inglés)](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — conecta el diseño del router con el host de virtualización.
+1. [Construcción de R1 (inglés)](https://blog.gntech.me/posts/r1-router-deployment/) — conoce las piezas de un router segmentado.
+2. [Segmentación por VLAN (inglés)](https://blog.gntech.me/posts/2026-05-12-mikrotik-vlan-segmentation/) — recorre el enrutamiento, DHCP y aislamiento.
+3. [Redes en Proxmox (inglés)](https://blog.gntech.me/posts/2026-05-08-proxmox-networking-bridges-vlans/) — conecta el diseño del router con el host de virtualización.
 
 **Objetivo práctico:** verifica tanto una conexión permitida como una que debería quedar bloqueada.
 
@@ -42,9 +42,9 @@ Estas guías requieren acceso al router y conocer las interfaces que vas a cambi
 
 Comienza con pocos servicios. Comprende su almacenamiento, configuración y arranque antes de agregar aplicaciones.
 
-1. [Patrones de Compose (inglés)](/posts/2026-05-08-docker-compose-patterns/) — organiza servicios y configuraciones.
-2. [Comprobaciones de salud y dependencias de arranque (inglés)](/posts/2026-05-14-docker-compose-healthchecks/) — distingue un proceso en ejecución de un servicio listo.
-3. [Despliegue de Frigate (inglés)](/posts/frigate-deployment/) — explora un proyecto de cámaras después de los fundamentos.
+1. [Patrones de Compose (inglés)](https://blog.gntech.me/posts/2026-05-08-docker-compose-patterns/) — organiza servicios y configuraciones.
+2. [Comprobaciones de salud y dependencias de arranque (inglés)](https://blog.gntech.me/posts/2026-05-14-docker-compose-healthchecks/) — distingue un proceso en ejecución de un servicio listo.
+3. [Despliegue de Frigate (inglés)](https://blog.gntech.me/posts/frigate-deployment/) — explora un proyecto de cámaras después de los fundamentos.
 
 **Objetivo práctico:** recrea un conjunto de servicios de pruebas y comprueba que sus datos persisten. La guía de Frigate describe un despliegue anterior; revisa sus versiones y requisitos de hardware.
 
@@ -52,8 +52,8 @@ Comienza con pocos servicios. Comprende su almacenamiento, configuración y arra
 
 Un equipo cliente cómodo y una consola de recuperación probada resuelven partes distintas del trabajo de administración.
 
-1. [ThinkPad T420 con Arch Linux e i3 (inglés)](/posts/2026-10-30-thinkpad-t420-arch-i3/) — prepara un escritorio para administración.
-2. [Intel AMT Serial over LAN en Proxmox (inglés)](/posts/2026-10-30-intel-amt-sol-proxmox/) — configura el acceso por consola y aprende a desconectarte correctamente.
+1. [ThinkPad T420 con Arch Linux e i3 (inglés)](https://blog.gntech.me/posts/2026-10-30-thinkpad-t420-arch-i3/) — prepara un escritorio para administración.
+2. [Intel AMT Serial over LAN en Proxmox (inglés)](https://blog.gntech.me/posts/2026-10-30-intel-amt-sol-proxmox/) — configura el acceso por consola y aprende a desconectarte correctamente.
 
 **Objetivo práctico:** conecta con el host correcto, confirma su identidad, cierra la sesión y vuelve a conectar hasta ver un nuevo aviso de inicio de sesión.
 
