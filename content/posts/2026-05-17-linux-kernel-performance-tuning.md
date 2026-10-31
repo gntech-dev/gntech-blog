@@ -527,6 +527,4 @@ of benefit:
 4. **CPU performance governor** — Eliminates latency variance
 5. **Memory management** — Reduces swap pressure for containers
 
-These configs have been tested on Ubuntu 24.04 / Debian 12 with kernel
-6.x and work identically on Proxmox hosts (the underlying Debian
-kernel) and container-optimized Linux distributions.
+Kernel settings depend on the installed kernel, distribution and namespace. This revision does not establish runtime evidence that these examples behave identically on Ubuntu, Debian, Proxmox or container hosts.

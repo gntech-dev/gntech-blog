@@ -267,7 +267,7 @@ CiliumNetworkPolicy (CNP) extends Kubernetes NetworkPolicy with identity-based s
 
 Create a policy that drops all inbound traffic to the `default` namespace unless explicitly allowed:
 
-```yaml
+```bash
 cat << 'EOF' | kubectl apply -f -
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -290,7 +290,7 @@ This allows ingress only from pods with the label `k8s:app: ingress-controller`.
 
 Allow pods in the `default` namespace to reach DNS (UDP 53) both internally and externally:
 
-```yaml
+```bash
 cat << 'EOF' | kubectl apply -f -
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
@@ -315,7 +315,7 @@ EOF
 
 Cilium can inspect HTTP requests at the eBPF level and filter by method, path, and headers. This deploys an HTTP-aware policy that allows `GET` to `/api` but blocks `POST`:
 
-```yaml
+```bash
 cat << 'EOF' | kubectl apply -f -
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy

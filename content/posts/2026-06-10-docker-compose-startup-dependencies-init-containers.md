@@ -41,7 +41,7 @@ services:
 
 Without any condition, `depends_on` only guarantees that the `db` container is *started* before `app`. It does **not** wait for Postgres to be ready to accept connections. On a fast machine with local volumes, this *usually* works. On a homelab with spinning disks or during first boot when databases initialize, it fails reliably.
 
-Compose v2.20+ (included in Docker Desktop 4.25+ and Docker Engine 25+) supports conditional `depends_on`:
+Supported Compose plugins provide conditional `depends_on`; do not infer the plugin version from the Engine version or a file-format version. Validate with docker compose config:
 
 ```yaml
 services:

@@ -95,7 +95,7 @@ Corosync traffic should be isolated from regular VM and storage traffic. If your
 
 Edit `/etc/pve/corosync.conf` to set the `bindnetaddr`:
 
-```yaml
+```text
 totem {
     version: 2
     cluster_name: homelab-cluster

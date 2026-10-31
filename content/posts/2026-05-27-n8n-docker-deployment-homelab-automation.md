@@ -30,8 +30,7 @@ support when you need it.
 In this guide, I'll deploy n8n with Docker Compose using a
 PostgreSQL backend for production reliability, wire it up behind
 Traefik with automatic SSL, apply security hardening, and walk
-through practical homelab automation workflows. Every command
-and config file has been tested on Docker 27+ and Compose 2.30+.
+through practical homelab automation workflows. Validate the examples on the installed image and tool versions; this revision does not establish runtime evidence for every command or configuration.
 
 ---
 

@@ -326,7 +326,8 @@ Create the tunnel in Cloudflare Zero Trust Dashboard, point it at
 **Option 2: Tailscale (private mesh)**
 
 ```yaml
-# Sidecar approach
+# Sidecar fragment; merge into the existing services and networks.
+services:
   tailscale:
     image: tailscale/tailscale:latest
     container_name: tailscale-ai

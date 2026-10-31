@@ -388,7 +388,7 @@ services:
 ```
 
 **If you must mount the Docker socket (Portainer, Traefik, Watchtower),
-read-only is safer but not safe — socket access is effectively root:**
+a read-only bind mount does not make Docker API requests read-only — direct socket access can control the host:**
 
 ```yaml
 services:

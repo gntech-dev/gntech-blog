@@ -147,7 +147,7 @@ services:
     image: traefik:v3.3
     logging:
       driver: journald
-    ...
+    # Preserve other existing service settings.
 ```
 
 Then use the `journald` backend in Fail2ban:

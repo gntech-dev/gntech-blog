@@ -93,6 +93,25 @@ Los aliases simples (`*logging`) funcionan para bloques individuales, pero cuand
 El merge key fusiona uno o varios anchors en un mapa, permitiendo sobreescribir campos específicos por servicio:
 
 ```yaml
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-resource-limits: &limits
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+        cpus: "0.5"
+      reservations:
+        memory: 128M
+
 x-defaults: &defaults
   <<: [*restart, *logging, *limits]
   networks:
@@ -118,6 +137,10 @@ services:
       resources:
         limits:
           memory: 1G
+
+networks:
+  internal:
+    internal: true
 ```
 
 El orden importa: los campos definidos después del merge key sobreescriben los que vienen del anchor. En el ejemplo, `worker` hereda `*limits` del defaults (512M) pero lo sobreescribe con 1G.
@@ -265,6 +288,14 @@ Cuando usas `<<: *defaults` seguido de campos propios del servicio, el orden es:
 Esto significa que puedes sobreescribir cualquier campo del defaults:
 
 ```yaml
+x-defaults: &defaults
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        memory: 512M
+        cpus: "0.5"
+
 services:
   heavy-worker:
     <<: *defaults

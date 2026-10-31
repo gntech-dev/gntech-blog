@@ -21,7 +21,7 @@ summary: "Enable TCP BBR congestion control on your Proxmox host, Docker contain
 
 If you run a homelab with Proxmox, Docker, or LXC containers, the single highest-impact, lowest-effort network performance tuning you can do is switching your TCP congestion control algorithm from the default CUBIC to BBR (Bottleneck Bandwidth and Round-trip propagation time). No hardware changes, no wiring upgrades, no VLAN rework — just a few sysctl lines and you get 2x-5x better throughput on long-distance or lossy links.
 
-This guide covers enabling TCP BBR on your Proxmox host, propagating it to Docker containers and LXC guests, verifying it works, and benchmarking the results with iperf3. All commands are tested on Debian 12/Ubuntu 22.04+ kernels (5.15+, but ideally 6.x+).
+This guide covers enabling TCP BBR on your Proxmox host, propagating it to Docker containers and LXC guests, verifying it works, and benchmarking the results with iperf3. Kernel and network-namespace behavior must be verified on the deployed system; this revision does not establish execution evidence for these commands.
 
 ## Checking Your Current TCP Congestion Control
 

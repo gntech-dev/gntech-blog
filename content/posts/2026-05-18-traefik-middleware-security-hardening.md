@@ -805,7 +805,7 @@ rateLimit:
 
 In Docker Compose labels, every `$` must be doubled:
 
-```yaml
+```text
 # Wrong — Docker Compose eats the $:
 "traefik.http.middlewares.auth.basicauth.users=admin:$2y$10$hash..."
 

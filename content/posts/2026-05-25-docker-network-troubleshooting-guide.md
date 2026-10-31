@@ -528,8 +528,7 @@ services:
       - app-net
 ```
 
-Docker Compose v2.20+ waits for the `depends_on` condition before
-starting dependent services. This is a timing problem, not a
+Compose can wait for service_healthy dependencies before starting consumers; this condition does not require Compose 2.20 specifically. This is a timing problem, not a
 networking problem — but the error looks exactly like one.
 
 ### Depends_on Without Condition Is Not Enough

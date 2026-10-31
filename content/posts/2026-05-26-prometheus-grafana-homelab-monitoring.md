@@ -139,10 +139,10 @@ scrape_configs:
         - "10.0.20.30:9100"   # SRV1 — Proxmox host
         - "10.0.20.31:9100"   # SRV2 — backup node
         - "10.0.20.10:9100"   # GATEWAY — OpenClaw gateway
-      relabel_configs:
-        - source_labels: ["__address__"]
-          regex: "([^:]+):.+"
-          target_label: "instance"
+    relabel_configs:
+      - source_labels: ["__address__"]
+        regex: "([^:]+):.+"
+        target_label: "instance"
 
   # cAdvisor — one target per host
   - job_name: cadvisor
@@ -150,10 +150,10 @@ scrape_configs:
       - targets:
         - "10.0.20.30:8080"   # SRV1
         - "10.0.20.31:8080"   # SRV2
-      relabel_configs:
-        - source_labels: ["__address__"]
-          regex: "([^:]+):.+"
-          target_label: "instance"
+    relabel_configs:
+      - source_labels: ["__address__"]
+        regex: "([^:]+):.+"
+        target_label: "instance"
 ```
 
 ### Alert Rules

@@ -255,7 +255,7 @@ Claude calls `nut_get_status` and `nut_get_battery` for real-time power data.
 
 The Homelab MCP server has access to your Docker socket, which is effectively root access to the host. Treat this deployment with the same care as any privileged container:
 
-- **Never expose the Docker socket to the network.** The mount is read-only (`:ro`), but even read-only socket access reveals container details. Keep it local.
+- **Never expose the Docker socket to the network.** A read-only bind mount does not restrict Docker API methods. Direct socket access can control the host; use a reviewed API authorization boundary and keep it private.
 - **Use a read-only API key for Pi-hole and Unifi.** Do not use admin credentials. Homelab MCP only queries data — it does not modify configurations.
 - **Keep `.env` out of version control.** Add it to `.gitignore`. It contains API keys and credentials for your infrastructure.
 - **Run on a management VLAN.** Place the Docker host in a dedicated management VLAN (VLAN 99 or similar) with strict ACLs limiting which services the MCP container can reach.
@@ -286,7 +286,7 @@ The Homelab MCP project is actively maintained and the server count grows with e
 
 - **Homelab MCP** — unified Docker container with 7 MCP servers
 - **Claude Desktop** — natural language interface for infrastructure queries
-- **Docker** — runtime for the MCP container with read-only socket access
+- **Docker** — runtime for the MCP container; a socket bind mount is not read-only API authorization
 - **Optional:** Pi-hole, Ollama, Unifi, NUT, Ansible — each adds more tools
 
 Deploy it tonight. Tomorrow morning ask Claude "Did anything interesting happen in my homelab while I was asleep?" and watch it query Pi-hole, check Docker containers, ping your hosts, and report back. That is the future of homelab management — it asks you less and answers you more.
