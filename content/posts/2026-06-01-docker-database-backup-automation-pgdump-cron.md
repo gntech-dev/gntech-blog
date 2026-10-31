@@ -1,400 +1,202 @@
 ---
-title: "Docker Database Backup Automation — pg_dump, cron, and S3 Uploads"
-description: "Automate PostgreSQL and MySQL backups in Docker Compose with cron-based pg_dump and mysqldump, retention pruning, healthchecks monitoring, and S3 off-site upload for your homelab."
+title: "Docker PostgreSQL Backups — Atomic Dumps and an Isolated Restore Test"
+description: "Create PostgreSQL custom-format dumps with a host-side script, reject partial files, and verify recovery in a separate disposable instance before scheduling."
 date: 2026-06-01T12:00:00-04:00
-tags:
-  - docker
-  - linux
-  - homelab
-  - database
-keywords:
-  - Docker Compose automated database backup automation
-  - PostgreSQL pg_dump cron Docker container backup
-  - MySQL mysqldump automated backup Docker Compose
-  - Docker database backup healthchecks monitoring
-  - S3-compatible backup upload Docker container
-  - Docker cron container automated database dumps
-  - Homelab database backup retention policy automation
-summary: "Automate PostgreSQL and MySQL database backups in Docker Compose with cron-driven pg_dump and mysqldump, retention pruning, healthchecks monitoring, and S3 off-site upload. Production-ready configs included."
+lastmod: 2026-10-31
+draft: false
+tags: [docker, linux, homelab, database]
+keywords: [Docker PostgreSQL backup, pg_dump custom format, pg_restore test, database backup automation]
+summary: "A focused PostgreSQL lab with atomic dump publication, error propagation, and a separate restore destination."
 ---
 
-## Why Volume-Only Backups Are Not Enough
+A database backup needs a consistent dump, a usable recovery format, and a restore test. This guide uses PostgreSQL custom-format archives and a separate PostgreSQL instance to check recovered content.
 
-Docker volumes are the standard way to persist database data, but relying on them alone for backups is risky. A `pg_data` or `mysql_data` volume contains binary files that are tightly coupled to the database engine version. If you upgrade PostgreSQL from 16 to 17 and need to restore the old volume, you face a version mismatch. More importantly, binary volume snapshots do not give you point-in-time restore for a single table or a specific row.
+The old combined PostgreSQL/MySQL script is replaced with one explicit PostgreSQL workflow. MySQL and MariaDB need their own engine-specific procedures.
 
-Logical dumps solve these problems. `pg_dump` and `mysqldump` produce portable SQL files that you can restore to any compatible version. They compress well, they are human-readable, and they let you restore individual objects without restoring an entire volume.
+## Verification status
 
-This guide walks through building a single backup script that handles both PostgreSQL and MySQL, scheduling it with a Docker sidecar container, monitoring it with healthchecks.io, pushing backups to S3-compatible storage, and pruning old backups automatically.
+| Area | Evidence and limits |
+|---|---|
+| Technical review | Official PostgreSQL and Docker references reviewed on October 31, 2026. |
+| Static checks | Bash syntax and embedded Compose structure checked. |
+| Runtime | Docker/PostgreSQL unavailable here; no dump, database restore, or scheduler execution performed. |
+| Scope | Disposable PostgreSQL 16 lab, not a production deployment or point-in-time recovery solution. |
 
-## Building the Database Backup Script
+## 1. Prepare a separate lab
 
-Start with a single shell script that discovers databases via environment variables and handles both PostgreSQL and MySQL. The script uses the official client tools (`pg_dump`, `mysqldump`) and supports configurable backup directories, retention, and S3 upload.
-
-Create `docker-db-backup.sh`:
-
-```bash
-#!/bin/bash
-# docker-db-backup.sh — Automated database backup for Docker Compose stacks
-set -euo pipefail
-
-# --- Configuration via environment variables ---
-DB_TYPE="${DB_TYPE:-postgres}"              # postgres or mysql
-DB_HOST="${DB_HOST:-localhost}"
-DB_PORT="${DB_PORT:-}"
-DB_NAME="${DB_NAME:-}"
-DB_USER="${DB_USER:-}"
-DB_PASSWORD="${DB_PASSWORD:-}"
-BACKUP_DIR="${BACKUP_DIR:-/backups}"
-RETENTION_DAYS="${RETENTION_DAYS:-14}"
-
-# S3-compatible storage (optional)
-S3_ENDPOINT="${S3_ENDPOINT:-}"
-S3_BUCKET="${S3_BUCKET:-}"
-S3_PREFIX="${S3_PREFIX:-db-backups}"
-S3_ACCESS_KEY="${S3_ACCESS_KEY:-}"
-S3_SECRET_KEY="${S3_SECRET_KEY:-}"
-
-# Healthchecks.io (optional)
-HC_UUID="${HC_UUID:-}"
-
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-FILENAME="${DB_NAME:-all}_${TIMESTAMP}.sql.gz"
-FILEPATH="${BACKUP_DIR}/${FILENAME}"
-
-mkdir -p "${BACKUP_DIR}"
-
-# --- Healthchecks start ping ---
-if [ -n "$HC_UUID" ]; then
-  curl -fsS --retry 3 "https://hc-ping.com/${HC_UUID}/start" 2>/dev/null || true
-fi
-
-# --- Database dump ---
-export PGPASSWORD="${DB_PASSWORD}"
-export MYSQL_PWD="${DB_PASSWORD}"
-
-case "${DB_TYPE}" in
-  postgres)
-    PORT="${DB_PORT:-5432}"
-    echo "Backing up PostgreSQL database ${DB_NAME} from ${DB_HOST}:${PORT}..."
-    pg_dump -h "${DB_HOST}" -p "${PORT}" -U "${DB_USER}" -d "${DB_NAME}" \
-      --no-owner --no-acl --compress=6 \
-      > "${FILEPATH}"
-    ;;
-  mysql)
-    PORT="${DB_PORT:-3306}"
-    echo "Backing up MySQL database ${DB_NAME} from ${DB_HOST}:${PORT}..."
-    mysqldump -h "${DB_HOST}" -P "${PORT}" -u "${DB_USER}" --single-transaction \
-      --routines --triggers --events "${DB_NAME}" \
-      | gzip -6 > "${FILEPATH}"
-    ;;
-  *)
-    echo "Unsupported DB_TYPE: ${DB_TYPE}"
-    exit 1
-    ;;
-esac
-
-unset PGPASSWORD MYSQL_PWD
-
-# Verify the dump is not empty
-if [ ! -s "${FILEPATH}" ]; then
-  echo "ERROR: Backup file is empty"
-  if [ -n "$HC_UUID" ]; then
-    curl -fsS --retry 3 "https://hc-ping.com/${HC_UUID}/fail" 2>/dev/null || true
-  fi
-  exit 1
-fi
-
-echo "Backup written: ${FILEPATH} ($(du -h "${FILEPATH}" | cut -f1))"
-
-# --- Retention: prune local backups older than RETENTION_DAYS ---
-find "${BACKUP_DIR}" -type f -name "*.sql.gz" -mtime +${RETENTION_DAYS} -delete
-echo "Pruned local backups older than ${RETENTION_DAYS} days"
-
-# --- S3 upload ---
-if [ -n "$S3_ENDPOINT" ] && [ -n "$S3_BUCKET" ]; then
-  export AWS_ACCESS_KEY_ID="${S3_ACCESS_KEY}"
-  export AWS_SECRET_ACCESS_KEY="${S3_SECRET_KEY}"
-  S3_PATH="s3://${S3_BUCKET}/${S3_PREFIX}/${FILENAME}"
-
-  # Use s5cmd for parallel uploads — install once in the container
-  if command -v s5cmd &>/dev/null; then
-    s5cmd --endpoint-url "${S3_ENDPOINT}" cp "${FILEPATH}" "${S3_PATH}"
-  else
-    aws s3 cp "${FILEPATH}" "${S3_PATH}" --endpoint-url "${S3_ENDPOINT}"
-  fi
-  echo "Uploaded to ${S3_PATH}"
-fi
-
-# --- Healthchecks success ping ---
-if [ -n "$HC_UUID" ]; then
-  curl -fsS --retry 3 "https://hc-ping.com/${HC_UUID}" 2>/dev/null || true
-fi
-
-echo "Backup complete: ${FILENAME}"
-```
-
-Make it executable:
+Use Bash, OpenSSL, Docker Engine, the Compose plugin, and host flock. This project publishes no database ports. Its two services have separate data volumes; only the test service is a restore target.
 
 ```bash
-chmod +x docker-db-backup.sh
-```
+db_lab_dir=$(mktemp -d -t postgres-backup-lab.XXXXXX)
+cd "$db_lab_dir" || exit 1
+umask 077
+mkdir backups
+openssl rand -base64 32 > db-password
 
-## Docker Compose Integration with a Sidecar Backup Container
-
-The cleanest approach in Docker Compose is a dedicated backup service that shares the Docker network and mounts the backup directory. This keeps the backup logic separate from the database service and avoids bloat in your application containers.
-
-Here is a complete `compose.yml` with a PostgreSQL instance and an automated backup sidecar:
-
-```yaml
+cat > compose.yaml <<'EOF'
 services:
-  postgres:
+  source:
     image: postgres:16-alpine
-    container_name: postgres
-    restart: unless-stopped
-    volumes:
-      - pg_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: appdb
-      POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-password
+    secrets:
+      - db-password
+    volumes:
+      - source_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "lab", "-d", "appdb"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
 
-  db-backup:
-    image: alpine:3.20
-    container_name: db-backup
-    restart: unless-stopped
-    volumes:
-      - ./docker-db-backup.sh:/usr/local/bin/backup.sh:ro
-      - backup_data:/backups
+  restore_test:
+    image: postgres:16-alpine
     environment:
-      DB_TYPE: postgres
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: appdb
-      DB_USER: appuser
-      DB_PASSWORD: changeme
-      BACKUP_DIR: /backups
-      RETENTION_DAYS: 14
-      S3_ENDPOINT: https://s3.us-west-004.backblazeb2.com
-      S3_BUCKET: my-homelab-backups
-      S3_PREFIX: db-backups/postgres
-      S3_ACCESS_KEY: 00Xxxxxx
-      S3_SECRET_KEY: XxxxXxxx
-      HC_UUID: 12345678-aaaa-bbbb-cccc-123456789abc
-    command: >
-      sh -c "
-        apk add --no-cache postgresql16-client mysql-client s5cmd curl bash &&
-        while true; do
-          echo '--- Starting database backup ---' &&
-          backup.sh &&
-          echo 'Next backup in 6 hours' &&
-          sleep 21600
-        done
-      "
-    depends_on:
-      postgres:
-        condition: service_healthy
+      POSTGRES_DB: restoredb
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD_FILE: /run/secrets/db-password
+    secrets:
+      - db-password
+    volumes:
+      - restore_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "lab", "-d", "restoredb"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+secrets:
+  db-password:
+    file: ./db-password
 
 volumes:
-  pg_data:
-  backup_data:
+  source_data:
+  restore_data:
+EOF
+
+docker compose config --quiet
+docker compose up --wait --wait-timeout 120
 ```
 
-Key points about this setup:
+Use a Compose version supporting the wait flags and inspect logs if startup fails. Record image digests: the version-series tag can change.
 
-- The backup container installs the database client tools and `s5cmd` at startup
-- The `sleep 21600` loop runs backups every 6 hours
-- `depends_on: condition: service_healthy` ensures the database is ready before the backup container starts
-- The backup script runs on the same Docker network, so `DB_HOST=postgres` resolves via DNS
+The official image initializes the lab user on an empty volume. These commands use its local socket from inside the container. Production remote authentication and backup privileges need separate review. See the [official image documentation](https://github.com/docker-library/docs/blob/master/postgres/README.md).
 
-### Better Scheduling with Host Cron
-
-The sleep-loop approach works, but host cron gives you finer control. Comment out the `command` in compose and schedule a host cron job instead:
+## 2. Create a recognizable source record
 
 ```bash
-# /etc/cron.d/docker-db-backup
-0 */6 * * * root docker exec db-backup backup.sh >> /var/log/db-backup.log 2>&1
+docker compose exec -T source psql -X -U lab -d appdb -v ON_ERROR_STOP=1 <<'SQL'
+CREATE TABLE backup_marker (id integer PRIMARY KEY, value text NOT NULL);
+INSERT INTO backup_marker VALUES (1, 'gntech-restore-check');
+SQL
 ```
 
-This logs output to a file and avoids the overhead of a continuously running container. The backup container stays up but idle, consuming negligible resources.
+This intentionally creates a new table in the disposable source. If you rerun it against the same lab, the existing-table error is expected; inspect the lab state rather than suppressing the error.
 
-## Healthchecks.io Monitoring
-
-Every backup should notify you on failure. Healthchecks.io is a free SaaS service (or self-hostable with Docker) that monitors cron jobs. The script already includes ping support — enable it by setting the `HC_UUID` environment variable.
-
-The flow:
-
-1. Backup starts → ping `https://hc-ping.com/UUID/start`
-2. Backup succeeds → ping `https://hc-ping.com/UUID`
-3. Backup fails → ping `https://hc-ping.com/UUID/fail`
-
-Healthchecks sends an alert (email, Slack, Telegram, or webhook) if the ping does not arrive within the expected interval. For a 6-hour backup window, configure healthchecks with a grace period of 30 minutes. If the backup script crashes or hangs, you will know before the next backup cycle.
-
-### Self-Hosted Healthchecks with Docker Compose
-
-If you prefer to keep everything local, run healthchecks in a sidecar stack:
-
-```yaml
-services:
-  healthchecks:
-    image: linuxserver/healthchecks:latest
-    container_name: healthchecks
-    restart: unless-stopped
-    ports:
-      - "8000:8000"
-    volumes:
-      - hc_data:/config
-    environment:
-      SITE_ROOT: https://healthchecks.yourdomain.com
-      SECRET_KEY: your-secret-key-here
-      SUPERUSER_EMAIL: admin@yourdomain.com
-      SUPERUSER_PASSWORD: changeme
-      DB_HOST: hc-db
-      DB_PORT: 3306
-      DB_NAME: healthchecks
-      DB_USER: hcuser
-      DB_PASSWORD: changeme
-    depends_on:
-      hc-db:
-        condition: service_healthy
-
-  hc-db:
-    image: mariadb:11
-    container_name: hc-db
-    restart: unless-stopped
-    volumes:
-      - hc_db_data:/var/lib/mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: healthchecks
-      MYSQL_USER: hcuser
-      MYSQL_PASSWORD: changeme
-
-volumes:
-  hc_data:
-  hc_db_data:
-```
-
-## S3-Compatible Off-Site Upload with s5cmd
-
-Pushing backups off-site protects against hardware failure, theft, or disaster. The script supports any S3-compatible endpoint — Backblaze B2, Cloudflare R2, MinIO, Wasabi, or AWS S3 itself.
-
-`s5cmd` is significantly faster than the AWS CLI for parallel uploads. Install it in the backup container, or use the `aws` CLI as a fallback (the script checks for `s5cmd` first).
-
-Typical Backblaze B2 pricing: $0.006/GB/month for storage, $0.01/GB for download. A homelab with 20 GB of daily database dumps costs under $1/month with a 30-day retention on B2.
-
-To reduce storage costs further, enable server-side compression by storing `.zst` (zstd) files instead of `.gz`:
+## 3. Write an atomic backup script
 
 ```bash
-# In backup.sh, replace gzip with zstd for better compression ratio
-pg_dump -h "${DB_HOST}" -U "${DB_USER}" -d "${DB_NAME}" --no-owner --no-acl \
-  | zstd -6 -o "${FILEPATH%.gz}.zst"
-```
-
-## Retention Policy and Cleanup
-
-The script prunes local backups older than `RETENTION_DAYS` using `find -mtime`. For remote backups, implement S3 lifecycle rules instead of script-level cleanup — they run on the storage side and consume zero compute.
-
-### S3 Lifecycle Rule (Backblaze B2 Example)
-
-```xml
-<LifecycleConfiguration>
-  <Rule>
-    <ID>Delete old database backups</ID>
-    <Filter>
-      <Prefix>db-backups/postgres/</Prefix>
-    </Filter>
-    <Status>Enabled</Status>
-    <Expiration>
-      <Days>90</Days>
-    </Expiration>
-  </Rule>
-</LifecycleConfiguration>
-```
-
-For MinIO, use `mc`:
-
-```bash
-mc ilm rule add myminio/my-homelab-backups \
-  --prefix "db-backups/" \
-  --expire-days 90
-```
-
-## Automated Restore Testing
-
-A backup you never test is not a backup. Add a weekly restore verification to your cron:
-
-```bash
-#!/bin/bash
-# test-db-restore.sh — Verify latest backup can restore cleanly
+cat > backup.sh <<'SCRIPT'
+#!/usr/bin/env bash
 set -euo pipefail
+umask 077
+cd -- "$(dirname -- "$0")"
 
-DB_HOST="${DB_HOST:-localhost}"
-DB_USER="${DB_USER:-appuser}"
-DB_PASSWORD="${DB_PASSWORD:-changeme}"
-RESTORE_DB="test_restore_$(date +%Y%m%d)"
-BACKUP_DIR="${BACKUP_DIR:-/backups}"
+# One instance of this workflow at a time.
+exec 9>backup.lock
+flock -n 9 || { echo "Backup already running" >&2; exit 1; }
 
-export PGPASSWORD="${DB_PASSWORD}"
+test -d backups
+partial=$(mktemp "$PWD/backups/appdb-$(date -u +%Y%m%dT%H%M%SZ).XXXXXX.partial")
+trap 'rm -f -- "$partial"' EXIT
 
-# Find the latest backup
-LATEST=$(ls -t "${BACKUP_DIR}"/*.sql.gz 2>/dev/null | head -1)
-if [ -z "$LATEST" ]; then
-  echo "No backup found in ${BACKUP_DIR}"
-  exit 1
-fi
+docker compose exec -T source pg_dump -U lab -d appdb --format=custom > "$partial"
+test -s "$partial"
 
-echo "Testing restore from: ${LATEST}"
+# A readable archive index is useful but is not a full restore test.
+docker compose exec -T source pg_restore --list < "$partial" > /dev/null
 
-# Create a temporary database
-createdb -h "${DB_HOST}" -U "${DB_USER}" "${RESTORE_DB}"
+final="${partial%.partial}.dump"
+mv -- "$partial" "$final"
+printf 'Published dump: %s\n' "$final"
+SCRIPT
 
-# Restore into it
-gunzip -c "${LATEST}" | psql -h "${DB_HOST}" -U "${DB_USER}" -d "${RESTORE_DB}" > /dev/null 2>&1
-
-# Verify it has data
-TABLE_COUNT=$(psql -h "${DB_HOST}" -U "${DB_USER}" -d "${RESTORE_DB}" -t -c \
-  "SELECT count(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
-
-echo "Restore verified — ${TABLE_COUNT} tables in restore database"
-
-# Clean up
-dropdb -h "${DB_HOST}" -U "${DB_USER}" "${RESTORE_DB}"
-
-unset PGPASSWORD
-echo "Restore test passed: $(basename ${LATEST})"
+chmod 700 backup.sh
+./backup.sh
 ```
 
-Save the restore test script to your compose directory, mount it into the backup container, and schedule it:
+A dump or archive-list failure exits nonzero and leaves no published .dump file. The temporary file and final file share a filesystem, allowing publication by rename. Existing successful archives are retained.
 
-```yaml
-# Add to db-backup volumes in compose.yml
-volumes:
-  - ./docker-db-backup.sh:/usr/local/bin/backup.sh:ro
-  - ./test-db-restore.sh:/usr/local/bin/test-restore.sh:ro
-  - backup_data:/backups
-```
+The custom archive is already compressed by default and is read by pg_restore; it is not a gzip-compressed SQL script. Plain SQL requires a different restore command. See [pg_dump](https://www.postgresql.org/docs/16/app-pgdump.html).
+
+The source database remains available during a logical dump. The dump covers one database, not cluster roles, tablespaces, application attachments, or a coordinated snapshot of multiple databases. Plan those separately.
+
+## 4. Restore a chosen archive into the empty test instance
+
+Run this once against the fresh restore_test database. Select the exact .dump filename printed by backup.sh:
 
 ```bash
-# /etc/cron.d/docker-db-restore
-0 3 * * 1  root docker exec db-backup bash /usr/local/bin/test-restore.sh >> /var/log/db-restore.log 2>&1
+read -r -p 'Archive path under backups/: ' archive
+test -s "$archive" &&
+  docker compose exec -T restore_test pg_restore \
+    --exit-on-error --single-transaction --no-owner --no-privileges \
+    -U lab -d restoredb < "$archive"
 ```
 
-This runs every Monday at 3:00 AM. If the restore test fails, it exits non-zero and cron mails the output to root. Pair it with healthchecks for alerting.
+Stop if the restore fails. Repeating it into a populated database is not an independent recovery test. Do not add clean/drop options or redirect it at source to bypass that problem.
 
-## Going Further
+Verify the marker using an assertion that fails on missing or incorrect data:
 
-- **Encryption**: Pipe the dump through GPG before upload: `pg_dump ... | gpg --encrypt --recipient your-key > backup.sql.gz.gpg`
-- **Parallel databases**: Loop over a list of `DB_NAME` values in the script to back up all databases on a server
-- **Prometheus metrics**: Emit a gauge file with the backup timestamp and size, then scrape it with Prometheus node_exporter's `--collector.textfile.directory`
-- **Slack/webhook alerts**: Add a `curl` POST to a Slack webhook or ntfy.sh topic when a backup fails
+```bash
+docker compose exec -T restore_test psql -X -U lab -d restoredb -v ON_ERROR_STOP=1 <<'SQL'
+DO $$
+BEGIN
+  IF (SELECT count(*) FROM backup_marker
+      WHERE id = 1 AND value = 'gntech-restore-check') <> 1 THEN
+    RAISE EXCEPTION 'Restore marker verification failed';
+  END IF;
+END
+$$;
+SQL
+```
 
-## Why This Matters for Your Homelab
+A successful marker test establishes this lab's expected row, not an entire application's correctness. Add schema, data, permissions, extension, and application checks for production. See [pg_restore](https://www.postgresql.org/docs/16/app-pgrestore.html).
 
-Databases power most self-hosted services — Immich, Nextcloud, Gitea, Vaultwarden, PostgreSQL for monitoring stacks, MariaDB for WordPress or Mattermost. Losing any of these is painful. A 10-minute cron setup with a 20-line script protects against data loss, gives you portable SQL dumps, and sends alerts when something goes wrong.
+For plain SQL imports, use psql with ON_ERROR_STOP so SQL errors propagate. Do not hide stderr or treat “some tables exist” as a passed restore.
 
-The full script is on the GnTech blog GitHub repository. Download it, drop it into your compose directory, set your environment variables, and schedule the cron job. Your future self will thank you when you need to restore a single table six months from now.
+## 5. Schedule after the manual recovery test
+
+Move the validated project to a stable host path before scheduling. Test backup.sh as the scheduler's actual user, using the installed Docker executable and Compose plugin. Confirm its PATH, permissions, mount state, logs, and time zone.
+
+The script already takes a nonblocking lock. Use a host timer or cron job to invoke it once per scheduled run; do not wrap it in a tight retry loop or rely on installing client tools every time a container starts.
+
+Connect failure and missed-run alerts to the actual command result. Send success only after every required stage succeeds, including any required off-site transfer. A notification transport failure should be visible and should not turn a failed dump into success.
+
+Keep retention separate until recovery is proven. Preview candidate archives, verify off-site availability and required recovery history, and scope deletion to this workflow. Do not delete older backups before confirming the new required copy succeeded.
+
+## 6. Add encrypted off-site recovery
+
+Database dumps here are plaintext data in a compressed archive. File permissions restrict local access but are not encryption.
+
+Use the [Restic backup and restore guide](/posts/2026-05-19-restic-docker-backup-strategy/) to protect completed archives. Select only published .dump files, excluding .partial files. Validate the remote repository and restore an archive from that remote copy into another isolated instance.
+
+Keep repository credentials, database versions, extension requirements, application secrets, and recovery instructions outside the original host. Measure recovery time; neither a successful upload nor a nonempty archive proves recoverability.
+
+Logical dumps do not provide arbitrary point-in-time recovery. Review [PostgreSQL backup guidance](https://www.postgresql.org/docs/16/backup-dump.html) and WAL-based recovery requirements when the recovery target demands more than periodic snapshots.
+
+## Stop the lab
+
+```bash
+docker compose down
+```
+
+This retains the lab volumes and archives for inspection. Removing the disposable volumes is a separate decision after checking recovery evidence. No production database should be attached to this project.
+
+## Continue reading
+
+- [Compose health checks](/posts/2026-05-14-docker-compose-healthchecks/) — Separate startup readiness from job success.
+- [Backup strategy](/posts/2026-05-23-proxmox-backup-strategies/) — Define recovery targets and independent copies.
