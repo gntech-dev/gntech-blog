@@ -1,283 +1,117 @@
 ---
-title: "Proxmox Backup Server — Installation, Datastore Tuning, and Garbage Collection"
-description: "Install Proxmox Backup Server on Debian, create a datastore with proper verification and GC intervals, prune backups, and integrate with a Proxmox VE host for automated VM/CT backups."
+title: "Proxmox Backup Server: Setup, Retention, and a First Restore Test"
+description: "Set up a PBS datastore, connect Proxmox VE, schedule retention and verification, and restore a disposable guest before relying on backups."
 date: 2026-05-08T04:00:00-04:00
-tags:
-  - proxmox
-  - backup
-  - pbs
-  - storage
-  - homelab
-categories:
-  - homelab
-  - storage
+lastmod: 2026-10-31
+draft: false
+tags: [proxmox, backup, pbs, storage, homelab]
+categories: [homelab, storage]
+aliases:
+  - /posts/2026-05-28-proxmox-backup-server-setup/
+summary: "One PBS setup workflow: dedicated storage, authenticated PVE access, maintenance jobs, and an isolated restore test."
 ---
 
-Proxmox Backup Server (PBS) is purpose-built backup storage for Proxmox VE. It does one thing and does it well: store, deduplicate, verify, and garbage-collect VM and container backups. No more cramming vzdump archives onto a NFS share and hoping they survive.
+Proxmox Backup Server (PBS) stores deduplicated guest backups for Proxmox VE (PVE). Start with one disposable guest and prove you can recover it before expanding the job to important systems.
 
-This guide covers installing PBS on Debian 12, creating a datastore with sane retention, connecting a PVE host, and avoiding the gotchas that'll eat your disk space.
+This guide consolidates the earlier PBS setup articles. Installation uses the official ISO and configuration uses the web interfaces; menu labels can vary by installed release.
 
----
+## Verification status
 
-## Why PBS Instead of a Simple NFS Export
+| Area | Evidence and limits |
+|---|---|
+| Technical review | Reviewed against the official documentation linked below on October 31, 2026. |
+| Examples | Names and schedules are proposed lab settings. No capacity or speed results are claimed. |
+| Runtime | Installation, backups, encryption recovery, sync, and restore have not been executed for this revision. |
+| Completion gate | Record a successful backup and isolated restore on your own installed versions. |
 
-| Capability | NFS vzdump | PBS |
-|------------|-----------|-----|
-| Deduplication | None | Chunk-level, across all backups |
-| Incremental backups | Full dump each time | Changed blocks only |
-| Integrity verification | None | Auto-verify after backup |
-| Garbage collection | None | Prunes orphaned chunks |
-| Restore granularity | Full restore only | File-level, single disk, or full VM |
+## 1. Choose the failure boundary
 
-For a homelab with multiple VMs and LXCs, the deduplication alone saves hours of transfer and disk space. Incremental backups mean daily backups take seconds, not minutes.
+Prefer separate hardware and storage when backups must survive loss of the PVE host. A PBS VM is useful for learning, but a VM and datastore on that same physical host share its failure risks. Keep another independent copy before depending on that arrangement.
 
----
+Download the current PBS ISO from [Proxmox](https://www.proxmox.com/en/downloads). Follow the [installation guide](https://pbs.proxmox.com/docs/installation.html), check its requirements, and identify the installation disk carefully: the installer overwrites its target. Use a separate backup disk or filesystem and document how it is attached.
 
-## Installation
+After installation, open `https://YOUR-PBS-HOST:8007`, sign in with the administrator credentials created during installation, and configure updates for the installed release and subscription status. Avoid copying an older Debian repository stanza into a newer installation.
 
-PBS ships as a standalone ISO, but I'm installing it on Debian 12 running in a Proxmox VM for flexibility.
+Record PBS and PVE versions, datastore location, network access, and recovery credentials somewhere accessible if the PVE host fails.
 
-### VM Specs
+## 2. Prepare and create the datastore
 
-| Setting | Value |
-|---------|-------|
-| OS | Debian 12 (Bookworm) |
-| vCPUs | 2 |
-| RAM | 4 GB |
-| System disk | 32 GB (OS + PBS metadata) |
-| Backup storage | 500 GB raw disk passed as `/dev/vdb` |
-| IP | 10.0.20.50/24 (VLAN 20 LAB) |
+Use PBS **Administration → Storage/Disks** to inspect storage. Creating a filesystem or pool can erase its selected disks; confirm device identities before proceeding. Follow the [storage documentation](https://pbs.proxmox.com/docs/storage.html) for the chosen filesystem.
 
-The backup storage disk is separate from the OS disk. This matters: if the OS disk dies, your backup data doesn't disappear with it.
+Once the dedicated filesystem is mounted, add a datastore:
 
-### Add PBS Repository
-
-```bash
-echo "deb http://download.proxmox.com/debian/pbs bookworm pbs-no-subscription" > /etc/apt/sources.list.d/pbs.list
-```
-
-Fetch the repo key:
-
-```bash
-curl -fsSL https://enterprise.proxmox.com/debian/proxmox-release-bookworm.gpg -o /etc/apt/trusted.gpg.d/proxmox-release-bookworm.gpg
-```
-
-Install:
-
-```bash
-apt update && apt install -y proxmox-backup-server
-```
-
-The service starts on port 8007. Point a browser at `https://10.0.20.50:8007` and you'll get the web UI.
-
-> **HTTPS is required.** PBS uses a self-signed cert by default. Accept it in your browser or upload a trusted cert under Administration → Certificates.
-
----
-
-## Datastore Creation
-
-A datastore is a directory managed by PBS with its own chunk store, verification schedule, and GC policy. Create one on the backup disk:
-
-```bash
-mkdir -p /backup/pbs-datastore
-```
-
-In the web UI: Datastore → Add Datastore
-
-| Field | Value |
-|-------|-------|
+| Setting | Example |
+|---|---|
 | Name | `main` |
-| Path | `/backup/pbs-datastore` |
-| GC Schedule | daily at 02:00 |
-| Verification Schedule | daily at 03:00 |
-| Verify New | Yes |
+| Backing path | `/mnt/datastore/main` on the prepared backup filesystem |
+| Capacity | Sized from measured backup growth and retention |
 
-The datastore path should be a **dedicated disk or filesystem**, not the OS root. ZFS is ideal for the datastore (compression, checksums), but ext4 works fine.
+Creating a directory alone does not mount a backup disk. Check that the backing filesystem is present before creating the datastore, and confirm it returns after reboot. Keep access-time behavior compatible with PBS garbage collection; do not apply the old `atime=off` tuning example.
 
----
+Let PBS manage datastore contents. Do not manually remove chunks to make space.
 
-## Storage Under the Hood
+## 3. Connect PVE with a dedicated account
 
-PBS stores backups as chunk-addressed blobs inside `.chunks/`. A 500 GB datastore with deduplication typically holds the equivalent of 2—3 TB of raw VM disk data before compression.
+In PBS, create a dedicated `backup@pbs` user with a strong password. Grant the `DatastoreBackup` role on `/datastore/main` for this example. That ACL path identifies the PBS datastore; it is different from its filesystem path. Use an administrator separately for maintenance.
 
-On disk:
+In PVE, open **Datacenter → Storage → Add → Proxmox Backup Server**:
 
-```
-/backup/pbs-datastore/
-├── .chunks/           # Deduplicated data chunks
-├── .gc-candidates/    # Orphaned chunks pending GC
-├── ct/                # LXC backups
-└── <PBS_ID>/          # VM or CT backup index
-```
-
-The chunk store is content-addressed: each chunk is named by its SHA-256 hash. Identical blocks across VMs and versions collapse to one copy.
-
----
-
-## Retention Policies
-
-PBS uses **prune** rules to keep your backup count manageable. I run two schedule-level policies:
-
-### Prune Job — Keep
-
-```
-Keep last 7 daily
-Keep last 4 weekly
-Keep last 3 monthly
-```
-
-This gives a month of recovery granularity without filling the disk. The prune runs nightly and removes backup snapshots according to the rule.
-
-Prune only removes backup snapshots, not the underlying data chunks. That's where garbage collection comes in.
-
----
-
-## Garbage Collection
-
-GC reclaims space from chunks that are no longer referenced by any backup. PBS uses a mark-and-sweep approach:
-
-1. **Mark phase** — walks all backup snapshots and marks each referenced chunk
-2. **Sweep phase** — deletes unmarked chunks
-
-Set GC to run daily (or weekly for smaller datastores). PBS disables GC by default:
-
-Web UI → Datastore → main → Options → GC Schedule → `daily 02:00`
-
-During GC, backups can still proceed, but deduplication won't find new matching chunks for the current operation.
-
----
-
-## Connecting PVE to PBS
-
-On the Proxmox VE host, add the PBS storage:
-
-Datacenter → Storage → Add → Proxmox Backup Server
-
-| Field | Value |
-|-------|-------|
-| ID | `pbs-main` |
-| Server | `10.0.20.50` |
+| Field | Example |
+|---|---|
+| Storage ID | `pbs-main` |
+| Server | Your PBS hostname or address |
 | Datastore | `main` |
-| Username | `root@pam` (or a dedicated user) |
-| Password | (your PBS root password) |
-| Fingerprint | (paste from PBS Dashboard → Server Fingerprint) |
+| Username | `backup@pbs` |
+| Password | Enter through the interface |
+| Fingerprint | Verify against the PBS dashboard when using a self-signed certificate |
 
-The fingerprint is your TLS trust anchor. Paste it instead of disabling certificate verification. Copy it from the PBS web UI under Administration → Server Fingerprint.
+Confirm storage becomes available and inspect any authentication errors. Do not disable TLS verification to work around a mismatch. For API tokens, follow the separate privilege rules in the [user management guide](https://pbs.proxmox.com/docs/user-management.html).
 
-### Verify the Connection
+### Optional client-side encryption
 
-```bash
-pvesm status
-```
+Use the supported encryption configuration in the [PVE PBS storage documentation](https://pve.proxmox.com/pve-docs/chapter-pvesm.html#storage_pbs). Do not substitute raw OpenSSL output for a PBS key file.
 
-You should see `pbs-main` with `Active 1` and the datastore's usage stats.
+Keep the encryption key and any required recovery secrets outside the PVE cluster. Confirm an encrypted backup can be restored using that saved material before relying on it. A working storage connection alone does not prove encryption or key recovery works.
 
----
+## 4. Back up one disposable guest
 
-## Running Backups
+Create a PVE backup job targeting `pbs-main`, selecting only the test guest initially. Run it manually and inspect the task log and resulting snapshot. Give the guest a recognizable test file so you can check recovered content later.
 
-Create a backup job through the PVE web UI:
+Choose backup mode using the [PVE backup documentation](https://pve.proxmox.com/pve-docs/chapter-vzdump.html): VM and container modes have different behavior and downtime requirements. Guest-agent filesystem freezing can help consistency; databases may also need application-specific backup procedures.
 
-Datacenter → Backup → Add
+Each PBS snapshot represents a complete restore point, even though deduplication and incremental transfer reduce repeated work. Savings depend on the workload; measure them after several runs.
 
-| Field | Value |
-|-------|-------|
-| Storage | `pbs-main` |
-| Schedule | `daily 00:00` |
-| Selection mode | All (or specific VMs/CTs) |
-| Backup type | Snapshot |
-| Compression | Zstandard (zstd) |
-| Mode | Stop if running VM (or snapshot) |
+## 5. Schedule maintenance deliberately
 
-### Important: Backup Mode
+Use the datastore's prune, garbage collection, and verification controls. Example starting points:
 
-- **Stop mode** — shuts down the VM briefly for a consistent snapshot. Fast but causes downtime.
-- **Snapshot mode** — live backup with QEMU dirty bitmap. No downtime but slightly higher disk I/O during backup.
-- **Suspend mode** — hybrid, suspends the VM during snapshot.
+| Task | Lab policy |
+|---|---|
+| Backup | Daily at 00:00, after the manual test succeeds |
+| Prune | Keep 7 daily, 4 weekly, 3 monthly restore points |
+| Garbage collection | Daily in a separate maintenance window |
+| Verify | Verify new backups and periodically reverify older ones |
 
-For LXCs, snapshot mode is the default and works well. For production VMs, snapshot mode is the safer choice.
+Pruning removes snapshot metadata; garbage collection later reclaims eligible unreferenced chunks. The grace period means space may not return immediately. Verification checks stored backup integrity and complements a restore test. See [maintenance tasks](https://pbs.proxmox.com/docs/maintenance.html).
 
----
+Check actual job duration before setting overlapping schedules. Send test notifications and review failed tasks, capacity, and the age of the last successful backup.
 
-## Restore Scenarios
+## 6. Restore into an isolated test guest
 
-### Full VM Restore
+In PVE, open the PBS storage's backup list, select the test snapshot, and choose **Restore**. Use an unused guest ID and suitable destination storage. Leave automatic startup disabled.
 
-In PVE web UI, select a backup → Restore. PBS restores the full VM to any node in the cluster.
+Before starting the restored guest, inspect its network configuration and disconnect its network interfaces or attach them to an isolated test network. Avoid duplicate IP addresses and accidental access to production services.
 
-### File-Level Restore
+Boot the restored guest, check the test file and application behavior, and record the snapshot, versions, elapsed recovery time, and result. If encrypted, include a recovery exercise using the separately saved key. Delete only the disposable restored guest after confirming its ID.
 
-For Linux VMs: Right-click the backup → File Restore. PBS spawns a small QEMU that mounts the backup image and serves it over HTTP (port 10000). You browse and download individual files through the browser.
+## 7. Prepare for host or site loss
 
-### Reinstall PBS from Scratch
+Document how to reinstall PBS, reconnect surviving storage using **Reuse existing datastore**, recreate access settings, and reconnect PVE. Preserve server configuration and encryption keys separately; surviving chunks alone do not recreate every setting.
 
-Backup metadata lives in the datastore itself. If the PBS VM dies:
+For another site, use a second PBS and a supported sync job. Start with a pull job on the destination, registering the source as a remote. Confirm permissions, destination capacity, retention, and whether vanished snapshots should be removed. Test recovery from that copy too. See [remotes and sync](https://pbs.proxmox.com/docs/managing-remotes.html).
 
-1. Reinstall PBS on a new VM
-2. Reattach the backup disk
-3. Go to Datastore → Add Datastore → point at the existing path
-4. Run `proxmox-backup-manager verify` to reindex everything
+## Continue reading
 
-Your datastore is portable. The only thing you lose is the server config (users, ACLs), not the backup data.
-
----
-
-## Performance Tuning
-
-### ZFS on the Datastore
-
-If the backup disk is backed by ZFS, enable compression:
-
-```bash
-zfs set compression=zstd-3 backup-pool/pbs
-zfs set atime=off backup-pool/pbs
-```
-
-PBS already deduplicates at the application level, so ZFS dedup is wasteful. Stick to compression only.
-
-### I/O Threads
-
-In PBS datastore options, increase the verification I/O threads from 1 to 4 for faster checksumming on multi-core systems.
-
-### Network
-
-If backing up over a 1 Gbps link, consider jumbo frames (MTU 9000) between PVE and PBS. With VLAN-segmented networking, this means configuring MTU 9000 on both the bridge and the VLAN interface.
-
----
-
-## Monitoring
-
-PBS exposes a REST API at `https://<PBS-IP>:8007/api2/json/`. Useful endpoints:
-
-```
-GET /api2/json/admin/datastore — datastore usage
-GET /api2/json/nodes/localhost/tasks — active tasks
-GET /api2/json/nodes/localhost/tasks?status=running — running tasks
-```
-
-For Telegram alerts, poll the tasks endpoint for failed backup jobs. Or use PVE's built-in notification system to relay to PBS.
-
----
-
-## Gotchas
-
-**Don't let the datastore fill to 100%.** PBS can't run GC when the disk is full, which means you can't reclaim space. Set a disk usage alarm at 85%.
-
-**Slow initial backup is expected.** The first backup of a VM sends all data. Subsequent backups send only changed chunks. Expect the first run to take 5x—10x longer.
-
-**PBS doesn't compress chunks on disk by default.** Enable ZFS compression at the pool level for space savings without a CPU penalty.
-
-**Don't share the datastore path.** PBS assumes exclusive ownership of the `.chunks/` directory. Writing to it from outside PBS will corrupt the chunk store.
-
----
-
-## Summary
-
-PBS replaces fragile vzdump-to-NFS with chunk-level deduplication, incremental forever backups, and automated verification. For a homelab with 5-10 VMs and LXCs, a 500 GB datastore running daily backups with monthly retention is more than sufficient.
-
-Key takeaways:
-- Separate OS disk from backup storage
-- Enable GC and verification schedules
-- Use snapshot backup mode for live VMs
-- Restoring a file is as easy as right-click → File Restore
-- The datastore survives PBS reinstalls — the data stays portable
+- [Proxmox bridges and VLANs](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — Plan access between PVE and PBS.
+- [Intel AMT Serial over LAN](/posts/2026-10-30-intel-amt-sol-proxmox/) — Prepare console access for host recovery.
+- [Homelab monitoring](/posts/2026-05-17-homelab-monitoring-stack/) — Add operational visibility alongside backup task reviews.
