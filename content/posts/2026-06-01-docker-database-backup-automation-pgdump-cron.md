@@ -368,14 +368,14 @@ Require the same marker assertion against this **new** database:
 ```bash
 docker compose -f compose.yaml -f compose.chain.yaml exec -T recovered_db \
   psql -X -U lab -d restoredb -v ON_ERROR_STOP=1 <<'SQL'
-DO $
+DO $$
 BEGIN
   IF (SELECT count(*) FROM backup_marker
       WHERE id = 1 AND value = 'gntech-restore-check') <> 1 THEN
     RAISE EXCEPTION 'Copied repository database recovery failed';
   END IF;
 END
-$;
+$$;
 SQL
 ```
 
