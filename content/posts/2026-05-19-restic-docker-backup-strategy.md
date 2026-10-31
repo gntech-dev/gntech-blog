@@ -131,6 +131,56 @@ With copy, explicitly configure destination access and source repository/passwor
 
 See [working with repositories](https://restic.readthedocs.io/en/stable/045_working_with_repos.html). Retention is independent for each repository. Do not substitute an uncoordinated file mirror of a changing repository for a tested recovery workflow.
 
+### Rehearse recovery from a separately encrypted copy
+
+This optional extension uses a second **local** repository to test copy and credential separation. It does not test a remote backend or survive loss of this host. Continue in the disposable lab from above.
+
+```bash
+mkdir repository-copy recovered-copy
+openssl rand -base64 32 > copy-password
+cat > compose.copy.yaml <<'EOF'
+services:
+  restic:
+    volumes:
+      - ./repository-copy:/repository-copy
+    secrets:
+      - copy-password
+  recovery:
+    image: ${RESTIC_IMAGE:?Set a reviewed restic/restic image}
+    environment:
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD_FILE: /run/secrets/copy-password
+    volumes:
+      - ./repository-copy:/repository
+      - ./recovered-copy:/restore
+    secrets:
+      - copy-password
+secrets:
+  copy-password:
+    file: ./copy-password
+EOF
+
+docker compose -f compose.yaml -f compose.copy.yaml run --rm restic \
+  --repo /repository-copy --password-file /run/secrets/copy-password init
+docker compose -f compose.yaml -f compose.copy.yaml run --rm restic \
+  --repo /repository-copy --password-file /run/secrets/copy-password \
+  copy --from-repo /repository --from-password-file /run/secrets/restic-password
+```
+
+The destination has its own password. The recovery service mounts only that repository, its password, and a fresh restore directory. It has no access to the original source, repository, or password. List and verify the copied snapshot, then select its ID:
+
+```bash
+docker compose -f compose.yaml -f compose.copy.yaml run --rm recovery snapshots
+docker compose -f compose.yaml -f compose.copy.yaml run --rm recovery check --read-data
+read -r -p 'Copied snapshot ID to restore: ' copied_snapshot_id
+test -n "$copied_snapshot_id" &&
+  docker compose -f compose.yaml -f compose.copy.yaml run --rm recovery \
+    restore "$copied_snapshot_id" --target /restore
+printf 'restic-restore-check\n' | cmp - recovered-copy/source/check.txt
+```
+
+For this small lab, `check --read-data` reads all stored backup data. Budget bandwidth and time before using it on a large remote repository. Matching the marker verifies this file exercise; it does not validate a database or an application's recovery.
+
 ## 7. Automate only the verified workflow
 
 Move the validated project to a stable operational path and adapt the source mounts to prepared application data. Before scheduling, require:
