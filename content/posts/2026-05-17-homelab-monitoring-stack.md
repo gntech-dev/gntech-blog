@@ -2,7 +2,7 @@
 title: "Homelab Monitoring with Docker Compose — Prometheus and Grafana Foundations"
 description: "Build and verify a small Prometheus and Grafana stack, then add exporters, logs and notifications with clear boundaries."
 date: 2026-05-17T14:30:00-04:00
-lastmod: 2026-10-30
+lastmod: 2026-10-31
 draft: false
 aliases:
   - /posts/2026-05-09-homelab-monitoring-stack/
@@ -18,6 +18,17 @@ summary: "A small monitoring foundation you can verify before adding host export
 A dashboard is useful only when you know what its data represents. Start by proving that Prometheus can scrape a target and Grafana can query Prometheus. Add host metrics, container metrics, logs and notifications after that path works.
 
 This guide consolidates the two earlier monitoring-stack posts. It replaces their overlapping all-in-one examples with a smaller foundation and explains the prerequisites for extending it. The commands are examples, not evidence of a deployment tested during this update.
+
+## Verification status
+
+| Scope | Evidence and limits |
+| --- | --- |
+| Environment | Docker host or VM with the Compose plugin; Prometheus and Grafana images must be selected and recorded by the reader. |
+| Previously reported lab observations | The consolidated two-service example is proposed configuration; no runtime result is claimed for it. |
+| Preparation checks | 6 Bash blocks passed syntax checks and 3 generated YAML files parsed during preparation. |
+| Still to verify | Run Compose and promtool validation, start the selected releases, and confirm the self-scrape query succeeds from Grafana. Test backups separately. |
+
+*This table summarizes the evidence recorded for this article. It is not a new hardware test or a certification for other versions.*
 
 ## Know which component does what
 
