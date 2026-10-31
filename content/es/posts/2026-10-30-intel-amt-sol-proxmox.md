@@ -18,7 +18,7 @@ Una consola de recuperación sirve cuando el acceso habitual al servidor deja de
 
 Durante mis pruebas llegué al inicio de sesión de Proxmox y escribí `~.` para desconectar. Linux lo recibió como un nombre de usuario. La explicación: **cerrar la sesión de Linux y desconectar el cliente SOL son acciones diferentes**.
 
-Esta es una **edición resumida en español** de la [guía completa en inglés](/posts/2026-10-30-intel-amt-sol-proxmox/). Conserva sus bloques de comandos; los mensajes que imprimen permanecen en inglés.
+Esta es una **edición resumida en español** de la [guía completa en inglés](https://blog.gntech.me/posts/2026-10-30-intel-amt-sol-proxmox/). Conserva sus bloques de comandos; los mensajes que imprimen permanecen en inglés.
 
 ## Estado de verificación
 
@@ -197,4 +197,4 @@ Para otros estados originales, restaura por separado la habilitación y ejecuci�
 
 Conecta, verifica el nombre del host, inicia sesión, ejecuta una consulta inocua, sal hasta el aviso de login y reconecta. Comprueba por separado la visibilidad durante el arranque en una ventana de mantenimiento.
 
-Consulta la [guía completa y sus referencias](/posts/2026-10-30-intel-amt-sol-proxmox/) para ampliar el contexto. La traducción no añade validación de firmware, hardware o versiones. Para más rutas de lectura, visita [Empieza aquí](/es/start-here/).
+Consulta la [guía completa y sus referencias](https://blog.gntech.me/posts/2026-10-30-intel-amt-sol-proxmox/) para ampliar el contexto. La traducción no añade validación de firmware, hardware o versiones. Para más rutas de lectura, visita [Empieza aquí](/es/start-here/).
