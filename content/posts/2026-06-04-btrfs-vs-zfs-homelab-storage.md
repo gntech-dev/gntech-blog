@@ -1,301 +1,131 @@
 ---
 title: "Btrfs vs ZFS for Homelab Storage — Proxmox and Docker Guide"
-description: "Compare Btrfs vs ZFS for homelab storage on Proxmox and Docker. Performance, features, memory use, snapshots, and practical recommendations for choosing your filesystem."
+description: "Compare filesystem support, checksums, memory, Docker storage, expansion and recovery using the versions and workloads actually deployed."
 date: 2026-06-04T14:30:00-04:00
-tags:
-  - storage
-  - linux
-  - homelab
-  - proxmox
-  - docker
-keywords:
-  - Btrfs vs ZFS homelab Proxmox comparison guide
-  - ZFS vs Btrfs Docker storage overlay2 performance
-  - Btrfs file system features compression snapshots quotas
-  - ZFS ARC memory tuning homelab best practices
-  - Docker overlay2 storage driver ZFS performance
-  - Btrfs send receive incremental snapshot backup
-  - Proxmox ZFS Btrfs filesystem choice recommendation
-summary: "Compare Btrfs and ZFS for homelab storage on Proxmox and Docker. Architecture, memory, snapshots, compression, and practical recommendations."
+lastmod: 2026-10-31
+draft: false
+tags: [storage, linux, homelab, proxmox, docker]
+keywords: [Btrfs vs ZFS homelab, Proxmox filesystem choice, Docker storage backend, filesystem recovery]
+summary: "Choose a supported storage design from workload and recovery requirements rather than blanket filesystem rankings."
 ---
 
-## Btrfs vs ZFS for Homelab Storage — Which Filesystem Should You Choose?
+Btrfs and OpenZFS both offer checksums, snapshots and compression, but that does not make them interchangeable. The host distribution, storage layout, kernel, management tools and recovery procedure matter as much as the filesystem name.
 
-If you run a homelab with Proxmox and Docker, you will eventually face the Btrfs vs ZFS question. Both are advanced copy-on-write filesystems with checksumming, snapshots, and compression. Both have passionate advocates. And both work with Proxmox VE.
+There is no universal rule to use ZFS for every hypervisor and Btrfs for every Docker volume. Start with the platform's supported configuration and a tested recovery workflow.
 
-The short answer: **use ZFS for your hypervisor storage and Btrfs for your Docker container volumes**. But the full picture depends on your hardware, workload, and comfort with tuning.
+## Verification status
 
-This guide compares both filesystems across the metrics that actually matter in a homelab: memory use, Docker compatibility, snapshot workflows, compression performance, and pool management flexibility.
+| Area | Evidence and limits |
+|---|---|
+| Technical review | Official references below reviewed on October 31, 2026. |
+| Examples | Read-only inventory commands; Bash syntax checked. |
+| Runtime | No filesystem creation, migration, expansion, benchmark, quota or recovery test executed. |
+| Recommendation scope | Decision framework, not measured performance or a promise of support across releases. |
 
-## Architecture and Kernel Integration
+## 1. Record the installed stack
 
-The first difference is architectural. ZFS is not part of the Linux kernel — it ships as an external DKMS module maintained by the OpenZFS project. Every kernel update triggers a rebuild of `zfs.ko` and `spl.ko`. On Proxmox this is handled automatically, but you will occasionally hit a delay between a kernel release and the matching ZFS module.
-
-Btrfs lives in the Linux kernel tree, maintained by kernel developers. It compiles as part of `btrfs.ko` and is always compatible with whatever kernel you are running.
+Run applicable commands on the host that owns the storage. A guest's filesystem does not identify the hypervisor's backing pool.
 
 ```bash
-# Check your ZFS version
+uname -r
+findmnt -o TARGET,SOURCE,FSTYPE,OPTIONS
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINTS
+```
+
+On a PVE host with ZFS:
+
+```bash
+pveversion -v
 zfs --version
-
-# Check Btrfs version (kernel module)
-modinfo btrfs | grep version
-
-# Check available Btrfs features
-btrfs filesystem show /mnt/storage
+zpool status
+zfs list -o name,type,used,available,mountpoint
 ```
 
-For daily use, most people will never notice the difference. The DKMS rebuild takes a few seconds during upgrades. But if you run custom kernels or frequent edge releases, Btrfs wins on simplicity.
-
-## Memory Usage — The ZFS ARC Tax
-
-This is the area where Btrfs has a clear advantage in RAM-constrained homelabs.
-
-ZFS uses an Adaptive Replacement Cache (ARC) that eagerly consumes available memory. By default, ZFS can claim up to 50% of system RAM. On a 16 GB Proxmox host, that means 8 GB reserved for the ARC before any VMs start. You can clamp it:
+On a Btrfs host, inspect the actual mount:
 
 ```bash
-# Check current ARC size
-cat /proc/spl/kstat/zfs/arcstats | grep -E "^c |^size |^c_max"
-
-# Set ARC max in /etc/modprobe.d/zfs.conf (adjust to your system)
-options zfs zfs_arc_max=2147483648   # 2 GB
-
-# Apply without reboot
-echo 2147483648 > /sys/module/zfs/parameters/zfs_arc_max
+btrfs version
+read -r -p 'Existing Btrfs mount path: ' btrfs_mount
+sudo btrfs filesystem show "$btrfs_mount"
+sudo btrfs filesystem usage "$btrfs_mount"
 ```
 
-Btrfs uses the standard Linux page cache. It does not pre-allocate memory, does not have an ARC, and yields memory to applications when needed. On a 4 GB or 8 GB homelab node, Btrfs will leave noticeably more RAM for your workloads.
+Btrfs user-space tools and kernel implementation have separate versions. OpenZFS is maintained outside the mainline Linux kernel, but packaging varies: do not assume every PVE kernel upgrade performs a local DKMS rebuild. Use the distribution's supported kernel/module packages.
 
-**The rule of thumb**: ZFS can be used comfortably with 8 GB+ RAM. Below that, running ZFS becomes a tradeoff. Btrfs works well on anything with 2 GB or more.
+## 2. Compare operational requirements
 
-## Data Integrity and Checksumming
+| Question | OpenZFS | Btrfs |
+|---|---|---|
+| Storage organization | Pools, vdevs, filesystems and zvols | Filesystems, devices and subvolumes |
+| Snapshot scope | Dataset or zvol | Subvolume |
+| Cache model | ARC plus other system memory consumers | Linux page-cache-based operation |
+| Repair opportunity | Requires an available correct copy or recoverable redundancy | Requires an available correct copy or recoverable redundancy |
+| Capacity changes | Depend on topology, features and version | Depend on allocation profiles, free space and version |
+| Docker suitability | Check the actual image store and mounted data paths | Check the actual image store and mounted data paths |
 
-Both filesystems checksum data and metadata. Both can detect and repair silent data corruption when redundancy is available.
+A checksum can detect damage without being able to repair it. Neither a snapshot on the same storage nor a redundant layout is an independent backup.
 
-ZFS checksums every block via a Merkle tree. When configured with mirrors or raidz, it performs automatic self-healing — if one copy is corrupt, ZFS fetches a good copy and repairs the bad one.
+Btrfs profiles have different support status. The upstream [feature-status table](https://btrfs.readthedocs.io/en/latest/Status.html) currently marks RAID56 unstable. Do not treat all Btrfs RAID profiles as equivalent or infer your older kernel's support from the newest table.
+
+## 3. Check platform support before choosing
+
+PVE documents both ZFS and a Btrfs storage backend. The earlier statement that Btrfs has no platform integration was too broad. Read the documentation matching the installed release, including feature limitations and installer support.
+
+The [PVE Btrfs backend](https://github.com/proxmox/pve-docs/blob/master/pve-storage-btrfs.adoc) describes how raw guest disks use subvolumes for snapshot support. That is different from placing a Btrfs filesystem inside a guest.
+
+For a PVE deployment, evaluate the [PVE ZFS guidance](https://github.com/proxmox/pve-docs/blob/master/local-zfs.adoc), required guest-storage features, maintenance support and available recovery skills. PBS backups do not require choosing ZFS for every source guest or host filesystem.
+
+For Docker, choose a deployment boundary you can support. A VM provides its own kernel and filesystem stack; an LXC shares the host kernel and introduces nesting and permission constraints. Do not infer a supported Docker layout merely from the outer host's filesystem.
+
+## 4. Separate Docker image storage from application data
+
+On the Docker host:
 
 ```bash
-# ZFS scrub to verify and repair data
-zpool scrub rpool
-
-# Monitor scrub progress
-zpool status -v rpool
+docker version
+docker info
 ```
 
-Btrfs also checksums data and metadata. Self-healing works on RAID levels 1, 10, and (with caveats) 5 and 6.
+Record the active storage backend and backing filesystem. New Docker Engine 29 installations use the containerd image store by default; upgraded installations can retain classic storage drivers. Consult [Docker storage selection](https://docs.docker.com/engine/storage/drivers/select-storage-driver/).
 
-```bash
-# Btrfs scrub
-btrfs scrub start /mnt/storage
+The classic native Btrfs driver uses subvolumes and snapshots. It is not the same implementation as overlay2. Neither Btrfs nor ZFS alone proves that a particular overlay or snapshotter combination is supported. See the [Btrfs driver documentation](https://docs.docker.com/engine/storage/drivers/btrfs-driver/).
 
-# Status
-btrfs scrub status /mnt/storage
-```
+Named volumes and bind mounts are separate from a container's writable layer. Evaluate application data on its actual backing storage, not from an image-layer benchmark. Do not change Docker's storage configuration on a populated host without a migration and rollback plan.
 
-In practice, both handle data integrity well. ZFS is more battle-tested here, especially at scale. Btrfs has had RAID56 corruption issues that are still being resolved — if you need RAID5/6, pick ZFS.
+## 5. Measure memory and compression
 
-## Docker Storage Drivers
+ARC's maximum is a cache limit, not a fixed allocation reserved before guests start. Defaults and distribution tuning vary. Observe memory pressure, guest demand and ARC behavior before setting a smaller limit; an arbitrary 2 GiB cap is not a universal improvement.
 
-If you run Docker containers heavily, the storage driver matters.
+Btrfs also uses memory for caches and filesystem work. Neither filesystem has a single RAM threshold that predicts performance for every workload.
 
-**Docker on ZFS**: The `zfs` storage driver creates a ZFS dataset per image layer. It works well but does not support `overlay2` — Docker skips the overlay layer model entirely. Performance is generally good, but container writes go through ZFS datasets instead of the overlay union filesystem.
+Compression consumes CPU and saves space only where the data is compressible. Check actual properties, files and measured workload behavior. Do not promise a fixed percentage gain or call compression free.
 
-```json
-{
-  "storage-driver": "zfs"
-}
-```
+Btrfs compression options affect file extents; a defragment/recompress operation rewrites existing data and can unshare extents. It is not a harmless way to toggle a subvolume setting. See [Btrfs compression](https://btrfs.readthedocs.io/en/latest/Compression.html) and [filesystem operations](https://btrfs.readthedocs.io/en/latest/btrfs-filesystem.html).
 
-**Docker on Btrfs**: Docker uses the native `overlay2` driver with Btrfs as the backing filesystem. Snapshots are used for layer management. This is the same code path as ext4/XFS but with Btrfs-level snapshot capabilities.
+## 6. Plan expansion and quotas by feature
 
-```json
-{
-  "storage-driver": "overlay2"
-}
-```
+The old claim that ZFS can never add a disk to an existing vdev is incorrect. On supporting versions, [zpool attach](https://openzfs.github.io/openzfs-docs/man/master/8/zpool-attach.8.html) can add a mirror member or expand a RAID-Z group. RAID-Z expansion does not increase its parity level. Check installed features, topology, capacity behavior and recovery implications first.
 
-For container-heavy workloads, Btrfs + overlay2 is measurably faster for layer operations and is the simpler configuration. Docker's own documentation recommends overlay2 as the preferred driver.
+Btrfs device addition and removal are also constrained operations. Removal needs enough space and readable or reconstructable data; it is not a guarantee that arbitrary disks can be removed safely.
 
-```bash
-# Check your current Docker storage driver
-docker info | grep "Storage Driver"
+For quotas, select documented ZFS dataset/user limits or Btrfs quota mechanisms and test snapshot accounting. Do not apply ext4/XFS project-quota mount advice to Btrfs as a substitute for its own quota documentation.
 
-# Docker performance with Btrfs — layer pulls are faster
-docker pull nginx:latest
-```
+This comparison intentionally includes no pool creation, formatting, balancing, device removal or live cache-tuning commands.
 
-If you run Docker inside a Proxmox LXC container (which many homelabbers do), the container itself uses a ZFS dataset. But inside that LXC, Docker writes to ext4 or Btrfs depending on how the LXC is configured. Btrfs gives you the overlay2 path natively.
+## 7. Decide from recovery evidence
 
-## Compression Performance
+| Need | Practical next step |
+|---|---|
+| PVE-managed guest storage | Compare release-specific backend features and support first. |
+| Docker application persistence | Test the actual mounted path and application's consistency requirements. |
+| Frequent disk-layout changes | Model permitted operations, free-space needs and rebuild exposure. |
+| Strict data protection | Test checks, alerts, independent copies and recovery on replacement hardware. |
+| Performance problem | Benchmark a controlled workload before changing filesystem or hardware. |
 
-Both filesystems offer transparent compression. On modern hardware with AES-NI and multi-core CPUs, compression is essentially free for data workloads.
+Document the selected versions, topology, included data, maintenance procedures and recovery credentials. Test an isolated restore before moving important services. Snapshot send/receive is a transfer mechanism, not proof that a complete application can be recovered.
 
-**ZFS** uses lz4 by default, which is incredibly fast. Newer pools can use zstd at compression levels 1 through 19.
+## Continue reading
 
-```bash
-# Enable lz4 compression on a ZFS dataset
-zfs set compression=lz4 tank/data
-
-# Check current compression ratio
-zfs get compressratio tank/data
-```
-
-**Btrfs** supports zstd, lzo, and zlib. Zstd at level 1 (`zstd:1`) is the recommended balance of speed versus compression.
-
-```bash
-# Enable zstd compression on a Btrfs subvolume
-btrfs filesystem defrag -czstd /mnt/data
-
-# Set compression on mount in /etc/fstab
-UUID=your-uuid /mnt/data btrfs defaults,compress=zstd:1 0 0
-
-# Check compression ratio
-btrfs filesystem usage /mnt/data
-```
-
-In benchmarks, lz4 (ZFS) and zstd:1 (Btrfs) offer comparable performance. Zstd typically compresses 5-15% better than lz4 at level 1, with similar CPU cost.
-
-## Snapshot and Replication Workflows
-
-This is where both filesystems really shine. Native snapshots and send/receive are the killer features that make them worth choosing over ext4 or XFS.
-
-**ZFS snapshots** are instant, space-efficient, and can be sent incrementally via `zfs send -i`.
-
-```bash
-# Create a snapshot
-zfs snapshot tank/data@backup-$(date +%Y%m%d)
-
-# Send to a backup target (incremental from previous snapshot)
-zfs send -i tank/data@backup-20260601 tank/data@backup-20260604 | \
-  ssh backup-server zfs receive backup/data
-
-# Automate with sanoid
-# /etc/sanoid/sanoid.conf
-[tank/data]
-    use_template = production
-    recursive = yes
-
-[template_production]
-    hourly = 24
-    daily = 30
-    monthly = 3
-```
-
-**Btrfs snapshots** are also instant. Send/receive works similarly but uses a different syntax.
-
-```bash
-# Create a read-only snapshot
-btrfs subvolume snapshot -r /mnt/data /mnt/data/.snapshots/backup-20260604
-
-# Send to a backup target
-btrfs send /mnt/data/.snapshots/backup-20260604 | \
-  ssh backup-server btrfs receive /backup/data
-
-# Automate with btrbk
-# /etc/btrbk/btrbk.conf
-volume /mnt/data
-    snapshot_dir .snapshots
-    snapshot_create hourly
-    snapshot_retain_min 2d
-    snapshot_retain_max 3m
-    target ssh://backup-server//backup/data
-```
-
-Both workflows are production-grade. ZFS send/receive is more widely documented, but Btrfs send/receive has matured significantly and works reliably across machines.
-
-## Pool Management and RAID
-
-ZFS pools consist of vdevs. You cannot add a single disk to an existing vdev — you add an entire vdev (mirror or raidz). You cannot shrink a pool. Pool expansion is planned in OpenZFS but not yet stable.
-
-```bash
-# ZFS: create a 3-disk raidz1 pool
-zpool create tank raidz1 /dev/sda /dev/sdb /dev/sdc
-
-# Add a mirror vdev
-zpool add tank mirror /dev/sdd /dev/sde
-```
-
-Btrfs allows adding and removing devices from an existing filesystem. You can start with two disks in RAID1 and add a third later.
-
-```bash
-# Btrfs: create a 2-disk RAID1 filesystem
-mkfs.btrfs -d raid1 -m raid1 /dev/sda /dev/sdb
-
-# Add a third disk
-btrfs device add /dev/sdc /mnt/storage
-
-# Rebalance to RAID1 across all three
-btrfs balance start -dconvert=raid1 -mconvert=raid1 /mnt/storage
-
-# Remove a device (if space allows)
-btrfs device remove /dev/sdb /mnt/storage
-```
-
-For flexibility with mixed disk sizes, Btrfs is the clear winner. For fixed, redundant pools you will never change, ZFS is equally capable.
-
-## Quotas and Resource Limits
-
-ZFS quotas are mature and reliable:
-
-```bash
-# Set a dataset quota (hard limit)
-zfs set quota=500G tank/data/website
-
-# Refquota limits the dataset itself, not snapshots
-zfs set refquota=500G tank/data/website
-
-# User quota
-zfs set userquota@www-data=100G tank/data/website
-```
-
-Btrfs qgroups have a history of inconsistency, especially with snapshots. They work for basic cases but can produce surprising results under snapshot-heavy workloads. For Docker use cases, the standard filesystem-level quotas (`quota` mount option with project quotas) are more reliable.
-
-```bash
-# Btrfs subvolume quota (use with caution)
-btrfs qgroup limit 500G /mnt/data/website
-
-# More reliable: use standard project quotas
-mount -o prjquota,compress=zstd:1 /dev/sda /mnt/data
-```
-
-If quotas are critical for multi-tenant setups, ZFS wins here.
-
-## Proxmox Integration
-
-Proxmox VE installs with either ext4, XFS, or ZFS as the root filesystem. Btrfs is not an installer option but can be configured manually.
-
-For the hypervisor itself, ZFS is the recommended choice because:
-- It integrates with Proxmox Backup Server natively
-- It provides boot environments for safe upgrades
-- Proxmox manages ZFS datasets for VM/LXC storage automatically
-
-```bash
-# Add a ZFS storage to Proxmox
-pvesm add zfspool storage --pool tank --content images,rootdir
-```
-
-For Docker workloads inside Proxmox, running Docker in a LXC container with Btrfs storage (or even on its own Btrfs-formatted disk) gives you the overlay2 performance advantage.
-
-A common hybrid strategy:
-- **Proxmox host**: ZFS for VM/LXC storage and hypervisor reliability
-- **Docker LXC**: Btrfs subvolume or disk for container storage
-
-## Decision Matrix
-
-| Factor | ZFS | Btrfs |
-|--------|-----|-------|
-| Memory usage | High (ARC) | Low (page cache) |
-| Docker storage driver | Non-overlay (zfs) | overlay2 native |
-| Data integrity | Battle-tested, mature | Mature for RAID1/10 |
-| Snapshots | Excellent | Excellent |
-| Quotas | Mature, reliable | Qgroups still maturing |
-| Pool flexibility | Cannot add single disk | Add/remove disks freely |
-| Kernel integration | DKMS module | In-kernel |
-| RAID5/6 | Production grade | Experimental |
-| Compression | lz4 (fast), zstd | zstd:1 (best ratio) |
-| Proxmox integration | Native installer option | Manual setup |
-
-Choose **ZFS** when: You have 8 GB+ RAM, need RAID5/6, require reliable quotas, or want the most battle-tested data integrity for the hypervisor.
-
-Choose **Btrfs** when: You are RAM-constrained, run Docker heavily, want the flexibility to add and remove disks, or prefer deep kernel integration.
-
-The best homelab configuration uses both: ZFS for your Proxmox storage pool and VMs, Btrfs for your Docker container volumes inside a dedicated LXC. You get the reliability of ZFS where it matters and the performance of overlay2 where Docker workloads count.
+- [Storage benchmarking](/posts/2026-05-23-linux-storage-benchmarking/) — Record a bounded baseline.
+- [ZFS snapshots and recovery](/posts/2026-05-08-zfs-snapshot-strategies/) — Separate dataset recovery from guest backups.
+- [Backup strategy](/posts/2026-05-23-proxmox-backup-strategies/) — Plan independent copies and recovery targets.
