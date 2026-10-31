@@ -316,6 +316,12 @@ Polybar, custom wallpapers, a newer-looking terminal, and clipboard history are 
 
 The T420 does not need to replace a modern workstation to be useful. Mine has a focused job: connect to the machines doing the heavy work, keep a terminal open, and let me administer the lab from a keyboard I enjoy using.
 
+## Continue reading
+
+- [Intel AMT Serial over LAN](/posts/2026-10-30-intel-amt-sol-proxmox/) — Use your administration client to reach a compatible host's text console.
+- [Proxmox bridges and VLANs](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — Learn how the machines you administer connect to their networks.
+- [Prometheus and Grafana foundations](/posts/2026-05-17-homelab-monitoring-stack/) — Build a dashboard for checking the lab from your client.
+
 ## References and image provenance
 
 - [ArchWiki: Lenovo ThinkPad T420](https://wiki.archlinux.org/title/Lenovo_ThinkPad_T420)
