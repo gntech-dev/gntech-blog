@@ -17,7 +17,8 @@ A successful backup command does not prove an application can be recovered. Star
 |---|---|
 | Technical review | Official Restic references below reviewed on October 31, 2026. |
 | Static checks | Bash syntax, embedded Compose YAML, and path mappings checked. |
-| Runtime | Docker and Restic unavailable in the review environment; no image pull, repository initialization, backup, or restore executed. |
+| Runtime | [Recovery lab run 41245705581](https://github.com/gntech-dev/gntech-blog/actions/runs/41245705581) passed on October 31, 2026: initialization, backup, restore, retention preview, separately encrypted copy, wrong-password rejection, full copied-repository data check, and recovery without original materials. |
+| Tested versions | GitHub-hosted Ubuntu 24.04 amd64; Docker 28.0.4; Compose 2.38.2; Restic 0.19.1. Image digest: `sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510`. |
 | Scope | Disposable local file lab. Production databases, off-site recovery and scheduling require separate validation. |
 
 ## 1. Separate source consistency from encryption
@@ -70,6 +71,8 @@ EOF
 docker compose config --quiet
 docker compose run --rm --interactive=false restic version
 ```
+
+The commands use `--interactive=false` so a container cannot consume input intended for a later host-side prompt when these steps run from a script. Repository passwords come from mounted files.
 
 This is a one-shot service, not a sleeping container with a background cron daemon. It needs no Docker socket. The password file is created in a new private directory; do not regenerate the password when reconnecting to an existing repository.
 
