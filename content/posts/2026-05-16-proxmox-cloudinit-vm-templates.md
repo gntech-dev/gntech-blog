@@ -1,610 +1,140 @@
 ---
 title: "Proxmox Cloud-Init VM Templates — Automated Virtual Machine Deployment"
-description: "Create reusable Proxmox VM templates with cloud-init for automated OS configuration. Step-by-step guide with Ubuntu cloud images, user setup, SSH keys, and CI-driven cloning."
+description: "Create an Ubuntu cloud-image template, clone it with an SSH public key, and verify first-boot configuration before adding custom user data."
 date: 2026-05-16T07:00:00-04:00
-tags:
-  - proxmox
-  - automation
-  - linux
-  - devops
-  - homelab
-keywords:
-  - Proxmox cloud-init VM template automation
-  - Proxmox Ubuntu cloud image template
-  - Proxmox automated VM deployment
-  - cloud-init Proxmox user configuration
-  - Proxmox VM template creation script
-  - Proxmox qm cloud-init guide
-  - Proxmox VM clone from template
-summary: "Create reusable Proxmox VM templates with cloud-init to deploy Ubuntu and Debian VMs in under 60 seconds. Covers image preparation, cloud-init user/SSH/package config, template creation, and CLI cloning."
+lastmod: 2026-10-31
+draft: false
+tags: [proxmox, automation, linux, devops, homelab]
+keywords: [Proxmox cloud-init template, Ubuntu cloud image, qm clone, cloud-init SSH keys]
+summary: "Build an unbooted cloud-image template and verify a disposable clone before extending provisioning."
 ---
 
-If you run Proxmox VE, you've spun up a VM from an ISO at least once.
-Maybe dozens of times. Boot the ISO, click through the installer, set a
-hostname, create a user, wait for updates, install QEMU Guest Agent,
-shut down, convert to template — forty-five minutes per VM.
+Cloud images let you prepare a reusable guest without repeating an ISO installation. Start with one disposable clone and working SSH access. Add packages and application provisioning after that baseline succeeds.
 
-Forty-five minutes, and you get one VM. Clone ten VMs for a testing
-environment and you've burned a full work day on installation.
+## Verification status
 
-Cloud-init eliminates this. You prepare one template image, define your
-OS configuration in YAML, and Proxmox applies it automatically on first
-boot. New VMs deploy in 30-60 seconds with SSH keys, users, packages,
-and network config pre-configured.
+| Area | Evidence and limits |
+|---|---|
+| Technical review | Reviewed against the official references below on October 31, 2026. |
+| Shell examples | Syntax checked with Bash; commands were not executed against PVE. |
+| Runtime | Disk import, cloning, SSH access, and guest initialization remain untested for this revision. |
+| Timing | No deployment-time guarantee is claimed. |
 
-This guide covers the exact process: downloading cloud images, creating
-Proxmox templates, configuring cloud-init user data, and cloning VMs
-from the CLI. The result is a repeatable pipeline that turns VM
-deployment into a one-liner.
+## 1. Prepare the inputs
 
----
+Run PVE commands as root on the intended node. Choose two unused IDs; the example uses template 9100 and test clone 9101. Check the cluster inventory, including containers, before proceeding.
 
-## What Cloud-Init Does in Proxmox
+Choose storage that supports VM disks, confirm free capacity, and select a bridge connected to your test network with DHCP. The examples use `local-lvm` and `vmbr0`; change them to match your host.
 
-Cloud-init is the industry standard for initializing cloud instances. It
-runs on first boot and applies configuration from a data source — in
-Proxmox's case, a small CD-ROM with YAML files that Proxmox generates
-from the VM's cloud-init settings.
+Download an official Ubuntu 24.04 AMD64 cloud image from [Ubuntu cloud images](https://cloud-images.ubuntu.com/noble/current/). Verify it against the publisher's authenticated checksum information and retain its exact filename and checksum for reproducibility. Place the verified image at the path used below.
 
-Proxmox's cloud-init support covers:
+Copy only your administrator workstation's SSH **public** key to `/root/cloud-template-admin.pub` on PVE. Keep the private key on the workstation. Do not copy the host's entire `authorized_keys` file into every guest.
 
-- **User setup:** Username, password, SSH authorized keys
-- **Hostname:** Set per-VM hostname automatically
-- **Network:** Static IP, DHCP, VLAN, DNS, gateway
-- **Packages:** Install packages on first boot
-- **Commands:** Run arbitrary shell commands on first boot
-- **DNS:** Custom nameservers and search domains
+## 2. Create an unbooted template
 
-The advantage over traditional ISO installs: you never touch an
-installer dialog. The OS boots, cloud-init reads the config from the
-attached CD-ROM, and the VM is ready in 30 seconds.
-
----
-
-## Step 1: Download a Cloud-Init Ready Image
-
-Proxmox works best with official Ubuntu and Debian cloud images. These
-are compact, optimized for first-boot initialization, and include
-cloud-init pre-installed.
-
-**Ubuntu 24.04 LTS (Noble) — recommended for most homelab VMs:**
+The following block runs in a Bash subshell and stops on an error. It creates new resources; review the IDs, storage, bridge, and image path first.
 
 ```bash
-# Download the official Ubuntu 24.04 cloud image
-wget https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img \
-  -O /var/lib/vz/template/iso/ubuntu-24.04-cloudimg.img
+(
+set -euo pipefail
+template_id=9100
+disk_store=local-lvm
+bridge=vmbr0
+image=/var/lib/vz/template/iso/ubuntu-24.04-cloudimg.img
 
-# Debian 12 (Bookworm)
-wget https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-generic-amd64.qcow2 \
-  -O /var/lib/vz/template/iso/debian-12-cloudimg.qcow2
+test -s "$image"
+pvesm status --storage "$disk_store"
+ip link show "$bridge"
+
+# qm create refuses an existing guest ID.
+qm create "$template_id" --name ubuntu-2404-template \
+  --memory 2048 --cores 2 --ostype l26 \
+  --net0 "virtio,bridge=$bridge" --scsihw virtio-scsi-pci
+qm set "$template_id" --scsi0 "$disk_store:0,import-from=$image"
+qm set "$template_id" --ide2 "$disk_store:cloudinit"
+qm set "$template_id" --boot order=scsi0 --serial0 socket --vga serial0
+qm resize "$template_id" scsi0 32G
+qm set "$template_id" --ipconfig0 ip=dhcp
+qm config "$template_id"
+qm template "$template_id"
+)
 ```
 
-These images are qcow2 format, 500-600 MB, and boot to a login prompt
-with no configuration — that's where cloud-init takes over.
+Import-and-attach avoids guessing the allocated volume name. The 32 GiB disk size is an example; select a size larger than the image's virtual disk. Guest filesystem expansion must be checked after boot.
 
-**Why cloud images instead of ISOs:**
+Keep this base image unbooted. If a command fails, inspect the partial VM and task log before retrying. Do not run an automatic destroy-and-rebuild command against an ID that may already contain useful data.
 
-| Aspect | Cloud Image | ISO Install |
-|--------|------------|-------------|
-| Size | ~500 MB | ~4 GB |
-| First boot | 30-60 seconds | 15-45 minutes |
-| Configuration | YAML (cloud-init) | Manual clicking |
-| Repeatable | Yes | No |
-| Clone-ready | Yes | No |
+See [PVE cloud-init support](https://github.com/proxmox/pve-docs/blob/master/qm-cloud-init.adoc) and [VM management](https://github.com/proxmox/pve-docs/blob/master/qm.adoc) for supported options on your release.
 
----
+## 3. Configure a full clone before starting it
 
-## Step 2: Create the Proxmox VM Template
-
-With the cloud image downloaded, create a VM that doesn't boot yet,
-import the disk, configure the cloud-init drive, and convert to a
-template.
-
-**Single script that does it all:**
+This block assumes the template above exists. It uses DHCP and the one public key prepared earlier. It intentionally does not start the clone until you inspect its generated configuration.
 
 ```bash
-#!/bin/bash
-# create-proxmox-template.sh — run on Proxmox host
-# Usage: ./create-proxmox-template.sh "<vm-id>" "<vm-name>" "<image-path>"
+(
+set -euo pipefail
+template_id=9100
+clone_id=9101
+public_key=/root/cloud-template-admin.pub
 
-VM_ID=${1:-9000}
-VM_NAME=${2:-ubuntu-2404-template}
-IMAGE=${3:-/var/lib/vz/template/iso/ubuntu-24.04-cloudimg.img}
-STORAGE=${4:-local-zfs}    # Change to match your storage name
-BRIDGE=${5:-vmbr0}
-
-# 1. Create VM with minimal hardware
-qm create $VM_ID \
-  --name $VM_NAME \
-  --memory 2048 \
-  --cores 2 \
-  --cpu host \
-  --net0 virtio,bridge=$BRIDGE \
-  --agent enabled=1 \
-  --ostype l26 \
-  --serial0 socket \
-  --vga serial0 \
-  --boot order=scsi0 \
-  --scsihw virtio-scsi-pci
-
-# 2. Import the cloud image disk
-qm importdisk $VM_ID $IMAGE $STORAGE
-
-# 3. Attach the imported disk as scsi0
-qm set $VM_ID \
-  --scsi0 $STORAGE:vm-$VM_ID-disk-0,discard=on,ssd=1
-
-# 4. Add cloud-init CD-ROM drive
-qm set $VM_ID --ide2 $STORAGE:cloudinit
-
-# 5. Resize disk to a useful size (default cloud images are ~2-4 GB)
-qm resize $VM_ID scsi0 32G
-
-# 6. Set first-boot DHCP for cloud-init
-qm set $VM_ID --ipconfig0 ip=dhcp
-
-# 7. Set default user and SSH key
-qm set $VM_ID \
-  --ciuser gntech \
-  --sshkeys ~/.ssh/authorized_keys
-
-# 8. Convert to template
-qm template $VM_ID
-
-echo "Template $VM_NAME (ID: $VM_ID) created successfully"
+test -s "$public_key"
+ssh-keygen -lf "$public_key"
+qm clone "$template_id" "$clone_id" --name cloudinit-test --full 1
+qm set "$clone_id" --ciuser gnolasco --sshkeys "$public_key" \
+  --ipconfig0 ip=dhcp
+qm cloudinit dump "$clone_id" user
+qm cloudinit dump "$clone_id" network
+qm config "$clone_id"
+)
 ```
 
-**What each step does:**
-
-- `qm create` — Registers the VM with minimal hardware (2 cores, 2 GB
-  RAM, virtio NIC, QEMU Agent, serial console)
-- `qm importdisk` — Converts the qcow2 cloud image into a Proxmox
-  volume on your chosen storage
-- `qm resize` — Grows the disk from the tiny default (2-4 GB) to 32 GB
-  (or whatever you need — 32 GB is enough for most Docker hosts)
-- `--ide2 ...:cloudinit` — Adds a cloud-init config drive (Proxmox
-  writes cloud-init YAML files here at clone time)
-- `qm set --ciuser/--sshkeys` — Sets default user and SSH key
-- `qm template` — Converts the VM into a read-only template
-
-Run it:
+Confirm the generated user and public key, the bridge, DHCP configuration, and boot disk. Then start the new guest:
 
 ```bash
-chmod +x create-proxmox-template.sh
-./create-proxmox-template.sh 9000 ubuntu-2404-template
+qm start 9101
 ```
 
-After ~30 seconds, you have a template ready to clone.
+Find its address in DHCP leases or console output. Check its SSH host-key fingerprint through a trusted route before accepting it on the workstation. A serial console can show boot errors but does not provide a password login when no password was configured.
 
-**For a Debian 12 template:**
+Full clones have independent disks; linked clones depend on their base. Choose deliberately using the installed release's storage and clone documentation.
+
+## 4. Verify from inside the guest
+
+Connect from your workstation using the matching private key and the guest's actual address. Run these commands **inside the guest**, not on PVE:
 
 ```bash
-./create-proxmox-template.sh 9010 debian-12-template \
-  /var/lib/vz/template/iso/debian-12-cloudimg.qcow2
+cloud-init status --wait
+cloud-init status --long
+whoami
+id
+lsblk
+df -h /
+sudo tail -n 80 /var/log/cloud-init-output.log
 ```
 
----
+Confirm the intended user exists, initialization finished without unresolved errors, and disk/filesystem capacity is appropriate. Review [cloud-init debugging](https://docs.cloud-init.io/en/latest/howto/debugging.html) if access or configuration fails.
 
-## Step 3: Configure Cloud-Init Defaults
+Enabling the PVE guest-agent option alone does not install the guest agent. If you need it, install and configure the guest package, enable the PVE option, and verify communication separately.
 
-Before cloning, set sensible defaults that every VM gets unless you
-override them. These are configured on the template itself and
-inherited by all clones.
+Do not set a shared template password or delete a user's password as an SSH-hardening shortcut. Inspect the generated configuration and test authentication on a disposable clone.
 
-**Set these once on the template:**
+## 5. Add custom user data only after the baseline works
 
-```bash
-# Set default user
-qm set 9000 --ciuser gntech
+A `cicustom user=...` file **replaces** PVE's generated user data. It does not automatically merge package settings with the user and SSH key supplied by `--ciuser` and `--sshkeys`.
 
-# Set SSH public key (copy your host key)
-qm set 9000 --sshkeys /root/.ssh/id_ed25519.pub
+Use `qm cloudinit dump 9101 user` as a starting point. Preserve the intended account and public-key configuration when building a complete custom document. Validate it with the cloud-init version used by the image, then test a fresh disposable clone.
 
-# Set DNS servers
-qm set 9000 \
-  --nameserver "10.0.20.1 1.1.1.1" \
-  --searchdomain "homelab.internal"
+Snippet storage must support the snippets content type, and the file must be available on every node where the VM may start or migrate. Network and metadata overrides are separate choices. Rebooting an already initialized guest is not proof that a first-boot module will run again.
 
-# Set default IP configuration (DHCP)
-qm set 9000 --ipconfig0 ip=dhcp
+Keep provisioning small at first. Record package failures and confirm access before enabling firewalls or adding applications. For configuration beyond first boot, see the [Ansible homelab guide](/posts/2026-05-27-ansible-homelab-automation/).
 
-# Set a default password (optional — use SSH keys instead)
-qm set 9000 --cipassword "changeme"    # Change on every clone!
-```
+## Recovery and maintenance
 
-**SSH keys are the better approach:** Set `--cipassword` to a temporary
-password and rely on SSH keys for access. Remove the password entirely
-after the first SSH login with:
+Keep the verified image and build inputs so you can create a new template under a new unused ID. Test its clone before retiring the previous template. Inspect dependencies before removing a base used by linked clones.
 
-```bash
-sudo passwd -d gntech
-```
+Record the PVE version, image checksum, template settings, generated cloud-init data, and clone verification results. Avoid filling the guest disk with zeroes or deleting existing templates as routine cleanup.
 
----
+## Continue reading
 
-## Step 4: Clone VMs from the Template
-
-With the template ready, deploying a new VM is a single command:
-
-**Basic clone with DHCP:**
-
-```bash
-# Deploy a new VM with hostname "docker-node-1"
-qm clone 9000 100 --name docker-node-1 --full
-
-# Assign cloud-init hostname
-qm set 100 --ciuser gntech --sshkeys /root/.ssh/id_ed25519.pub
-
-# Start the VM
-qm start 100
-```
-
-**Clone with static IP and custom hostname:**
-
-```bash
-qm clone 9000 101 --name web-gateway --full
-
-qm set 101 \
-  --ciuser gntech \
-  --sshkeys /root/.ssh/id_ed25519.pub \
-  --ipconfig0 ip=10.0.20.50/24,gw=10.0.20.1 \
-  --nameserver "10.0.20.1 1.1.1.1" \
-  --searchdomain "homelab.internal"
-
-qm start 101
-```
-
-**Clone with extra CPU/memory and a second network interface:**
-
-```bash
-qm clone 9000 102 --name database-node --full
-
-qm set 102 \
-  --memory 8192 \
-  --cores 4 \
-  --ciuser gntech \
-  --sshkeys /root/.ssh/id_ed25519.pub \
-  --ipconfig0 ip=10.0.20.60/24,gw=10.0.20.1 \
-  --ipconfig1 ip=10.0.30.60/24,gw=10.0.30.1 \
-  --net1 virtio,bridge=vmbr1
-
-qm start 102
-```
-
-The `--full` flag creates a full clone (complete copy of the disk).
-Linked clones (`--linked`) use the template as a backing store and save
-disk space, but require the template to stay in place.
-
----
-
-## Step 5: Advanced Cloud-Init User Data (Custom YAML)
-
-For more complex provisioning, define a custom cloud-init YAML snippet.
-Proxmox writes this to the cloud-init CD-ROM on clone.
-
-**Custom cloud-init config with package installation:**
-
-```yaml
-# Save as /var/lib/vz/snippets/docker-host.yaml
-#cloud-config
-package_update: true
-package_upgrade: true
-packages:
-  - docker.io
-  - docker-compose-v2
-  - qemu-guest-agent
-  - htop
-  - tree
-  - ufw
-  - fail2ban
-
-runcmd:
-  - systemctl enable --now docker
-  - systemctl enable --now qemu-guest-agent
-  - usermod -aG docker gntech
-  - ufw allow OpenSSH
-  - ufw --force enable
-  - echo "Provisioning complete" > /etc/motd
-
-final_message: "Cloud-init finished in $UPTIME seconds"
-```
-
-Apply it to a clone:
-
-```bash
-qm clone 9000 120 --name docker-worker-1 --full
-
-# Point to the custom cloud-init snippet
-qm set 120 \
-  --ciuser gntech \
-  --sshkeys /root/.ssh/id_ed25519.pub \
-  --cicustom "user=local:snippets/docker-host.yaml"
-
-qm start 120
-```
-
-The `--cicustom` flag overrides the default cloud-init user data with
-your custom YAML. Proxmox reads it from the local storage snippet path.
-
-**Another example — a web server template:**
-
-```yaml
-# Save as /var/lib/vz/snippets/webserver.yaml
-#cloud-config
-package_update: true
-packages:
-  - nginx
-  - certbot
-  - python3-certbot-nginx
-  - qemu-guest-agent
-
-write_files:
-  - path: /etc/nginx/sites-available/default
-    content: |
-      server {
-          listen 80 default_server;
-          server_name _;
-          return 301 https://$host$request_uri;
-      }
-
-runcmd:
-  - systemctl enable --now nginx
-  - systemctl enable --now qemu-guest-agent
-  - nginx -t && systemctl restart nginx
-```
-
-Deploy a web server in one command:
-
-```bash
-qm clone 9000 130 --name webserver-1 --full
-qm set 130 \
-  --ciuser gntech \
-  --sshkeys /root/.ssh/id_ed25519.pub \
-  --cicustom "user=local:snippets/webserver.yaml" \
-  --ipconfig0 ip=10.0.20.70/24,gw=10.0.20.1
-qm start 130
-```
-
----
-
-## Step 6: Verification — Confirm Cloud-Init Worked
-
-After the VM boots, SSH in with your key and verify cloud-init
-completed successfully:
-
-```bash
-# Wait for cloud-init to finish
-ssh gntech@10.0.20.50 "cloud-init status --wait"
-
-# Check the cloud-init output log
-ssh gntech@10.0.20.50 "sudo cat /var/log/cloud-init-output.log"
-
-# Verify packages were installed
-ssh gntech@10.0.20.50 "docker --version"
-
-# Verify the user and SSH key work
-ssh gntech@10.0.20.50 "whoami && id"
-
-# Check disk layout
-ssh gntech@10.0.20.50 "lsblk"
-
-# Verify QEMU Agent is running (check from Proxmox host)
-qm agent 100 ping
-```
-
-If cloud-init fails, check these logs on the VM:
-
-```bash
-/var/log/cloud-init.log       # Cloud-init module execution log
-/var/log/cloud-init-output.log  # Full output of all cloud-init stages
-```
-
-**Common failures and fixes:**
-
-| Symptom | Cause | Fix |
-|---------|-------|-----|
-| VM boots to login prompt but SSH fails | Cloud-init generated SSH host keys but didn't apply user config | Check `cloud-init status --wait`. Reboot and retry |
-| Packages not installed | No network at boot time | Set `--nameserver` correctly. Use `package_update: true` in custom config |
-| Static IP not applied | Cloud-init networking conflicts with Netplan | Use Proxmox `--ipconfig0` — don't also configure Netplan in cloud-init |
-| "No cloud-init data source found" | Missing cloud-init drive | Verify `qm set VM_ID --ide2 STORAGE:cloudinit` on the template |
-
----
-
-## Step 7: Automation — A Deployment Script
-
-For daily use, wrap the clone-and-configure steps into a script:
-
-```bash
-#!/bin/bash
-# deploy-vm.sh — clone a template and configure cloud-init
-# Usage: ./deploy-vm.sh "<template-id>" "<new-vm-id>" "<hostname>" <ip/cidr> "<gateway>"
-
-TEMPLATE_ID=${1:-9000}
-VM_ID=${2:-200}
-HOSTNAME=${3:-test-vm}
-IP=${4:-dhcp}
-GATEWAY=${5:-}
-
-echo "Cloning template $TEMPLATE_ID to VM $VM_ID ($HOSTNAME)..."
-qm clone $TEMPLATE_ID $VM_ID --name $HOSTNAME --full
-
-if [ "$IP" = "dhcp" ]; then
-  qm set $VM_ID \
-    --ciuser gntech \
-    --sshkeys /root/.ssh/authorized_keys \
-    --ipconfig0 ip=dhcp
-else
-  qm set $VM_ID \
-    --ciuser gntech \
-    --sshkeys /root/.ssh/authorized_keys \
-    --ipconfig0 ip=${IP},gw=${GATEWAY}
-fi
-
-qm start $VM_ID
-echo "VM $HOSTNAME (ID: $VM_ID) started. Waiting for cloud-init..."
-
-# Wait for the VM to get an IP and cloud-init to finish
-sleep 15
-
-# Get VM IP from Proxmox
-VM_IP=$(qm guest exec $VM_ID -- hostname -I 2>/dev/null | grep -oP '\d+\.\d+\.\d+\.\d+' | head -1)
-if [ -n "$VM_IP" ]; then
-  echo "VM IP: $VM_IP"
-  echo "SSH: ssh gntech@$VM_IP"
-else
-  echo "VM started. Get IP from Proxmox web UI or DHCP leases."
-fi
-```
-
-One-command deployment:
-
-```bash
-./deploy-vm.sh 9000 200 docker-node-1 dhcp
-./deploy-vm.sh 9000 201 web-server-1 "10.0.20.71/24" "10.0.20.1"
-./deploy-vm.sh 9000 202 database-1 "10.0.20.72/24" "10.0.20.1"
-```
-
-Three VMs deployed in under 2 minutes. Compare that to three ISO
-installs at 45 minutes each.
-
----
-
-## Step 8: Terraform Integration (Optional)
-
-For the full infrastructure-as-code experience, manage templates with
-Terraform and the Proxmox provider:
-
-```hcl
-# main.tf
-provider "proxmox" {
-  pm_api_url = "https://10.0.20.30:8006/api2/json"
-  pm_user    = "root@pam"
-}
-
-resource "proxmox_vm_qemu" "docker_node" {
-  name        = "docker-node-${count.index + 1}"
-  target_node = "srv1"
-  clone       = "ubuntu-2404-template"
-  full_clone  = true
-  count       = 3
-
-  cores   = 4
-  memory  = 8192
-  agent   = 1
-
-  disk {
-    size    = "64G"
-    type    = "scsi"
-    storage = "local-zfs"
-  }
-
-  network {
-    model  = "virtio"
-    bridge = "vmbr0"
-  }
-
-  # Cloud-init settings
-  ciuser      = "gntech"
-  sshkeys     = file("~/.ssh/id_ed25519.pub")
-  ipconfig0   = "ip=10.0.20.${80 + count.index}/24,gw=10.0.20.1"
-  nameserver  = "10.0.20.1"
-  searchdomain = "homelab.internal"
-}
-```
-
-Apply:
-
-```bash
-terraform init
-terraform apply -auto-approve
-# Creates 3 Docker nodes in ~90 seconds
-```
-
----
-
-## Performance Tips for Proxmox Templates
-
-**Disk format considerations:**
-
-- **Full clones** — Independent copy. Slower to create, no dependency
-  on template. Best for production VMs.
-- **Linked clones** — COW (copy-on-write) on ZFS. Instant creation,
-  saves disk space. Template must stay on the same storage.
-
-Choose linked clones when you're spinning up ephemeral test
-environments. Use full clones for production services.
-
-**Template location:**
-
-Store templates on fast storage (NVMe or SSD ZFS pool). Cloning from
-spinning disks is significantly slower.
-
-```bash
-# Move template to fast storage
-qm move_disk 9000 scsi0 local-nvme --delete
-```
-
-**Minimize template disk size:**
-
-Cloud images include a swap partition and some bloat. Create a lean
-template:
-
-```bash
-# Inside the template before converting:
-# Remove cloud-init artifacts
-sudo cloud-init clean
-
-# Remove machine ID (will be regenerated on clone)
-sudo rm -f /etc/machine-id
-sudo truncate -s 0 /etc/machine-id
-
-# Clean package cache
-sudo apt clean
-sudo apt autoremove --purge
-
-# Zero free space for better compression
-sudo dd if=/dev/zero of=/zerofile bs=1M || true
-sudo rm -f /zerofile
-```
-
-After cleanup, consider a fresh template:
-
-```bash
-# Delete old template and rebuild
-qm destroy 9000
-./create-proxmox-template.sh 9000 ubuntu-2404-template
-```
-
----
-
-## Summary: The Cloud-Init Template Workflow
-
-```
-Download cloud image → Create VM → Import disk → Configure
-cloud-init → Convert to template
-
-Then on demand:
-Clone template → Set IP/hostname → Power on → SSH in (60 seconds)
-```
-
-**Key takeaways:**
-
-1. **One template, unlimited VMs** — Download once, clone endlessly. No
-   more ISO installs.
-2. **Cloud-init handles first-boot config** — Users, SSH keys, packages,
-   network, hostname — all automated.
-3. **Custom snippets for role-specific setup** — Docker hosts, web
-   servers, databases — define once in a YAML snippet, apply to any
-   clone.
-4. **Full CLI automation** — Script the entire workflow. `deploy-vm.sh`
-   turns VM creation into a single command.
-5. **Terraform-ready** — Cloud-init + Proxmox provider gives you
-   infrastructure-as-code for your homelab.
-
-Every homelab running Proxmox should have at least one cloud-init
-template. Deploying a new VM should take seconds, not the time it takes
-to watch an installer progress bar.
-
-The template creation script and deploy script from this guide will be
-on the GnTech GitHub repo — grab them, customize the user and SSH key,
-and you're deploying VMs in under a minute.
+- [Proxmox bridges and VLANs](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — Check where the clone's network connects.
+- [PBS setup and first restore](/posts/2026-05-08-proxmox-backup-server-setup/) — Test recovery alongside deployment.
