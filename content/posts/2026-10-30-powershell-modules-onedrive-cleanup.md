@@ -2,6 +2,7 @@
 title: "PowerShell Modules Filled My OneDrive — How to Clean Up Safely"
 description: "Find PowerShell modules in OneDrive, copy them to local storage, verify imports, and prevent future installs from filling your synced Documents folder."
 date: 2026-10-30T13:00:00-04:00
+lastmod: 2026-10-31
 draft: false
 tags:
   - powershell
@@ -22,6 +23,17 @@ That is nearly 2.4 GiB of module files, before counting anything else in Documen
 The reason is the combination of PowerShell's per-user module locations and a Documents folder redirected into OneDrive. The fix needs two parts: relocate the existing modules and give future module downloads an explicit destination.
 
 This guide prepares a cleanup on one Windows account. It does not change your Documents location or disable OneDrive backup.
+
+## Verification status
+
+| Scope | Evidence and limits |
+| --- | --- |
+| Environment | Windows account with OneDrive-backed Documents; instructions distinguish Windows PowerShell 5.1 from PowerShell 7. |
+| Previously reported lab observations | Module folders occupied approximately 1.16 GiB and 1.22 GiB; a previous inventory encountered Constrained Language restrictions. |
+| Preparation checks | Markdown structure was checked during preparation. The PowerShell examples were not executed or syntax-validated with PowerShell. |
+| Still to verify | Pilot copying and imports in both editions, check scheduled jobs and other synced devices, and verify recovery before removing source files. |
+
+*This table summarizes the evidence recorded for this article. It is not a new hardware test or a certification for other versions.*
 
 ## Before you start
 
