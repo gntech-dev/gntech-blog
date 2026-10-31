@@ -7,6 +7,7 @@ draft: false
 tags: [proxmox, backup, pbs, storage, homelab]
 categories: [homelab, storage]
 aliases:
+  - /posts/2026-05-15-proxmox-backup-server-deployment/
   - /posts/2026-05-28-proxmox-backup-server-setup/
 summary: "One PBS setup workflow: dedicated storage, authenticated PVE access, maintenance jobs, and an isolated restore test."
 ---
