@@ -17,6 +17,7 @@ keywords:
   - lightweight Kubernetes single board computer cluster
   - Kubernetes homelab workload migration Docker Compose
 summary: "Deploy a production-grade K3s Kubernetes cluster in your homelab on Proxmox VMs — multi-node setup, Longhorn persistent storage, MetalLB load balancing, Traefik ingress, and migrating existing Docker Compose workloads."
+lastmod: 2026-10-31
 ---
 
 You have mastered Docker Compose. Your homelab runs a dozen stacks
@@ -640,8 +641,7 @@ capabilities:
   for declarative deployments.
 - **Horizontal pod autoscaling** — Let Kubernetes scale web
   services based on CPU or custom metrics.
-- **Cluster upgrades** — K3s supports one-line upgrades:
-  `curl -sfL https://get.k3s.io | sh -s - --update-server`.
+- **Cluster upgrades** — follow the [manual upgrade procedure](https://docs.k3s.io/upgrades/manual), back up the datastore, preserve installation configuration, and respect Kubernetes version skew. Upgrade server nodes one at a time before agents. The earlier `--update-server` shortcut was not a valid upgrade procedure.
 
 K3s is Kubernetes without the baggage — small enough for a
 Raspberry Pi, capable enough for production edge workloads. Your

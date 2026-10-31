@@ -5,6 +5,7 @@ date: 2026-10-30T14:00:00-04:00
 draft: false
 translationKey: start-here
 ShowToc: true
+lastmod: 2026-10-31
 ---
 
 Welcome to **GnTech**. Pick the problem you want to solve, then follow a short path through the guides. You do not need to read the blog in publication order.
@@ -14,6 +15,7 @@ Welcome to **GnTech**. Pick the problem you want to solve, then follow a short p
 | Build a virtualized lab | [Proxmox foundations](#proxmox-foundations) |
 | Separate users, servers, and devices | [MikroTik networking](#mikrotik-networking) |
 | Run and maintain your own services | [Docker Compose](#docker-compose) |
+| Back up services and prove recovery | [Backup and recovery](#backup-and-recovery) |
 | Administer and recover your machines | [Administration and recovery](#administration-and-recovery) |
 
 ## Proxmox foundations
@@ -45,6 +47,16 @@ Start with a small service stack. Understand its storage, configuration, and sta
 3. [Frigate deployment](/posts/frigate-deployment/) — explore a concrete camera-system example after the basics.
 
 **Practice goal:** recreate a disposable stack and confirm that its intended data survives. The Frigate guide describes an earlier deployment; check its version and hardware assumptions.
+
+## Backup and recovery
+
+Choose the recovery target first, then follow the relevant workflow:
+
+1. [Backup strategy and independent copies](/posts/2026-05-23-proxmox-backup-strategies/) — define recovery targets and the failures each copy must survive.
+2. For guests, use [PBS setup and isolated guest recovery](/posts/2026-05-08-proxmox-backup-server-setup/). For PostgreSQL, use the [dump, scheduling, and complete Restic-to-database recovery lab](/posts/2026-06-01-docker-database-backup-automation-pgdump-cron/).
+3. Use the [Restic file and repository-copy lab](/posts/2026-05-19-restic-docker-backup-strategy/) to understand encrypted file recovery and separate repository passwords.
+
+**Practice goal:** recover into an isolated destination using the copy and credentials that will be available after a failure. Local CI repositories demonstrate the commands; they do not prove your real off-site storage or hardware recovery.
 
 ## Administration and recovery
 

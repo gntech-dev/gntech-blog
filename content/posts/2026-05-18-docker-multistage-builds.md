@@ -17,6 +17,7 @@ keywords:
   - Python slim Docker image production
   - Docker build cache optimization
 summary: "Master Docker multi-stage builds to shrink production images from 1.2GB to under 50MB. Covers Go, Python, and Node.js patterns with real Dockerfiles and build cache strategies."
+lastmod: 2026-10-31
 ---
 
 Docker images in the wild easily balloon past 1 GB. A `python:3.12`
@@ -367,20 +368,9 @@ COPY --from=builder /app/server /server
 ENTRYPOINT ["/server"]
 ```
 
-```dockerfile
-# Python on distroless
-FROM python:3.12-slim AS builder
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --user --no-cache-dir -r requirements.txt
+For Python distroless builds, match the runtime's Python version, ABI, architecture, library dependencies, and import paths. Copying `/root/.local` from an arbitrary `python:3.12-slim` builder into a Debian 12 Python runtime can select a different interpreter ABI and an inaccessible or undiscovered package directory. That example is removed rather than presented as a working migration.
 
-FROM gcr.io/distroless/python3-debian12
-COPY --from=builder /root/.local /root/.local
-COPY --from=builder /app /app
-WORKDIR /app
-ENV PATH=/root/.local/bin:$PATH
-CMD ["app.py"]
-```
+Use the [distroless project's language examples](https://github.com/GoogleContainerTools/distroless) and build/test the actual application against pinned compatible images. A package cache optimization does not prove binary compatibility.
 
 **When to use distroless:**
 - You need the smallest possible attack surface

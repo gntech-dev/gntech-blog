@@ -17,11 +17,12 @@ keywords:
   - Container layer size docker system df inspect
   - Docker storage driver overlay2 vs aufs devicemapper
 summary: "Everything about Docker's overlay2 storage driver — how overlay layers work, tracking disk usage by layer, recovering space from dangling layers, and performance tuning on ZFS-backed Proxmox hosts. Real commands, real output."
+lastmod: 2026-10-31
 ---
 
 Every Docker homelab eventually hits a storage wall. Containers stop writing. `docker compose up` fails with "no space left on device". You check `df -h` and there's 40% free. The culprit? Docker's overlay2 storage driver and its layer-based architecture — a system where disk usage isn't always visible through traditional filesystem tools.
 
-Docker overlay2 is the default storage driver on modern Linux distributions. It's fast, stable, and efficient thanks to overlay filesystem support built into the Linux kernel since version 4.0. But its copy-on-write layer model means container disk usage behaves differently than traditional filesystems. Understanding how overlay2 works is essential for any homelab running Docker on Proxmox, bare metal, or VPS.
+This article describes the classic `overlay2` driver. Fresh Docker Engine 29 installations use the containerd image store by default; upgraded installations can retain classic drivers. Check `docker info` before using driver-specific paths or options. See [Docker's backend distinction](https://docs.docker.com/engine/storage/containerd/). Copy-on-write affects usage, but a storage error also requires checking the actual mount, inodes, quotas, and application path.
 
 This guide covers the overlay2 architecture from the ground up — how layers are structured, how to measure real disk usage, how to troubleshoot the most common storage failures, and how to tune performance when Docker is backed by ZFS on a Proxmox host.
 
@@ -31,7 +32,7 @@ Docker overlay2 uses the Linux kernel's overlay filesystem to present a unified 
 
 ### The Four Directories
 
-Every running container with overlay2 has four directories in `/var/lib/docker/overlay2/<layer-id>/`:
+The overlay mount exposes lower, upper, merged, and work paths. These are mount roles, not four literal directories with these names under every layer:
 
 - **lowerdir** — the base image layers (read-only, shared across containers)
 - **upperdir** — the container's writable layer (one per container)
@@ -128,8 +129,8 @@ This shows which container writable layers are consuming the most space. If a co
 ### Cleanup Strategies
 
 ```bash
-# Remove all unused containers, networks, images, and dangling build cache
-docker system prune -a --volumes
+# Inventory usage before choosing any cleanup target
+docker system df -v
 
 # Remove only build cache
 docker buildx prune --all
@@ -138,7 +139,7 @@ docker buildx prune --all
 docker image prune -a --filter "until=24h"
 ```
 
-For homelabs running nightly or weekly builds (Renovate, Watchtower), the build cache accumulates rapidly. Schedule a weekly prune:
+Builds can accumulate cache; image update tools do not necessarily build images. Review cache needs and rollback images before any manual prune:
 
 ```bash
 docker system prune -a -f --filter "until=48h"
@@ -273,28 +274,11 @@ zfs set recordsize=1M storage/docker/media
 
 For the Docker storage directory itself, keep the default recordsize unless you benchmark and find a clear improvement.
 
-### Docker Storage Options
+### Docker storage options depend on the backend
 
-Fine-tune overlay2 behavior through `daemon.json`:
+Do not bypass kernel compatibility checks or replace an existing daemon configuration to enable a guessed storage option. Inspect `docker info`, the backing filesystem, and the installed daemon's supported configuration. Classic `overlay2.size` requires compatible XFS project quotas and limits the writable layer; it does not cap bind mounts, named volumes, or logs. It is not a portable containerd snapshotter option.
 
-```json
-{
-  "storage-driver": "overlay2",
-  "storage-opts": [
-    "overlay2.override_kernel_check=1",
-    "overlay2.size=10G"
-  ]
-}
-```
-
-- `overlay2.override_kernel_check=1` — bypass kernel compatibility checks (use only on up-to-date kernels)
-- `overlay2.size=10G` — per-container size limit (10GB writable layer cap)
-
-Apply changes:
-
-```bash
-sudo systemctl restart docker
-```
+Use the [quota and backend guide](/posts/2026-06-11-docker-container-storage-quotas-xfs/) to plan a separate test. A daemon restart affects running services and belongs in a maintenance window with a rollback plan.
 
 ### Per-Container Resource Limits
 
@@ -323,37 +307,28 @@ This bypasses overlay2 CoW for the database directory entirely, avoiding double-
 
 ## Maintenance and Automation
 
-### Daily Prune Cron
+### Review cleanup before scheduling
 
-```bash
-# /etc/cron.daily/docker-cleanup
-#!/bin/bash
-/usr/bin/docker system prune -a -f --filter "until=24h"
-/usr/bin/docker builder prune -a -f
-```
+Do not schedule an indiscriminate data-volume cleanup. An unused volume may hold the only copy of a stopped application's data. Preserve rollback images and inspect stopped containers before removing them. The following timer records usage instead of deleting resources; its unit names are retained from the earlier example, so inspect existing local units before replacing them.
 
-```bash
-sudo chmod +x /etc/cron.daily/docker-cleanup
-```
-
-### Systemd Timer for Weekly Deep Clean
+### Systemd timer for weekly storage inventory
 
 ```ini
 # /etc/systemd/system/docker-cleanup.service
 [Unit]
-Description=Docker deep cleanup
+Description=Docker storage inventory
 After=docker.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/docker system prune -a -f --volumes
-ExecStartPost=/usr/bin/docker builder prune -a -f
+ExecStart=/usr/bin/docker system df -v
+
 ```
 
 ```ini
 # /etc/systemd/system/docker-cleanup.timer
 [Unit]
-Description=Weekly Docker cleanup
+Description=Weekly Docker storage inventory
 
 [Timer]
 OnCalendar=weekly

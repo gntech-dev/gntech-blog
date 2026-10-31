@@ -198,6 +198,10 @@ Test the scheduled command under its actual user and environment. Do not source 
 
 Keep the demo files until you have reviewed the restore result. No services remain running after these one-shot commands. Any repository deletion must be a separate, deliberate cleanup decision.
 
+## Choose the next recovery exercise
+
+This guide demonstrates files and separately encrypted repository copies. For a complete PostgreSQL dump → Restic copy → fresh database import, use the [integrated database recovery lab](/posts/2026-06-01-docker-database-backup-automation-pgdump-cron/). Its runtime evidence covers local CI repositories, not your actual remote backend. For guest recovery, follow [PBS setup](/posts/2026-05-08-proxmox-backup-server-setup/); for copy planning, start with the [backup strategy](/posts/2026-05-23-proxmox-backup-strategies/).
+
 ## Continue reading
 
 - [Proxmox backup strategy](/posts/2026-05-23-proxmox-backup-strategies/) — Plan independent copies and recovery targets.

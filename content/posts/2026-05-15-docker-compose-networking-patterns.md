@@ -17,6 +17,7 @@ keywords:
   - Docker network isolation
   - cross-compose container communication
 summary: "Learn how Docker Compose networking really works — bridge networks, DNS-based service discovery, cross-stack communication, and real-world network isolation patterns for homelab deployments."
+lastmod: 2026-10-31
 ---
 
 Every homelab running Docker Compose eventually runs into the same
@@ -594,10 +595,12 @@ cd ~/docker/media && docker compose up -d
 Want to rebuild monitoring without touching the media stack?
 
 ```bash
-cd ~/docker/monitoring && docker compose down -v && docker compose up -d
+cd ~/docker/monitoring && docker compose up -d --force-recreate
 ```
 
-Everything else keeps running. That's the point of multi-stack
+The stack's volumes are retained. Check its own startup result and data before
+continuing. Other stacks are separate deployments; shared external networks
+and services remain dependencies. That's the point of multi-stack
 networking.
 
 ---

@@ -17,6 +17,7 @@ keywords:
   - Proxmox cluster quorum split-brain prevention
   - Homelab high availability Proxmox cluster step-by-step
 summary: "A step-by-step guide to building a Proxmox VE cluster with high availability for your homelab — covering corosync setup, quorum with QDevice, HA groups, live migration, and fencing."
+lastmod: 2026-10-31
 ---
 
 If you started your homelab on a single Proxmox host, you already know the pain: planned maintenance means shutting everything down, a hardware failure takes out every VM and container, and there is no live migration without a second node.
@@ -147,7 +148,7 @@ nfs: nfs-storage
 	server 10.0.20.5
 	export /srv/nfs/proxmox
 	content images,rootdir,vztmpl,backup
-	options vers=4.2,soft,timeo=600
+	options vers=4.2,hard,timeo=600
 	maxfiles 0
 ```
 
@@ -329,3 +330,7 @@ A few things to keep in mind as you move beyond the basic setup:
 Building a Proxmox VE cluster with high availability in your homelab is not as complicated as it sounds. The core stack — corosync for membership, QDevice for quorum, watchdog for fencing, and the HA manager for recovery — has been battle-tested in production environments for years. With two modest Proxmox hosts, a cheap Raspberry Pi (or a spare LXC), and shared storage, you get enterprise-grade HA at homelab prices.
 
 Start with one cluster, enable HA on your most critical VMs, run the failover test, and then expand from there.
+
+### NFS outage behavior
+
+The application-storage example uses a hard mount. Soft mounts can return I/O errors and risk corruption; disabling locking is not a general migration workaround. Confirm the selected NFS version, locking semantics, client permissions, and outage/recovery behavior before moving persistent data. This source revision does not establish a live migration or HA failover test. See the [NFS mount documentation](https://man7.org/linux/man-pages/man5/nfs.5.html).

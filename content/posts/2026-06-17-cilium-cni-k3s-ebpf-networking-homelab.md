@@ -17,6 +17,7 @@ keywords:
   - Cilium replace Flannel K3s default CNI eBPF
   - Cilium k3s L7 network policy HTTP API filtering
 summary: "Replace K3s default Flannel with Cilium CNI for accelerated eBPF networking, remove kube-proxy, gain Hubble observability, and enforce identity-based network policies in a lightweight homelab cluster."
+lastmod: 2026-10-31
 ---
 
 K3s ships with Flannel as its default CNI and a bundled kube-proxy for service routing. It works out of the box, but for a homelab where you want deep visibility, granular security policies, and modern eBPF performance, both Flannel and kube-proxy leave room for improvement.
@@ -223,18 +224,22 @@ Open `http://localhost:12000` in your browser. The UI shows a live service graph
 
 ### Hubble CLI
 
-Install the Hubble client on your management machine:
+Install a matching Hubble CLI using the release and checksum instructions in the [official Hubble setup guide](https://docs.cilium.io/en/stable/observability/hubble/setup/). The earlier guessed `main/hubble/install.sh` path is removed.
+
+The management machine normally cannot reach a Kubernetes ClusterIP directly. With the matching Cilium CLI and cluster access, keep the relay port-forward running in one terminal:
 
 ```bash
-curl -L https://raw.githubusercontent.com/cilium/hubble/main/hubble/install.sh | bash
+cilium hubble port-forward
 ```
 
-Set up the connection to the Hubble relay:
+In another terminal, use the forwarded local endpoint:
 
 ```bash
-export HUBBLE_SERVER=$(kubectl -n kube-system get svc hubble-relay -o jsonpath='{.spec.clusterIP}'):80
-hubble observe --server $HUBBLE_SERVER --last 20
+hubble status --server localhost:4245
+hubble observe --server localhost:4245 --last 20
 ```
+
+Check relay readiness, authentication, and the installed version's options if the connection fails. These source corrections were not executed against a Kubernetes cluster in this audit.
 
 You'll see flows like:
 

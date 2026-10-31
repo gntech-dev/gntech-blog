@@ -17,6 +17,7 @@ keywords:
   - Docker container non-root user best practices
   - Dockerfile optimization for small secure images
 summary: "Harden your Docker images with multi-stage builds, distroless base images, and runtime security options. A practical guide to reducing image size and CVEs in your homelab."
+lastmod: 2026-10-31
 ---
 
 ## Why Docker Image Security Matters in Your Homelab
@@ -25,7 +26,7 @@ Your homelab runs Docker containers — maybe a lot of them. MiniO, Grafana, Ngi
 
 The security problem is straightforward: every unnecessary package and binary in your container image is an attack surface. When `FROM ubuntu:22.04` pulls a 77 MB base image and your Dockerfile adds build dependencies that inflate it past 1 GB, you're not just wasting disk — you're shipping every CVE in every one of those packages to your homelab.
 
-Docker's April 2026 Hardened Images update reported that hardened images have roughly 90–95% fewer CVEs than their standard counterparts, with some images running at near-zero known vulnerabilities. Google's distroless project has shown similar results for years.
+Compare exact image digests with the same scanner and vulnerability database. No dated scan evidence is supplied here for a fixed percentage reduction. See the [hardened-image migration guide](/posts/2026-06-05-docker-hardened-images-homelab-migration/) for compatibility and evidence requirements.
 
 This guide covers three layers of Docker image security you can apply in your homelab right now:
 
@@ -68,24 +69,27 @@ Python is trickier because you need a Python interpreter at runtime. The multi-s
 ```dockerfile
 # Stage 1: install dependencies
 FROM python:3.12-alpine AS builder
+RUN python -m venv /opt/venv
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --user gunicorn fastapi uvicorn[standard]
+    /opt/venv/bin/pip install fastapi uvicorn
 
 # Stage 2: runtime
 FROM python:3.12-alpine
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /opt/venv /opt/venv
 WORKDIR /app
 COPY app.py .
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/opt/venv/bin:$PATH
 USER appuser
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8000", "app:app"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 Key improvements over a single-stage Dockerfile:
 - Package archives in `/root/.cache/pip` don't persist into the final image because the `RUN --mount=type=cache` mount disappears after that layer
 - The final image is based on `-alpine` (only ~50 MB) instead of `python:3.12` full (~335 MB)
 - The non-root user is created explicitly in the `RUN` layer
+
+The virtual environment is outside `/root`, so the non-root runtime user can traverse its path. FastAPI is an ASGI application and this example launches it with Uvicorn. Pin dependencies for a reproducible build and test the actual `app.py`; this audit did not execute the image.
 
 ### Cache Mounts for Faster Builds
 
@@ -108,24 +112,14 @@ Not every image you consume is one you build. For off-the-shelf containers, your
 | Shell | Yes | Yes | No | Varies |
 | Package manager | Yes | Limited | No | No |
 | `apt` upgrade | Manual | Manual | Not needed | Auto-patched |
-| CVEs | High | Medium | Low | Near-zero |
+| CVEs | Scan exact digest | Scan exact digest | Scan exact digest | Scan exact digest |
 | Debugging | Easy | Moderate | Hard (no shell) | Moderate |
 
-Google's **distroless** images (`gcr.io/distroless/base`, `gcr.io/distroless/python3-debian12`, `gcr.io/distroless/java17-debian12`) contain only your application and its runtime dependencies. There is no shell, no `apt`, no `curl`, no `ls` — which means no way to exploit those tools even if an attacker gets code execution.
+Google's **distroless** images (`gcr.io/distroless/base`, `gcr.io/distroless/python3-debian12`, `gcr.io/distroless/java17-debian12`) contain only your application and its runtime dependencies. There is no shell, no `apt`, no `curl`, no `ls` — which removes those particular utilities. Arbitrary code execution can still read accessible secrets, use network access, or call operating-system interfaces; distroless does not neutralize a compromised application.
 
-Switch to distroless images where possible in your Docker Compose files:
+Build an application image using a compatible distroless runtime; changing an application service directly to a bare language runtime does not copy its application code or dependencies. Match the language ABI, architecture, shared libraries, entrypoint, and non-root filesystem permissions. Use the [distroless project documentation](https://github.com/GoogleContainerTools/distroless).
 
-```yaml
-services:
-  # Instead of:
-  # image: python:3.12-slim
-  # Use:
-  image: gcr.io/distroless/python3-debian12:latest
-```
-
-Docker's **Hardened Images** (`docker.io/library/nginx:hardened`, `docker.io/library/python:hardened`) are a newer option. As of April 2026, they see over 500,000 daily pulls and are continuously rebuilt from source as CVEs are patched. They integrate with Docker Scout for attestation and SBOM generation.
-
-For a practical homelab strategy: use `-slim` variants for general services (Grafana, Prometheus) and distroless or hardened images for security-critical services (reverse proxies, authentication gateways, public-facing APIs).
+For Docker Hardened Images, select an actual catalog reference and review its migration guide. Do not assume `nginx:hardened` or `python:hardened` exists. The [migration guide](/posts/2026-06-05-docker-hardened-images-homelab-migration/) replaces the earlier guessed tags and unmeasured pull/CVE claims.
 
 ## Vulnerability Scanning — Trivy in Your Docker Pipeline
 
@@ -158,7 +152,7 @@ If you use Gitea Actions with your self-hosted runner, add a scan step to catch 
       myapp:${GITEA_COMMIT_SHA}
 ```
 
-`--exit-code 1` makes the pipeline fail if critical or high CVEs are found. In a homelab context, you may want `--exit-code 0` with a human review instead — few homelabs have dedicated security teams.
+With `--ignore-unfixed`, this gate fails only for matching findings with known fixes. Remove that filter or add a separate report if policy also covers unfixed findings. `--exit-code 1` makes the pipeline fail on the selected findings. In a homelab context, you may want `--exit-code 0` with a human review instead — few homelabs have dedicated security teams.
 
 ### Docker Scout Alternative
 
@@ -170,11 +164,11 @@ docker scout recommendations myapp:latest
 docker scout quickview myapp:latest
 ```
 
-Docker Scout connects with Docker Hub's vulnerability database and can suggest base image upgrades automatically. It's included with Docker Desktop and Docker Engine 24+.
+Docker Scout connects with Docker Hub's vulnerability database and can suggest base image upgrades automatically. It is included with Docker Desktop. Docker Engine users install the CLI plugin separately using [Docker's installation guidance](https://docs.docker.com/scout/install/).
 
 ### Interpreting Results
 
-A typical scan of a full `ubuntu:22.04`-based image returns 50–200 CVEs (depending on the packages). A slim variant of the same image drops to 20–80. A distroless or hardened image often returns 0–5, and those are typically in glibc or OpenSSL — infrastructure you genuinely need.
+Report measurements for exact digests and a dated scanner database. This guide supplies no scan evidence for fixed CVE counts by image family.
 
 For each finding:
 - **Fixed version available** → rebuild with the patched base image
@@ -192,7 +186,7 @@ Image hardening reduces risk at build time. Runtime security controls reduce ris
 
 ### Run as Non-Root
 
-Most official images now run as non-root by default, but check. In your own Dockerfiles:
+Inspect the selected image's configured user and runtime behavior; do not assume all official images run as non-root. In your own Dockerfiles:
 
 ```dockerfile
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
@@ -207,7 +201,7 @@ Linux capabilities control what a process can do — even as root inside the con
 docker run --cap-drop ALL --cap-add NET_BIND_SERVICE nginx:alpine
 ```
 
-Nginx needs `NET_BIND_SERVICE` to bind to port 80. A database container doesn't need any extra capabilities at all.
+Required capabilities depend on the image entrypoint, configured user, ports, kernel settings, and mounts. Initialization may need permissions that steady-state operation does not. Test dropped capabilities against the actual application; the example is not a universal profile.
 
 ### Read-Only Root Filesystem
 

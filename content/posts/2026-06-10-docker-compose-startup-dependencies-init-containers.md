@@ -17,6 +17,7 @@ keywords:
   - Docker compose healthcheck condition service_healthy
   - Docker compose startup order database migration pattern
 summary: "A practical guide to Docker Compose startup ordering — covering depends_on conditions, healthcheck-based readiness, init container patterns with wait-for-it, and real-world compose examples for multi-service homelab stacks."
+lastmod: 2026-10-31
 ---
 
 You write a shiny `compose.yml`, run `docker compose up -d`, and everything starts at once. Postgres is still initializing when your web app tries to connect. The migration container runs before the database accepts queries. Redis is listed as a dependency, but your cache-dependent service crashes three times before it finds the port open.
@@ -284,45 +285,23 @@ services:
     restart: unless-stopped
 ```
 
-### Conditional Startup with Profiles
+### Conditional startup with profiles
 
-Use Compose profiles to control which services start normally vs. on-demand:
+Profiles select optional services; they do not make an enabled application's required dependency disappear. An always-enabled app depending on a migration service hidden behind an inactive profile can produce an invalid Compose model. Put a required migration in the normal dependency graph, or put the whole optional application group in the same profile. See [Compose profiles](https://docs.docker.com/compose/how-tos/profiles/).
 
-```yaml
-services:
-  migrations:
-    profiles: ["setup"]
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-    command: alembic upgrade head
+For a manually managed migration, run and check the migration explicitly before starting the application; remove the automatic dependency only if the deployment procedure now enforces that ordering. A profile is not an error-handling or migration-rollback mechanism.
 
-  app:
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-    build: .
-    ports: ["8080:8080"]
-```
+### Diagnose unexpected health state
 
-Run migrations explicitly: `docker compose --profile setup run migrations`. Without the profile flag, `migrations` is skipped, and `app` starts immediately. This pattern is useful when you manage migrations manually.
-
-### Handling Stale Health States
-
-Occasionally Compose caches a stale health check status. When this happens, a container shows as healthy when it is not:
+A health check reports the result of its configured probe. Inspect its command, output, and timing before recreating anything:
 
 ```bash
-docker compose down -v && docker compose up -d
+docker compose ps
+docker inspect --format '{{json .State.Health}}' container_name
+docker compose logs --tail 100
 ```
 
-If the issue persists, check the health status explicitly:
-
-```bash
-docker inspect --format='{{.State.Health.Status}}' container_name
-```
-
-For a full reset of all health state, restart the Docker daemon — though this is rarely needed.
+Replace `container_name` with the inspected container. A probe can succeed while the application is unusable if it tests the wrong condition. Correct the probe and apply the configuration in a maintenance window with `docker compose up -d`. Do not delete volumes or restart the whole Docker daemon to clear a supposed Compose health cache.
 
 ## Summary and Best Practices
 

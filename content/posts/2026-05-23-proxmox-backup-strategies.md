@@ -120,3 +120,7 @@ For a host loss, recover access to the backup copy first, prepare replacement PV
 - [PBS setup and first restore](/posts/2026-05-08-proxmox-backup-server-setup/) — Configure the backup service.
 - [Intel AMT Serial over LAN](/posts/2026-10-30-intel-amt-sol-proxmox/) — Prepare another route to a host console.
 - [Proxmox bridges and VLANs](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — Document the network needed during recovery.
+
+## Application backups alongside guest backups
+
+For PostgreSQL application data, follow the [atomic dump, scheduler, and Restic-to-database recovery lab](/posts/2026-06-01-docker-database-backup-automation-pgdump-cron/). For ordinary prepared files, use the [Restic file recovery guide](/posts/2026-05-19-restic-docker-backup-strategy/). Their disposable Docker results do not validate a PBS sync, VM restore, or production application; keep those recovery tests distinct.
