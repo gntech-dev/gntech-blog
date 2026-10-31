@@ -351,3 +351,9 @@ Your router and hypervisor are two halves of the same network: the
 router defines the VLANs and firewall rules, the hypervisor connects
 guests to the right VLAN. Get the bridge config right on both sides,
 and you never think about it again.
+
+## Continue reading
+
+- [MikroTik VLAN segmentation](/posts/2026-05-12-mikrotik-vlan-segmentation/) — Connect the guest-side VLAN design to router-side DHCP and firewall policy.
+- [Intel AMT Serial over LAN](/posts/2026-10-30-intel-amt-sol-proxmox/) — Prepare a recovery console before making changes that could interrupt network access.
+- [Prometheus and Grafana foundations](/posts/2026-05-17-homelab-monitoring-stack/) — Add visibility after you have established the network path.
