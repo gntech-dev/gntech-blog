@@ -376,5 +376,5 @@ Three layers — smartd for push alerts, Scrutiny for daily review, and Promethe
 
 **Related guides:**
 - [ZFS Snapshot Strategies for Your Homelab](/posts/2026-05-08-zfs-snapshot-strategies/)
-- [Proxmox Backup Server Deployment Guide](/posts/2026-05-15-proxmox-backup-server-deployment/)
+- [Proxmox Backup Server Deployment Guide](/posts/2026-05-08-proxmox-backup-server-setup/)
 - [Restic Docker Backup Strategy](/posts/2026-05-19-restic-docker-backup-strategy/)
