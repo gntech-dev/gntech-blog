@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Run the backup article's Bash examples in a disposable Compose project."""
 import os
+import json
 import fcntl
 import time
 from pathlib import Path
@@ -14,8 +15,8 @@ ARTICLE = Path(__file__).resolve().parents[1] / "content/posts/2026-06-01-docker
 
 def blocks(text):
     examples = re.findall(r"^```bash\n(.*?)^```", text, re.M | re.S)
-    if len(examples) != 9:
-        raise ValueError("Expected nine Bash examples; review the lab harness after article edits")
+    if len(examples) != 12:
+        raise ValueError("Expected twelve Bash examples; review the lab harness after article edits")
     return examples
 
 
@@ -32,10 +33,10 @@ def main():
     with tempfile.TemporaryDirectory(prefix="gntech-pg-test-") as directory:
         work = Path(directory)
 
-        def run(script, *, input=None, check=True):
+        def run(script, *, input=None, check=True, capture=False):
             return subprocess.run(
                 ["bash", "-euo", "pipefail", "-c", script],
-                cwd=work, env=env, input=input, text=True, check=check, timeout=240,
+                cwd=work, env=env, input=input, text=True, check=check, capture_output=capture, timeout=240,
             )
 
         unit = env["COMPOSE_PROJECT_NAME"] + "-backup"
@@ -135,6 +136,32 @@ def main():
             if list((work / "backups").glob("*.dump")) != archives or {a.name: a.read_bytes() for a in archives} != published:
                 raise AssertionError("Failed backup changed published archives")
             print("PASS: failed dump publishes nothing and preserves prior archive", flush=True)
+            # Rehearse recovery of the published SQL dumps from an encrypted copy.
+            (work / "backups/ignored.partial").write_text("must never enter a snapshot")
+            run(examples[8])
+            chain = "docker compose -f compose.yaml -f compose.chain.yaml"
+            run(chain + " run --rm --interactive=false archive version")
+            run("docker image inspect restic/restic:0.19.1 --format '{{json .RepoDigests}}'")
+            copied = json.loads(run(
+                chain + " run --rm --interactive=false recover_archive snapshots --json",
+                capture=True,
+            ).stdout)
+            if len(copied) != 1:
+                raise AssertionError("Expected exactly one copied dump snapshot")
+            run("docker compose stop restore_test")
+            # Only the copied repository remains available to the recovery procedure.
+            for name in ("backups", "chain-repository", "chain-password", "db-password"):
+                (work / name).rename(work / (name + "-unavailable"))
+            run(examples[9], input=copied[0]["id"] + "\n" + archive.name + "\n")
+            run(examples[10])
+            restored = work / "chain-restored/dumps"
+            recovered = {a.name: a.read_bytes() for a in restored.glob("*.dump")}
+            if recovered != published:
+                raise AssertionError("Recovered dumps differ from published archives")
+            if list(restored.glob("*.partial")):
+                raise AssertionError("Restic included a partial dump")
+            print("PASS: PostgreSQL dump -> encrypted repository copy -> fresh database recovery", flush=True)
+            print("PASS: restored dump bytes match and partial files are excluded", flush=True)
         finally:
             run("systemctl stop " + unit + ".timer " + unit + ".service", check=False)
             run("systemctl reset-failed " + unit + ".service", check=False)
@@ -149,7 +176,10 @@ def main():
             if (work / "compose.yaml").exists():
                 run("docker compose logs --no-color --tail 60", check=False)
                 # Only our randomly named, disposable project's volumes are removed.
-                run("docker compose down --volumes --remove-orphans")
+                if (work / "compose.chain.yaml").exists():
+                    run("docker compose -f compose.yaml -f compose.chain.yaml down --volumes --remove-orphans")
+                else:
+                    run("docker compose down --volumes --remove-orphans")
 
 
 if __name__ == "__main__":
