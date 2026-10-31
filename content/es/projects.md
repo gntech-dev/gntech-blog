@@ -14,15 +14,15 @@ Las guías enlazadas a continuación están en **inglés**. Se indica el idioma 
 
 El enrutamiento MikroTik y las VLAN permiten separar usuarios, servidores y dispositivos. Empieza por la configuración del router y continúa con los puentes de Proxmox.
 
-- [Construcción de R1: router MikroTik con segmentación por VLAN (inglés)](/posts/r1-router-deployment/)
-- [Redes en Proxmox: puentes, VLAN y topología del host (inglés)](/posts/2026-05-08-proxmox-networking-bridges-vlans/)
+- [Construcción de R1: router MikroTik con segmentación por VLAN (inglés)](https://blog.gntech.me/posts/r1-router-deployment/)
+- [Redes en Proxmox: puentes, VLAN y topología del host (inglés)](https://blog.gntech.me/posts/2026-05-08-proxmox-networking-bridges-vlans/)
 
 ## Servicios propios
 
 Docker Compose permite definir servicios y sus dependencias de forma repetible. Estas guías explican patrones de despliegue y un proyecto concreto de videovigilancia.
 
-- [Patrones de Docker Compose para el laboratorio (inglés)](/posts/2026-05-08-docker-compose-patterns/)
-- [Despliegue de Frigate NVR en Proxmox (inglés)](/posts/frigate-deployment/)
+- [Patrones de Docker Compose para el laboratorio (inglés)](https://blog.gntech.me/posts/2026-05-08-docker-compose-patterns/)
+- [Despliegue de Frigate NVR en Proxmox (inglés)](https://blog.gntech.me/posts/frigate-deployment/)
 
 El artículo de Frigate describe un despliegue anterior. Revisa el entorno y las versiones antes de adaptarlo.
 
@@ -30,8 +30,8 @@ El artículo de Frigate describe un despliegue anterior. Revisa el entorno y las
 
 Un entorno de administración útil incluye un equipo cliente y una forma de acceder al host cuando su interfaz habitual no está disponible.
 
-- [ThinkPad T420 con Arch Linux e i3 (inglés)](/posts/2026-10-30-thinkpad-t420-arch-i3/)
-- [Intel AMT Serial over LAN en Proxmox (inglés)](/posts/2026-10-30-intel-amt-sol-proxmox/)
+- [ThinkPad T420 con Arch Linux e i3 (inglés)](https://blog.gntech.me/posts/2026-10-30-thinkpad-t420-arch-i3/)
+- [Intel AMT Serial over LAN en Proxmox (inglés)](https://blog.gntech.me/posts/2026-10-30-intel-amt-sol-proxmox/)
 
 El artículo del T420 distingue el hardware instalado de las mejoras previstas. La guía SOL separa el comportamiento observado del procedimiento general de configuración.
 
