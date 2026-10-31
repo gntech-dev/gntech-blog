@@ -33,8 +33,7 @@ provides a real-time stats dashboard, and supports advanced routing
 patterns like session stickiness and path-based ACLs.
 
 This guide walks through deploying HAProxy with Docker Compose in your
-homelab. Every config file and command has been tested on Docker Engine
-27+ and Compose 2.30+ running on Debian 12.
+homelab. Validate the examples against the installed HAProxy, Docker and Compose versions; source parsing does not establish a deployment test.
 
 ---
 

@@ -33,8 +33,7 @@ and the recently released 7.24beta1 continue to refine this implementation.
 
 This guide covers eBGP peering, iBGP with route reflectors, prefix
 advertisement with filter chains, BGP communities for traffic engineering,
-and IPv6 MP-BGP. Every command has been tested on RouterOS 7.1+ and
-confirmed working on 7.23 stable. You will need two or more MikroTik
+and IPv6 MP-BGP. RouterOS routing syntax and behavior vary by release; this source review does not establish runtime evidence across 7.1 through 7.23. You will need two or more MikroTik
 routers (or CHR instances) with IP connectivity between loopback or
 physical interfaces.
 

@@ -217,9 +217,9 @@ services:
   app:
     environment:
       # Hardcoded value
-      - MODE=production
+      MODE: production
       # From compose interpolation (reads .env or shell)
-      - DB_HOST=${DB_HOST:-postgres}
+      DB_HOST: ${DB_HOST:-postgres}
       # Pairs syntax (equivalent to above)
       DB_PORT: ${DB_PORT:-5432}
 ```

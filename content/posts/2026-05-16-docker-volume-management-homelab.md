@@ -439,7 +439,7 @@ docker volume prune --filter "label!=backup" --filter "label!=keep"
 
 **Include volumes in your docker compose down strategy:**
 
-```yaml
+```bash
 # This does NOT remove volumes (safe for daily down/up)
 docker compose down
 

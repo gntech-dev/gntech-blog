@@ -120,8 +120,7 @@ services using `depends_on: condition: service_healthy`.
 ## 2. Depends On with Conditions — Real Startup Ordering
 
 The old `depends_on` only waited for a container to start, not for it
-to be ready. Compose v2.20+ supports conditions, and when combined with
-healthchecks, you get real ordering.
+to be ready. Use a supported Compose plugin with conditional depends_on and healthchecks. The service_healthy condition is not new to Compose 2.20; validate the installed plugin's parsed configuration.
 
 ### Service-Healthy Dependencies
 

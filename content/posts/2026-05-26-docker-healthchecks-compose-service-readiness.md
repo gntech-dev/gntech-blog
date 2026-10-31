@@ -125,7 +125,7 @@ connections. No retry loops, no connection refused errors.
 
 ```yaml
 healthcheck:
-  test: ["CMD-SHELL", "pg_isready -U \${POSTGRES_USER:-postgres}"]
+  test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
   interval: 10s
   timeout: 5s
   retries: 5
@@ -172,7 +172,7 @@ RUN apk add --no-cache curl
 
 ```yaml
 healthcheck:
-  test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p\${MYSQL_ROOT_PASSWORD}"]
+  test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}"]
   interval: 10s
   timeout: 5s
   retries: 5

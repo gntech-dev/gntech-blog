@@ -32,8 +32,7 @@ bridge filtering, FastTrack performance tuning, DNS over HTTPS
 setup, container management, and backup automation — all with
 concrete commands that work on RouterOS 7.15 and later.
 
-Every rule, setting, and script below has been tested on
-MikroTik CCR, RB5009, hAP ax, and CHR deployments. Adjust
+The examples require validation on the actual RouterOS release and hardware. This source review does not establish deployment evidence for CCR, RB5009, hAP ax or CHR. Adjust
 interface names and IP ranges to match your network.
 
 ---

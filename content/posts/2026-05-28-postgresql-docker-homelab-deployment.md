@@ -36,7 +36,7 @@ This guide walks through deploying PostgreSQL 16 with Docker Compose
 in a homelab — persistent storage, health checking, performance
 tuning, the pgvector extension for AI workloads, automated backup
 with systemd timers, and optional streaming replication. Every config
-file and command has been tested on Docker Engine 27+ and Compose 2.30+
+file and command requires validation on the installed Docker Engine and Compose versions
 running on Debian 12.
 
 ---
@@ -163,7 +163,10 @@ performance on the table.
 Mount a custom configuration file to override the defaults:
 
 ```yaml
-# Add to the postgres service volumes section in docker-compose.yml
+# Merge into the existing postgres service; preserve the data volume.
+services:
+  postgres:
+    volumes:
       - ./postgresql.conf:/etc/postgresql/postgresql.conf:ro
     command:
       - "postgres"
