@@ -2,6 +2,7 @@
 title: "ThinkPad T420 with Arch Linux and i3 — A Practical Admin Laptop"
 description: "Give a ThinkPad T420 a useful second life with Arch Linux, i3, PipeWire, working brightness keys, and a straightforward verification checklist."
 date: 2026-10-30T14:00:00-04:00
+lastmod: 2026-10-31
 draft: false
 tags:
   - thinkpad
@@ -22,6 +23,17 @@ My ThinkPad T420 cost $50. After adding an SSD and bringing it to 8 GB of RAM, I
 I chose Arch Linux with i3. The attraction was a simple desktop that I could understand and adjust: a window manager, a panel, a launcher, and a few services doing specific jobs.
 
 This post combines the results from my machine with a clean starting configuration readers can reproduce. The commands below are a proposed setup, not an export of my exact dotfiles or a claim that every block has been tested on every T420.
+
+## Verification status
+
+| Scope | Evidence and limits |
+| --- | --- |
+| Environment | ThinkPad T420; Core i5-2520M, SSD, 8 GB RAM; Arch Linux with Xorg/i3. |
+| Previously reported lab observations | Working brightness control and an NVIDIA runtime-suspend observation; fingerprint verification and some mute behavior remained unresolved. |
+| Preparation checks | 13 Bash examples passed syntax checks during preparation. The starter configuration is not an export of the installed dotfiles. |
+| Still to verify | Run the i3 configuration parser and test audio, input, locking, suspend/resume and battery behavior on the target laptop. |
+
+*This table summarizes the evidence recorded for this article. It is not a new hardware test or a certification for other versions.*
 
 ## The hardware and the result
 
