@@ -243,6 +243,12 @@ Verify that you can connect, identify the correct host, log in, run a harmless c
 
 The useful result is a recovery path you have exercised. On my nodes, the final lesson was simple: `exit` belongs to the Linux shell, and disconnect belongs to the SOL client.
 
+## Continue reading
+
+- [Proxmox bridges and VLANs](/posts/2026-05-08-proxmox-networking-bridges-vlans/) — Understand the normal host and guest network paths alongside the management console.
+- [ThinkPad T420 administration laptop](/posts/2026-10-30-thinkpad-t420-arch-i3/) — Prepare a focused Linux client for day-to-day administration.
+- [Proxmox Backup Server](/posts/2026-05-08-proxmox-backup-server-setup/) — Pair recovery access with a backup and restore plan.
+
 ## References and image provenance
 
 - [Intel AMT documentation](https://www.intel.com/content/www/us/en/developer/tools/active-management-technology/documentation.html)
