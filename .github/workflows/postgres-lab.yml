@@ -20,4 +20,4 @@ jobs:
         with:
           persist-credentials: false
       - name: Replay guide and verify recovery and failure behavior
-        run: python3 tools/check-postgres-lab.py
+        run: sudo python3 tools/check-postgres-lab.py
