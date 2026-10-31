@@ -22,9 +22,10 @@ The old combined PostgreSQL/MySQL script is replaced with one explicit PostgreSQ
 | Runtime | [Recovery lab run 41244956545](https://github.com/gntech-dev/gntech-blog/actions/runs/41244956545) passed on October 31, 2026: dump, isolated restore, marker assertion, repeated-restore failure, and stopped-source backup failure. That run covered recovery only. |
 | Scheduler | [Scheduler lab run 41245987064](https://github.com/gntech-dev/gntech-blog/actions/runs/41245987064) passed on October 31, 2026: manual service execution, accelerated timer activation, lock-contention failure, stopped-source failure, service result/exit status, and journal error details. Tested with systemd 255.4-1ubuntu8.18. The daily calendar was parsed; CI used a two-second timer override. |
 | Tested versions | GitHub-hosted Ubuntu 24.04.5 amd64; Docker 28.0.4; Compose 2.38.2; PostgreSQL 16.15. Image digest: `sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab`. |
+| Recovery chain | [Integrated lab run 41247821482](https://github.com/gntech-dev/gntech-blog/actions/runs/41247821482) passed on October 31, 2026: PostgreSQL dump → separately encrypted Restic copy → fresh PostgreSQL database. Original dumps, original repository, and original credentials were unavailable during recovery; restored archive bytes matched and partial files were excluded. Both repositories were local to CI. Restic 0.19.1 image digest: `sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510`. |
 | Scope | Disposable PostgreSQL 16 lab, not a production deployment or point-in-time recovery solution. |
 
-The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. It also tests the generated systemd service and an accelerated timer on a disposable runner. Off-site recovery, external alert delivery, missed-run monitoring, downtime catch-up, and production data remain outside this test.
+The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. It also tests the generated systemd service, an accelerated timer, and the integrated Restic-to-database recovery chain on a disposable runner. Off-site recovery, external alert delivery, missed-run monitoring, downtime catch-up, and production data remain outside this test.
 
 ## 1. Prepare a separate lab
 
@@ -269,10 +270,128 @@ Keep repository credentials, database versions, extension requirements, applicat
 
 Logical dumps do not provide arbitrary point-in-time recovery. Review [PostgreSQL backup guidance](https://www.postgresql.org/docs/16/backup-dump.html) and WAL-based recovery requirements when the recovery target demands more than periodic snapshots.
 
-## Stop the lab
+### Recover a database dump from a copied Restic repository
+
+This extension joins the two labs. Both repositories are local to the disposable host; this tests the recovery chain, not off-site durability or a remote backend. Run it after successful dump creation. Stop the timer during this rehearsal so the selected dump directory does not change.
+
+Use a reviewed official Restic image. The example below matches the Restic lab's tested 0.19.1 release. Keep these passwords and the copied repository outside the original host in a real deployment.
 
 ```bash
-docker compose down
+umask 077
+mkdir chain-repository chain-copy chain-restored
+openssl rand -base64 32 > chain-password
+openssl rand -base64 32 > chain-copy-password
+openssl rand -base64 32 > recovery-db-password
+cat > compose.chain.yaml <<'EOF'
+services:
+  archive:
+    image: restic/restic:0.19.1
+    environment:
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD_FILE: /run/secrets/chain-password
+    volumes:
+      - ./backups:/dumps:ro
+      - ./chain-repository:/repository
+      - ./chain-copy:/copy
+    secrets:
+      - chain-password
+      - chain-copy-password
+  recover_archive:
+    image: restic/restic:0.19.1
+    environment:
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD_FILE: /run/secrets/chain-copy-password
+    volumes:
+      - ./chain-copy:/repository
+      - ./chain-restored:/restore
+    secrets:
+      - chain-copy-password
+  recovered_db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: restoredb
+      POSTGRES_USER: lab
+      POSTGRES_PASSWORD_FILE: /run/secrets/recovery-db-password
+    secrets:
+      - recovery-db-password
+    volumes:
+      - chain_recovery_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-U", "lab", "-d", "restoredb"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+
+secrets:
+  chain-password:
+    file: ./chain-password
+  chain-copy-password:
+    file: ./chain-copy-password
+  recovery-db-password:
+    file: ./recovery-db-password
+volumes:
+  chain_recovery_data:
+EOF
+
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false archive init
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false archive \
+  backup /dumps --exclude '*.partial' --host postgres-recovery-lab --tag pgdump
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false archive \
+  --repo /copy --password-file /run/secrets/chain-copy-password init
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false archive \
+  --repo /copy --password-file /run/secrets/chain-copy-password \
+  copy --from-repo /repository --from-password-file /run/secrets/chain-password
+```
+
+Keep this staging directory limited to the workflow's published dumps and temporary partial files. The exclude rule prevents a partially written dump from entering the snapshot. It does not make other arbitrary files safe to publish.
+
+The recovery service has no mount for the original dumps, original repository, or its password. Recover from the copy and import a selected dump into the new database:
+
+```bash
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false recover_archive snapshots
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false recover_archive check --read-data
+read -r -p 'Copied snapshot ID: ' copied_id
+test -n "$copied_id" || exit 1
+docker compose -f compose.yaml -f compose.chain.yaml run --rm --interactive=false recover_archive \
+  restore "$copied_id" --target /restore
+read -r -p 'Recovered dump filename (without directory): ' recovered_dump
+[[ "$recovered_dump" =~ ^[a-zA-Z0-9_.-]+\.dump$ ]] || exit 1
+test -s "chain-restored/dumps/$recovered_dump" || exit 1
+docker compose -f compose.yaml -f compose.chain.yaml up --wait --wait-timeout 120 recovered_db
+docker compose -f compose.yaml -f compose.chain.yaml exec -T recovered_db pg_restore \
+  --exit-on-error --single-transaction --no-owner --no-privileges \
+  -U lab -d restoredb < "chain-restored/dumps/$recovered_dump"
+```
+
+Require the same marker assertion against this **new** database:
+
+```bash
+docker compose -f compose.yaml -f compose.chain.yaml exec -T recovered_db \
+  psql -X -U lab -d restoredb -v ON_ERROR_STOP=1 <<'SQL'
+DO $$
+BEGIN
+  IF (SELECT count(*) FROM backup_marker
+      WHERE id = 1 AND value = 'gntech-restore-check') <> 1 THEN
+    RAISE EXCEPTION 'Copied repository database recovery failed';
+  END IF;
+END
+$$;
+SQL
+```
+
+Do not repeat this import into the populated database or point it at the source. The new database uses a fresh volume and its own bootstrap credential; production roles, extensions, attachments, and permissions still need their own recovery plan. Include both Compose files when stopping this extended lab.
+
+## Stop the lab
+
+For the extended Restic lab, stop all its services with both files; otherwise use the original single-file command.
+
+```bash
+if [ -f compose.chain.yaml ]; then
+  docker compose -f compose.yaml -f compose.chain.yaml down
+else
+  docker compose down
+fi
 ```
 
 This retains the lab volumes and archives for inspection. Removing the disposable volumes is a separate decision after checking recovery evidence. No production database should be attached to this project.

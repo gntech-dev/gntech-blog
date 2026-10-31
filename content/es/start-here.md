@@ -5,6 +5,7 @@ date: 2026-10-30T14:00:00-04:00
 draft: false
 translationKey: start-here
 ShowToc: true
+lastmod: 2026-10-31
 ---
 
 Bienvenido a **GnTech**. Elige el problema que quieres resolver y sigue una ruta corta por las guías. No necesitas leer el blog en orden de publicación.
@@ -16,6 +17,7 @@ Las guías técnicas enlazadas en estas rutas están en **inglés**. Esta págin
 | Crear un laboratorio virtualizado | [Fundamentos de Proxmox](#fundamentos-de-proxmox) |
 | Separar usuarios, servidores y dispositivos | [Redes MikroTik](#redes-mikrotik) |
 | Alojar y mantener servicios propios | [Docker Compose](#docker-compose) |
+| Respaldar servicios y comprobar la recuperación | [Respaldos y recuperación](#respaldos-y-recuperación) |
 | Administrar y recuperar tus equipos | [Administración y recuperación](#administración-y-recuperación) |
 
 ## Fundamentos de Proxmox
@@ -47,6 +49,14 @@ Comienza con pocos servicios. Comprende su almacenamiento, configuración y arra
 3. [Despliegue de Frigate (inglés)](https://blog.gntech.me/posts/frigate-deployment/) — explora un proyecto de cámaras después de los fundamentos.
 
 **Objetivo práctico:** recrea un conjunto de servicios de pruebas y comprueba que sus datos persisten. La guía de Frigate describe un despliegue anterior; revisa sus versiones y requisitos de hardware.
+
+## Respaldos y recuperación
+
+1. [Estrategia y copias independientes (inglés)](https://blog.gntech.me/posts/2026-05-23-proxmox-backup-strategies/) — define los objetivos y el fallo que debe soportar cada copia.
+2. Para máquinas virtuales, sigue [PBS y recuperación aislada (inglés)](https://blog.gntech.me/posts/2026-05-08-proxmox-backup-server-setup/). Para PostgreSQL, usa el [laboratorio de exportación, programación y recuperación mediante Restic (inglés)](https://blog.gntech.me/posts/2026-06-01-docker-database-backup-automation-pgdump-cron/).
+3. El [laboratorio de Restic (inglés)](https://blog.gntech.me/posts/2026-05-19-restic-docker-backup-strategy/) explica la recuperación de archivos y la copia entre repositorios con contraseñas separadas.
+
+**Objetivo práctico:** recuperar en un destino aislado usando la copia y las credenciales disponibles después de un fallo. Los repositorios locales de CI comprueban los comandos; no validan tu almacenamiento remoto ni la recuperación del hardware.
 
 ## Administración y recuperación
 

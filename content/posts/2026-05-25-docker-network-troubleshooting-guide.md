@@ -17,6 +17,7 @@ keywords:
   - container cross-host connectivity docker
   - docker-compose network connectivity issues
 summary: "A practical guide to diagnosing and fixing Docker container networking problems — DNS timeouts, port conflicts, bridge network isolation, cross-host communication, and the netshoot toolkit for homelab deployments."
+lastmod: 2026-10-31
 ---
 
 Docker networking is the number one source of "it works on my machine"
@@ -465,18 +466,15 @@ if you need macvlan isolation:
 
 **Symptom:** `docker compose up` fails with `network not found`.
 
-**Fix — Docker Compose v2 creates networks automatically.** If you're
-manually pre-creating networks, stop:
+Compose creates networks declared as managed resources in its project. It does not create a network marked `external: true`. Check the rendered configuration and the actual Docker daemon/context before changing network definitions:
 
 ```bash
-# Don't do this — Compose manages it
-docker network create app-net
-docker compose up  # Conflicts
-
-# Do this instead — just define it in compose
-docker compose down -v
-docker compose up  # Creates network from definition
+docker compose config
+docker network ls
+docker compose up -d
 ```
+
+If an external network is intended, create and manage it separately with the required driver, subnet, and ownership. Do not delete application volumes to resolve a missing network. A network with an unexpected name or project label needs investigation, not an assumption that any manually created network conflicts.
 
 If you must share a network across multiple compose files, create it
 once with `external: true`:

@@ -17,6 +17,7 @@ keywords:
   - Docker volume backup and restore
   - Docker compose volume configuration
 summary: "Learn when to use Docker named volumes vs bind mounts for homelab containers. Covers volume drivers, NFS-backed storage, backup automation, and practical data persistence patterns for production-like Docker deployments."
+lastmod: 2026-10-31
 ---
 
 Every Docker container running in your homelab generates data — database
@@ -32,7 +33,7 @@ backup gaps, or containers that can't migrate between hosts.
 This guide covers the four Docker storage options available in every
 homelab — named volumes, bind mounts, tmpfs, and NFS volumes — with
 practical patterns for databases, configs, media, and logs. You'll learn
-which to use, when, and how to back it all up without thinking about it.
+which to use and how to plan a recoverable copy of its contents.
 
 ---
 
@@ -53,7 +54,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: changeme
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set a generated password}
       POSTGRES_DB: homelab
 
 volumes:
@@ -139,10 +140,10 @@ The most common Docker storage question has a straightforward answer:
 |--------|-------------|------------|
 | **Management** | Docker creates, names, destroys | You manage paths manually |
 | **Backup** | Back up `/var/lib/docker/volumes/` | Back up the host directory |
-| **Permission safety** | Docker sets initial ownership to the container user | Host permissions apply directly |
+| **Permission safety** | Inspect initialization and the selected image UID/GID | Host permissions apply directly |
 | **Editing files** | Requires `docker exec` or root on host | Direct file access from host |
 | **Performance** | Native Docker (btrfs, overlay2) | Direct host filesystem |
-| **Portability** | Copy volume name to another Docker host | Must replicate path structure |
+| **Portability** | Migrate the data and recreate its driver/mount settings | Must replicate path structure |
 | **Secrets / configs** | Awkward | Ideal |
 
 **Rule of thumb for the homelab:**
@@ -216,16 +217,17 @@ apt install nfs-kernel-server
 
 # Create and export a volume directory
 mkdir -p /srv/nfs/docker-volumes
-chown -R nobody:nogroup /srv/nfs/docker-volumes
 chmod 755 /srv/nfs/docker-volumes
 
 # Edit /etc/exports
-echo "/srv/nfs/docker-volumes 10.0.20.0/24(rw,sync,no_subtree_check,no_root_squash)" \
+echo "/srv/nfs/docker-volumes 10.0.20.0/24(rw,sync,no_subtree_check,root_squash)" \
   >> /etc/exports
 
 exportfs -a
 systemctl restart nfs-kernel-server
 ```
+
+Choose ownership for each service directory using its verified UID/GID before starting it. Root squashing does not grant the application write permission automatically. Restrict exports to the intended clients and verify the server-side paths.
 
 **Use NFS volumes in Docker Compose:**
 
@@ -245,13 +247,13 @@ volumes:
     driver: local
     driver_opts:
       type: nfs
-      o: addr=10.0.20.30,rw,nfsvers=4,soft,timeo=100,retrans=3
+      o: addr=10.0.20.30,rw,nfsvers=4,hard
       device: :/srv/nfs/docker-volumes/jellyfin-config
   jellyfin-cache:
     driver: local
     driver_opts:
       type: nfs
-      o: addr=10.0.20.30,rw,nfsvers=4,soft,timeo=100,retrans=3
+      o: addr=10.0.20.30,rw,nfsvers=4,hard
       device: :/srv/nfs/docker-volumes/jellyfin-cache
 ```
 
@@ -261,194 +263,50 @@ volumes:
 docker volume create \
   --driver local \
   --opt type=nfs \
-  --opt o=addr=10.0.20.30,rw,nfsvers=4,soft \
+  --opt o=addr=10.0.20.30,rw,nfsvers=4,hard \
   --opt device=:/srv/nfs/docker-volumes/postgres-data \
   postgres_data_nfs
 ```
 
 **NFS volume considerations:**
 
-- NFSv4 is the minimum for production — older versions lack locking and
-  security
-- Network latency adds 1-5 ms per I/O operation — don't put latency-
-  sensitive databases on NFS
-- Use `soft` mounts to avoid a container hang when the NFS server is
-  unreachable
-- `no_root_squash` on the server lets container root write files (needed
-  for most containers)
-- Back up the NFS server, not the individual Docker hosts
+- Use mount and locking semantics supported by the application. A `soft` mount can return I/O errors during an outage and risks data corruption; it is not a general fix for application hangs. `hard` mounts trade availability for retry behavior, which also needs an outage plan.
+- NFSv3 can support locking through additional services; it is inaccurate to say all older versions have no locking or security. Prefer a version and authentication policy explicitly supported by both endpoints.
+- Preserve root squashing where practical. Align application UID/GID permissions instead of making `no_root_squash` a default requirement.
+- Test latency and outage behavior. Shared storage does not make a database safe for concurrent writers on multiple hosts.
+- Back up application-consistent data and its configuration, including any dependencies outside the NFS server.
 
----
+## Back up prepared data, then prove recovery
 
-## Docker Volume Backup — Practical Automation
+The earlier generic tar loop archived live database volumes and could report success after a failed step. It is removed. A read-only helper mount does not stop other containers writing to a volume, and a configured password variable is useless unless the backup tool actually consumes it.
 
-A volume is only useful if you can restore it. Here's a backup strategy
-that covers databases, configs, and app data with minimal overhead.
+Use the [PostgreSQL atomic dump and recovery lab](/posts/2026-06-01-docker-database-backup-automation-pgdump-cron/) for database-native dumps, failure propagation, scheduling, and a restore into a new instance. It also tests a separately encrypted Restic copy. For ordinary files, follow the [Restic file recovery lab](/posts/2026-05-19-restic-docker-backup-strategy/).
 
-**Backup script for named volumes with restic (or rsync):**
+For a filesystem archive, first stop **all** writers cleanly and confirm the application's supported shutdown/backup procedure. Record volume driver settings, ownership, ACLs, extended attributes, image digests, and credentials. Test recovery into a new empty destination and verify the application before touching the original. A successful tar extraction is not an application recovery test.
 
-```bash
-#!/bin/bash
-# docker-volume-backup.sh — backs up named volumes to a remote repo
-# Dependencies: restic, docker
-# Schedule: daily cron at 03:00
+## Volume cleanup and lifecycle
 
-REPO="sftp:backup@10.0.20.100:/backups/docker-volumes"
-PASSWORD="your-restic-password"   # Use env var or vault in production
-
-# Volumes to back up — add your own here
-VOLUMES=(
-  "postgres_data"
-  "mysql_data"
-  "prometheus_data"
-  "grafana_data"
-  "influxdb_data"
-)
-
-BACKUP_DIR="/tmp/docker-volume-backup"
-
-mkdir -p "$BACKUP_DIR"
-
-for VOLUME in "${VOLUMES[@]}"; do
-  echo "Backing up volume: $VOLUME"
-  
-  # Spin up a temporary Alpine container, mount the volume, tar it up
-  docker run --rm \
-    -v "${VOLUME}":/volume \
-    -v "${BACKUP_DIR}":/backup \
-    alpine:latest \
-    tar czf "/backup/${VOLUME}.tar.gz" -C /volume .
-done
-
-# Send to restic repo
-restic -r "$REPO" backup "$BACKUP_DIR" --tag docker-volumes --tag daily
-
-# Clean up local temp files
-rm -rf "$BACKUP_DIR"
-
-echo "Backup complete: $(date)"
-```
-
-**For PostgreSQL databases specifically — use pg_dump for consistent
-snapshots:**
+Inspect first:
 
 ```bash
-#!/bin/bash
-# pg-dump-backup.sh — consistent database backup with pg_dump
-
-docker exec postgres \
-  pg_dump -U homelab --format=custom \
-  -f /tmp/homelab-backup.dump homelab
-
-# Then back up the dump file (which lives in the container's writable layer)
-# Better: pipe the dump to a file in a bind mount
-docker exec postgres \
-  pg_dump -U homelab --format=custom \
-  homelab > /backups/postgres/homelab-$(date +%Y%m%d-%H%M%S).dump
+docker system df -v
+docker volume ls
+docker volume ls --filter dangling=true
 ```
 
-**Restore a volume:**
+“Unused” means no container currently references the volume. It does not mean its data is disposable: a removed Compose stack can leave an important named volume behind. Inspect the exact candidate and its container references, then verify an independent recovery copy before deleting it.
+
+Current `docker volume prune` defaults to unused anonymous volumes; `--all` includes unused named volumes. Its supported filters are label filters, not `until=24h`. See [the command reference](https://docs.docker.com/reference/cli/docker/volume/prune/). Labels aid inventory but are not a backup or a dry-run deletion preview.
+
+For routine stack shutdown, retain volumes:
 
 ```bash
-# Restore a tar.gz backup into a named volume
-docker volume create postgres_data_restored
-
-docker run --rm \
-  -v postgres_data_restored:/volume \
-  -v /path/to/backups:/backup \
-  alpine:latest \
-  tar xzf "/backup/postgres_data.tar.gz" -C /volume
-```
-
-**Automate with a systemd timer:**
-
-```ini
-# /etc/systemd/system/docker-volume-backup.service
-[Unit]
-Description=Docker Volume Backup
-Requires=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/docker-volume-backup.sh
-User=root
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```ini
-# /etc/systemd/system/docker-volume-backup.timer
-[Unit]
-Description=Daily Docker volume backup
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-Enable it:
-
-```bash
-systemctl daemon-reload
-systemctl enable --now docker-volume-backup.timer
-```
-
----
-
-## Volume Cleanup and Lifecycle Management
-
-Unused volumes accumulate. A year into your homelab, you'll have orphaned
-volumes from renamed services, abandoned experiments, and failed updates.
-
-**Find and prune old volumes:**
-
-```bash
-# List all volumes and their sizes
-docker system df --volumes
-
-# Find volumes not used by any container
-docker volume ls -qf dangling=true
-
-# Prune all unused volumes (careful!)
-docker volume prune -f
-
-# Prune volumes older than 24 hours
-docker volume prune --filter "until=24h"
-```
-
-**Label-based volume management — tag your volumes so you know what's
-safe to remove:**
-
-```bash
-# Create volumes with labels
-docker volume create \
-  --label project=monitoring \
-  --label backup=daily \
-  prometheus_data
-
-# Filter by label
-docker volume ls --filter label=project=monitoring
-
-# Prune everything except labeled volumes
-docker volume prune --filter "label!=backup" --filter "label!=keep"
-```
-
-**Include volumes in your docker compose down strategy:**
-
-```bash
-# This does NOT remove volumes (safe for daily down/up)
 docker compose down
-
-# This removes all resources including volumes (destructive)
-docker compose down -v
 ```
 
-Only use `-v` when you're certain you want to destroy data — it's
-irreversible.
+The `--volumes` option removes declared named volumes and attached anonymous volumes within its scope; external volumes and bind-mounted host directories are handled differently. Do not add it to troubleshooting or routine restart commands. Make any data deletion a separate decision after identifying the destination and testing recovery.
+
+This revision received source checks, not a live NFS, volume migration, or application recovery test. The linked labs state their own runtime evidence and boundaries.
 
 ---
 
@@ -526,11 +384,10 @@ host plus Docker-managed storage for the data that needs it.
    Keep absolute paths consistent across environments.
 3. **Back up early, back up often** — one `docker compose down -v`
    mistake and your database is gone. Automate volume backups with
-   restic, borg, or rsync on a systemd timer.
+   an application-consistent backup workflow and test its recovery before scheduling.
 4. **Use NFS volumes for multi-node setups** — but don't put
    latency-sensitive databases on NFS. Reserve it for media and config.
-5. **Label and prune** — tag production volumes with `backup=daily` and
-   prune the rest weekly.
+5. **Label and review** — tag volumes for inventory. Verify ownership, references, and recovery before any separate deletion; an absent label does not make data disposable.
 
 The difference between a well-managed homelab and a brittle one comes
 down to how you handle data persistence. Containers come and go.

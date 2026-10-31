@@ -17,6 +17,7 @@ keywords:
   - Docker container migration minimal downtime homelab
   - migrate Docker environment to new host step by step
 summary: "Migrate Docker containers between homelab hosts with minimal downtime. Covers volume backup and restore, image export/import, Compose stack portability, and rsync-based data transfer strategies."
+lastmod: 2026-10-31
 ---
 
 You've outgrown your first Docker host, you're rebuilding Proxmox nodes, or you just want to move a stack to a beefier server without starting from scratch. Migrating Docker containers between hosts is a task every homelab operator eventually faces, and doing it wrong means losing persistent data, breaking DNS, or forgetting critical .env files.
@@ -153,7 +154,7 @@ volumes:
   prometheus_data:
     driver_opts:
       type: nfs
-      o: addr=10.0.20.10,nolock,soft,rw
+      o: addr=10.0.20.10,nfsvers=4,hard,rw
       device: :/tank/monitoring/prometheus
 ```
 
@@ -359,3 +360,7 @@ Docker container migration doesn't have to be stressful. Pick the method that fi
 The most important rule: test your restore process on a throwaway host before doing it for real. Practise the migration with a non-critical service first, then scale up. Keep old hosts around for at least 24 hours post-migration, and version-control your Compose files so you're never hunting for configs after the move.
 
 For automated volume backups, check out our [restic Docker backup guide](/posts/2026-05-19-restic-docker-backup-strategy/) — it pairs perfectly with the migration and restore workflows covered here.
+
+### NFS outage behavior
+
+The application-storage example uses a hard mount. Soft mounts can return I/O errors and risk corruption; disabling locking is not a general migration workaround. Confirm the selected NFS version, locking semantics, client permissions, and outage/recovery behavior before moving persistent data. This source revision does not establish a live migration or HA failover test. See the [NFS mount documentation](https://man7.org/linux/man-pages/man5/nfs.5.html).

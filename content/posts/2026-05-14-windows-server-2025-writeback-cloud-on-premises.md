@@ -1,6 +1,6 @@
 ---
 title: "Windows Server 2025: Writeback — Cloud to On-Premises (Password, Device, and Group)"
-description: "Enable password writeback with SSPR, device writeback for Hybrid Entra Join and Conditional Access, and Microsoft 365 group writeback on Windows Server 2025 via Microsoft Entra Connect."
+description: "Enable password writeback with SSPR, device writeback for supported AD FS and certificate-trust scenarios, and Microsoft 365 group writeback on Windows Server 2025 via Microsoft Entra Connect."
 date: 2026-05-14T14:00:00-04:00
 tags:
   - windows-server
@@ -17,11 +17,12 @@ keywords:
   - SSPR password reset writeback
   - cloud to on-premises writeback
   - Entra ID writeback configuration
-summary: "Enable password writeback (SSPR), device writeback (Hybrid Entra Join), and group writeback (Microsoft 365 groups) from cloud to on-premises Active Directory using Entra Connect."
+summary: "Enable password writeback (SSPR), device writeback (supported AD FS scenarios), and group writeback (Microsoft 365 groups) from cloud to on-premises Active Directory using Entra Connect."
 cover:
   image: "https://upload.wikimedia.org/wikipedia/commons/2/26/Windows_Server_logo.svg"
   alt: "Windows Server logo"
   caption: "Windows Server logo — © Microsoft Corporation (public domain as simple geometric logo)"
+lastmod: 2026-10-31
 ---
 
 Writeback is the reverse direction of hybrid identity. In the previous
@@ -34,7 +35,7 @@ Three writeback types matter in a modern hybrid environment:
 | Writeback | What It Does | Why You Need It |
 |---|---|---|
 | **Password** | Cloud password changes/ resets are written back to on-premises AD in real time | Enables Self-Service Password Reset (SSPR); users reset passwords from anywhere |
-| **Device** | Devices registered in Entra ID appear as computer objects in on-premises AD | Required for Hybrid Entra Join, Conditional Access, Windows Hello for Business |
+| **Device** | Selected device registrations are represented as `msDS-Device` objects in AD | Specific AD FS device-access and Windows Hello hybrid certificate-trust scenarios; not a general prerequisite for hybrid join |
 | **Group (M365)** | Microsoft 365 groups are created in on-premises AD | Mail-enabled security groups for hybrid Exchange; deprecated for cloud-only groups |
 
 > **Important deprecation notice:** Group Writeback v2 in Entra Connect
@@ -43,17 +44,6 @@ Three writeback types matter in a modern hybrid environment:
 > you need Microsoft 365 groups written back, Group Writeback v1 is
 > still supported through Entra Connect Sync. Read the group writeback
 > section carefully before enabling.
-
-> **Screenshots and images to add later:**
->
-> - Entra Connect wizard — Additional Tasks page showing writeback options
-> - Password writeback option in Entra Connect
-> - SSPR configuration in Entra admin center — writeback toggle
-> - Device writeback — forest selection
-> - Device writeback — OU container configuration
-> - Group writeback — OU selection
-> - User SSPR registration portal
-> - Confirmation of synced device in AD
 
 ## Prerequisites
 
@@ -87,24 +77,9 @@ persistent outbound connection to an Azure Service Bus relay, and
 password changes flow through it synchronously — the user sees
 immediate feedback if the new password violates on-premises AD policy.
 
-### Step 1 — Set AD Permissions
+### Step 1 — Verify the actual connector and permissions
 
-The Entra Connect AD Connector account needs specific permissions to
-write passwords. These are set automatically during installation if you
-run the wizard with Enterprise Admin credentials, but you should verify:
-
-```powershell
-# Run on a domain controller as Domain Admin
-# Check if password writeback permissions are set
-$adConnector = Get-ADUser "MSOL_*" -Filter * | Select-Object Name, DistinguishedName
-Write-Host "AD Connector account: $($adConnector.Name)"
-
-# If the account does not have Reset Password permission on user OUs,
-# grant it via ADSI Edit or:
-dsacls "OU=Users,DC=gntech,DC=me" /G "GNTECH\MSOL_xxxxx:CA;Reset Password;user"
-```
-
-The wizard handles this automatically in most cases.
+Identify the AD DS connector account from the installed Entra Connect configuration; do not guess it from an `MSOL_*` wildcard or grant permissions to a placeholder account. Use Microsoft's [connector-account permissions procedure](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-configure-ad-ds-connector-account) for the selected feature and scoped OUs. Reset Password alone is not a complete permissions checklist. Review protected accounts and inherited permissions separately, then test with an intended, non-privileged account.
 
 ### Step 2 — Enable Password Writeback in Entra Connect
 
@@ -132,8 +107,7 @@ A full sync cycle runs to apply the change.
    signing in** to **Yes**
 6. Go to **On-premises integration**:
    - Set **Write back passwords to your on-premises directory** to **Yes**
-   - Choose the OU where users receive password writeback (or leave
-     default — writeback respects the user's current OU)
+   - Verify the selected on-premises integration settings. SSPR does not offer an arbitrary writeback destination OU; permissions and the synchronized user determine the target account.
 7. Click **Save**
 
 ### Step 4 — Test Password Writeback
@@ -177,60 +151,19 @@ In Synchronization Service Manager, look for export runs with
 
 ## Device Writeback
 
-Device writeback registers devices from Entra ID as computer objects in
-on-premises AD. This is a prerequisite for:
+Device writeback creates `msDS-Device` registration objects under a configured `RegisteredDevices` container. These are not ordinary AD computer accounts. It supports specific AD FS device-based access scenarios and Windows Hello for Business hybrid certificate trust; it is not generally required for Microsoft Entra hybrid join or cloud Kerberos trust.
 
-- **Hybrid Entra Join** (Post #4)
-- **Windows Hello for Business — Hybrid Certificate Trust** (Post #5)
-- **Conditional Access** against on-premises applications (via ADFS)
+Follow Microsoft's [device-writeback configuration and verification procedure](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-device-writeback). Review the selected forest, container, licensing, supported trust design, connector permissions, and installed Entra Connect version before enabling it. Keep directory permissions narrowly scoped and verify the generated registration objects after synchronization.
 
-### How It Works
-
-```
-Hybrid-joined device → syncs to Entra ID during registration
-    → Entra Connect picks up the device registration
-    → writes object to on-prem AD under a designated OU
-```
-
-### Step 1 — Prerequisites
-
-- **Entra ID P1 or P2** license
-- **Entra Connect** fully installed and syncing (Post #2)
-- A single AD forest (device writeback does not support multi-forest
-  with users in one forest and devices in another)
-- Devices registered or joining Entra ID
-
-### Step 2 — Enable Device Writeback
-
-1. On the Entra Connect server, run **Microsoft Entra Connect**
-2. Click **Configure**
-3. Select **Configure device options** → **Next**
-4. On **Device options**, select **Configure device writeback** → **Next**
-5. **Device writeback forest:** Select `gntech.me` (your AD forest)
-6. **Device container:** Choose the OU for written-back devices:
-   - Option A: **Provide enterprise admin credentials** — Entra Connect
-     creates and configures the container automatically
-   - Option B: **Download PowerShell script** — run it manually to
-     prepare the container
-7. Complete the wizard
-
-### Step 3 — Verifying Device Objects
-
-After device writeback is enabled, domain-joined devices that have
-registered in Entra ID appear in AD:
+On an administrative machine with the AD module, the following is a read-only inventory for the current AD domain. If writeback targets another domain, select that domain explicitly first:
 
 ```powershell
-# Check the device writeback container
-Get-ADComputer -Filter * -SearchBase "CN=RegisteredDevices,DC=gntech,DC=me" | Select Name, Enabled
-
-# Check Entra Connect sync status for devices
-Get-ADSyncRule -Identifier "In from AD - Device Join" | Format-List
+$domainDn = (Get-ADDomain).DistinguishedName
+Get-ADObject -LDAPFilter '(objectClass=msDS-Device)' -SearchBase "CN=RegisteredDevices,$domainDn" |
+    Select-Object Name, ObjectClass, DistinguishedName
 ```
 
-Device objects in AD will have:
-- `objectClass`: `computer`
-- `userCertificate`: populated if Windows Hello for Business is configured
-- `altSecurityIdentities`: populated for device registration
+The container may not exist before configuration, and synchronization is not instantaneous. A registration object alone does not establish that an AD FS relying party or Windows Hello deployment works; verify the specific end-to-end trust scenario.
 
 ### Step 4 — Troubleshooting Device Writeback
 
@@ -333,26 +266,11 @@ the Entra Connect wizard.
 
 ## Post-Installation Verification
 
-### Check Writeback Status from PowerShell
+### Verify each feature through its own workflow
 
-```powershell
-# Verify password writeback is enabled
-Get-ADSyncAADCompanyFeature | Select PasswordWriteback
+Review the installed wizard's feature configuration and connector operations. For password writeback, complete an authorized SSPR test with a scoped test account and verify the on-premises result. For device writeback, inspect the selected container's `msDS-Device` objects. For groups, verify scope, memberships, and the intended group-provisioning mechanism.
 
-# Verify device writeback
-Get-ADSyncAADCompanyFeature | Select DeviceWriteback
-
-# Check device writeback forest
-Get-ADSyncAADCompanyFeature | Select DeviceWritebackForest
-```
-
-Expected output:
-
-```
-PasswordWriteback        : Enabled
-DeviceWriteback          : Enabled
-DeviceWritebackForest    : gntech.me
-```
+Do not infer enabled features from a fabricated PowerShell output block or unverified property names. Record the installed tool version and observed results. This source audit did not modify a tenant or execute directory writeback.
 
 ### Monitor with Synchronization Service Manager
 
@@ -411,7 +329,7 @@ $config | Format-List
 ## When to Skip Writeback
 
 - **No on-premises Exchange?** Skip group writeback v1
-- **No Hybrid Entra Join planned?** Skip device writeback (comes in Post #4)
+- **No supported AD FS/device certificate-trust requirement?** Do not enable device writeback merely because hybrid join is planned.
 - **Small lab with same admin passwords?** Password writeback is optional —
   but SSPR is a good demo feature
 

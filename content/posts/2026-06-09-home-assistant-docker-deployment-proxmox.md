@@ -17,6 +17,7 @@ keywords:
   - Zigbee2MQTT Docker Proxmox smart home automation integration
   - Home Assistant local voice pipeline AI automation homelab 2026
 summary: "Deploy Home Assistant Core with Docker Compose on your Proxmox homelab. Complete guide covering Zigbee2MQTT, USB passthrough, MQTT broker, Traefik reverse proxy, and automated backups."
+lastmod: 2026-10-31
 ---
 
 ## Why Self-Host Home Automation with Home Assistant on Docker
@@ -467,101 +468,17 @@ The `http.use_x_forwarded_for` and `trusted_proxies` settings in configuration.y
 
 ## Home Assistant Backup Automation and Recovery
 
-### Volume Backup Script
+### Use Home Assistant's supported backup workflow
 
-Create `/opt/homeassistant/backup.sh`:
+Use the installed release's [Backup integration and recovery documentation](https://www.home-assistant.io/integrations/backup/). Current releases provide backup configuration through the UI across installation types. Check the capabilities of the older image used elsewhere in this historical deployment example before following current UI steps.
 
-```bash
-#!/bin/bash
-# Home Assistant Docker backup script
-BACKUP_DIR=/opt/homeassistant/backups
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-mkdir -p "$BACKUP_DIR"
+Create a backup, save an independent copy, and retain the encryption/recovery materials outside this host. Record which Home Assistant data is included. Separate Compose services such as MQTT and Zigbee2MQTT need their own configuration and data recovery plan; a Home Assistant backup does not automatically include every adjacent container.
 
-cd /opt/homeassistant
+The previous script paused the stack and then attempted `exec` into a paused container. It also excluded authentication state and copied a SQLite database without establishing a complete database recovery point. That procedure and its timer are removed. Do not extract a database file over a running Home Assistant instance or remove volumes to prepare a restore.
 
-# Stop the stack for consistent snapshots
-docker compose pause
+Test restoration in a separate instance with fresh storage and device/network isolation. Prevent the test from issuing real automations, MQTT commands, or duplicate radio/network identities. Verify login, configuration, history as required, integrations, and attachments. Keep the original data until the recovery test and any planned cutover succeed.
 
-# Archive config directories
-tar czf "$BACKUP_DIR/hass-config-$TIMESTAMP.tar.gz" \
-  --exclude="config/.storage/auth*" \
-  config/ \
-  zigbee2mqtt/data/ \
-  mqtt/config/
-
-# Backup Home Assistant database separately (can be large)
-docker compose exec -T homeassistant tar czf - /config/home-assistant_v2.db \
-  > "$BACKUP_DIR/hass-db-$TIMESTAMP.tar.gz"
-
-# Resume the stack
-docker compose unpause
-
-# Keep only last 14 days of backups
-find "$BACKUP_DIR" -name "hass-*.tar.gz" -mtime +14 -delete
-
-echo "Backup completed: $TIMESTAMP"
-```
-
-Set execute permission and test:
-
-```bash
-chmod +x /opt/homeassistant/backup.sh
-/opt/homeassistant/backup.sh
-```
-
-### Automated Daily Backup with Systemd Timer
-
-```bash
-cat > /etc/systemd/system/hass-backup.service << 'EOF'
-[Unit]
-Description=Home Assistant Docker backup
-After=docker.service
-Requires=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/opt/homeassistant/backup.sh
-WorkingDirectory=/opt/homeassistant
-User=root
-EOF
-
-cat > /etc/systemd/system/hass-backup.timer << 'EOF'
-[Unit]
-Description=Daily Home Assistant backup
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-RandomizedDelaySec=30m
-
-[Install]
-WantedBy=timers.target
-EOF
-
-systemctl daemon-reload
-systemctl enable --now hass-backup.timer
-```
-
-### Restore Procedure
-
-To restore from backup on a fresh installation:
-
-```bash
-# Stop the stack
-docker compose down -v
-
-# Restore config
-tar xzf /path/to/backup/hass-config-20250609-070000.tar.gz -C /opt/homeassistant/
-
-# Restore database
-docker compose up -d homeassistant
-docker compose exec -T homeassistant bash -c 'tar xzf - -C /' \
-  < /path/to/backup/hass-db-20250609-070000.tar.gz
-
-# Restart everything
-docker compose up -d
-```
+For ordinary prepared files, the [Restic recovery lab](/posts/2026-05-19-restic-docker-backup-strategy/) demonstrates encrypted copies. It does not by itself validate a Home Assistant or SQLite backup. This source revision does not claim a new Home Assistant runtime restore test.
 
 ### Docker Image Updates with Watchtower
 
