@@ -3,6 +3,7 @@ title: "Intel AMT Serial over LAN on Proxmox: Setup, Login, and Disconnect"
 description: "Identify the Intel AMT serial device, enable a Proxmox Linux login console, and understand how to log out and disconnect without confusing client escape sequences."
 date: 2026-10-30T14:00:00-04:00
 lastmod: 2026-10-31
+translationKey: intel-amt-sol-proxmox
 draft: false
 tags:
   - proxmox
