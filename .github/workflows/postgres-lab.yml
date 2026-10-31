@@ -1,0 +1,23 @@
+name: PostgreSQL recovery lab
+
+on:
+  pull_request:
+    paths:
+      - 'content/posts/2026-06-01-docker-database-backup-automation-pgdump-cron.md'
+      - 'tools/check-postgres-lab.py'
+      - '.github/workflows/postgres-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Replay guide and verify recovery and failure behavior
+        run: python3 tools/check-postgres-lab.py
