@@ -19,11 +19,12 @@ The old combined PostgreSQL/MySQL script is replaced with one explicit PostgreSQ
 |---|---|
 | Technical review | Official PostgreSQL and Docker references reviewed on October 31, 2026. |
 | Static checks | Bash syntax and embedded Compose structure checked. |
-| Runtime | [Recovery lab run 41244956545](https://github.com/gntech-dev/gntech-blog/actions/runs/41244956545) passed on October 31, 2026: dump, isolated restore, marker assertion, repeated-restore failure, and stopped-source backup failure. Scheduler execution was not tested. |
+| Runtime | [Recovery lab run 41244956545](https://github.com/gntech-dev/gntech-blog/actions/runs/41244956545) passed on October 31, 2026: dump, isolated restore, marker assertion, repeated-restore failure, and stopped-source backup failure. That run covered recovery only. |
+| Scheduler | [Scheduler lab run 41245987064](https://github.com/gntech-dev/gntech-blog/actions/runs/41245987064) passed on October 31, 2026: manual service execution, accelerated timer activation, lock-contention failure, stopped-source failure, service result/exit status, and journal error details. Tested with systemd 255.4-1ubuntu8.18. The daily calendar was parsed; CI used a two-second timer override. |
 | Tested versions | GitHub-hosted Ubuntu 24.04.5 amd64; Docker 28.0.4; Compose 2.38.2; PostgreSQL 16.15. Image digest: `sha256:0cefaabd882e42bcb2a2f3dc56d3ce4770560ba62fd7f197f1a2e008fd5731ab`. |
 | Scope | Disposable PostgreSQL 16 lab, not a production deployment or point-in-time recovery solution. |
 
-The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. Scheduler execution, off-site recovery, and production data remain outside this test.
+The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. It also tests the generated systemd service and an accelerated timer on a disposable runner. Off-site recovery, external alert delivery, missed-run monitoring, downtime catch-up, and production data remain outside this test.
 
 ## 1. Prepare a separate lab
 
