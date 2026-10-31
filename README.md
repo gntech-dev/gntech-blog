@@ -111,3 +111,19 @@ git diff --check
 ```
 
 The audit script needs Python 3.9+ and Bash. It parses shell examples without executing them. Technical procedures still need version-appropriate documentation review and lab validation. See [the October 2026 audit report](docs/content-audit-2026-10-30.md) for coverage and limitations.
+
+## Article navigation
+
+PaperMod's table of contents is enabled globally and collapsed on initial page
+load. Readers can expand it to jump to a guide's sections. It uses the existing
+Hugo table-of-contents renderer; no JavaScript dependency or custom shortcode is
+introduced by this configuration change.
+
+For a short page where an outline adds little value, set `ShowToc: false` in YAML
+front matter (or `ShowToc = false` in TOML). An individual page can use
+`TocOpen: true` if an expanded outline is useful. Keep descriptive headings so the
+links make sense outside their surrounding text.
+
+See the [PaperMod variables](https://github.com/adityatelange/hugo-PaperMod/wiki/Variables)
+for the theme's supported overrides. Preview a long guide in English and Spanish
+at desktop and mobile widths after changing navigation settings.
