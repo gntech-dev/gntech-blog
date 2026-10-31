@@ -17,7 +17,8 @@ A successful backup command does not prove an application can be recovered. Star
 |---|---|
 | Technical review | Official Restic references below reviewed on October 31, 2026. |
 | Static checks | Bash syntax, embedded Compose YAML, and path mappings checked. |
-| Runtime | Docker and Restic unavailable in the review environment; no image pull, repository initialization, backup, or restore executed. |
+| Runtime | [Recovery lab run 41245705581](https://github.com/gntech-dev/gntech-blog/actions/runs/41245705581) passed on October 31, 2026: initialization, backup, restore, retention preview, separately encrypted copy, wrong-password rejection, full copied-repository data check, and recovery without original materials. |
+| Tested versions | GitHub-hosted Ubuntu 24.04 amd64; Docker 28.0.4; Compose 2.38.2; Restic 0.19.1. Image digest: `sha256:136600b6ff6843d61d355f7f71f460a166429f35de6fd11b568fece3c9a4d510`. |
 | Scope | Disposable local file lab. Production databases, off-site recovery and scheduling require separate validation. |
 
 ## 1. Separate source consistency from encryption
@@ -68,8 +69,10 @@ secrets:
 EOF
 
 docker compose config --quiet
-docker compose run --rm restic version
+docker compose run --rm --interactive=false restic version
 ```
+
+The commands use `--interactive=false` so a container cannot consume input intended for a later host-side prompt when these steps run from a script. Repository passwords come from mounted files.
 
 This is a one-shot service, not a sleeping container with a background cron daemon. It needs no Docker socket. The password file is created in a new private directory; do not regenerate the password when reconnecting to an existing repository.
 
@@ -80,10 +83,10 @@ Keep production repository credentials and recovery instructions somewhere acces
 Run initialization only for this new empty repository. For an existing repository, use its saved password and inspect snapshots instead.
 
 ```bash
-docker compose run --rm restic init
-docker compose run --rm restic backup /source --host restic-file-lab --tag demo
-docker compose run --rm restic snapshots
-docker compose run --rm restic check
+docker compose run --rm --interactive=false restic init
+docker compose run --rm --interactive=false restic backup /source --host restic-file-lab --tag demo
+docker compose run --rm --interactive=false restic snapshots
+docker compose run --rm --interactive=false restic check
 ```
 
 Check each command's exit status before continuing. A nonzero backup result requires investigation even if some snapshot data was saved.
@@ -97,7 +100,7 @@ Select the exact demo snapshot ID from the listing:
 ```bash
 read -r -p 'Demo snapshot ID to restore: ' snapshot_id
 test -n "$snapshot_id" &&
-  docker compose run --rm restic restore "$snapshot_id" --target /restore
+  docker compose run --rm --interactive=false restic restore "$snapshot_id" --target /restore
 cmp source/check.txt restored/source/check.txt
 ```
 
@@ -112,7 +115,7 @@ Use [Restic restore guidance](https://restic.readthedocs.io/en/stable/050_restor
 For the demo group, preview a policy:
 
 ```bash
-docker compose run --rm restic forget --dry-run \
+docker compose run --rm --interactive=false restic forget --dry-run \
   --host restic-file-lab --tag demo \
   --keep-daily 7 --keep-weekly 4 --keep-monthly 3
 ```
@@ -130,6 +133,56 @@ Choose a supported remote backend, configure its credentials, and initialize a s
 With copy, explicitly configure destination access and source repository/password options. Do not assume local and remote passwords are interchangeable. Verify remote snapshots, check the remote repository, and restore from it using only the off-site credentials and recovery materials.
 
 See [working with repositories](https://restic.readthedocs.io/en/stable/045_working_with_repos.html). Retention is independent for each repository. Do not substitute an uncoordinated file mirror of a changing repository for a tested recovery workflow.
+
+### Rehearse recovery from a separately encrypted copy
+
+This optional extension uses a second **local** repository to test copy and credential separation. It does not test a remote backend or survive loss of this host. Continue in the disposable lab from above.
+
+```bash
+mkdir repository-copy recovered-copy
+openssl rand -base64 32 > copy-password
+cat > compose.copy.yaml <<'EOF'
+services:
+  restic:
+    volumes:
+      - ./repository-copy:/repository-copy
+    secrets:
+      - copy-password
+  recovery:
+    image: ${RESTIC_IMAGE:?Set a reviewed restic/restic image}
+    environment:
+      RESTIC_REPOSITORY: /repository
+      RESTIC_PASSWORD_FILE: /run/secrets/copy-password
+    volumes:
+      - ./repository-copy:/repository
+      - ./recovered-copy:/restore
+    secrets:
+      - copy-password
+secrets:
+  copy-password:
+    file: ./copy-password
+EOF
+
+docker compose -f compose.yaml -f compose.copy.yaml run --rm --interactive=false restic \
+  --repo /repository-copy --password-file /run/secrets/copy-password init
+docker compose -f compose.yaml -f compose.copy.yaml run --rm --interactive=false restic \
+  --repo /repository-copy --password-file /run/secrets/copy-password \
+  copy --from-repo /repository --from-password-file /run/secrets/restic-password
+```
+
+The destination has its own password. The recovery service mounts only that repository, its password, and a fresh restore directory. It has no access to the original source, repository, or password. List and verify the copied snapshot, then select its ID:
+
+```bash
+docker compose -f compose.yaml -f compose.copy.yaml run --rm --interactive=false recovery snapshots
+docker compose -f compose.yaml -f compose.copy.yaml run --rm --interactive=false recovery check --read-data
+read -r -p 'Copied snapshot ID to restore: ' copied_snapshot_id
+test -n "$copied_snapshot_id" &&
+  docker compose -f compose.yaml -f compose.copy.yaml run --rm --interactive=false recovery \
+    restore "$copied_snapshot_id" --target /restore
+printf 'restic-restore-check\n' | cmp - recovered-copy/source/check.txt
+```
+
+For this small lab, `check --read-data` reads all stored backup data. Budget bandwidth and time before using it on a large remote repository. Matching the marker verifies this file exercise; it does not validate a database or an application's recovery.
 
 ## 7. Automate only the verified workflow
 
