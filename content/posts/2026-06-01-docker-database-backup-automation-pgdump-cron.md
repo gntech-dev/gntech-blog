@@ -22,6 +22,8 @@ The old combined PostgreSQL/MySQL script is replaced with one explicit PostgreSQ
 | Runtime | Docker/PostgreSQL unavailable here; no dump, database restore, or scheduler execution performed. |
 | Scope | Disposable PostgreSQL 16 lab, not a production deployment or point-in-time recovery solution. |
 
+The repository includes an automated replay of this lab in `tools/check-postgres-lab.py`. It runs the article's Bash examples on a disposable Docker host, checks recovery, rejects a repeated restore, and confirms a failed dump preserves existing archives. Check the **PostgreSQL recovery lab** Actions run for runtime evidence; merely adding the test does not establish a passing result. Scheduler execution, off-site recovery, and production data remain outside this test.
+
 ## 1. Prepare a separate lab
 
 Use Bash, OpenSSL, Docker Engine, the Compose plugin, and host flock. This project publishes no database ports. Its two services have separate data volumes; only the test service is a restore target.
