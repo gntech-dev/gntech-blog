@@ -25,6 +25,8 @@ buildFuture = true
   ShowSearchButton = true
   comments = true
   UseHugoToc = true
+  ShowToc = true
+  TocOpen = false
   disableSpecial1stPost = false
   disableScrollToTop = false
 
