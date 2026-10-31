@@ -1,0 +1,23 @@
+name: Restic recovery lab
+
+on:
+  pull_request:
+    paths:
+      - 'content/posts/2026-05-19-restic-docker-backup-strategy.md'
+      - 'tools/check-restic-lab.py'
+      - '.github/workflows/restic-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Replay Restic guide and recover from separately encrypted copy
+        run: python3 tools/check-restic-lab.py
