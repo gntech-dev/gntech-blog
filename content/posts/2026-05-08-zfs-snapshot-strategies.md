@@ -6,6 +6,8 @@ lastmod: 2026-10-31
 draft: false
 tags: [proxmox, zfs, storage, backup, homelab]
 categories: [homelab, storage]
+aliases:
+  - /posts/2026-06-15-proxmox-zfs-snapshot-replication-backup/
 ---
 
 ZFS snapshots preserve dataset state, but they are only one part of a recovery plan. Pool failure, lost guest configuration, and inconsistent application data need separate protection.
@@ -115,6 +117,17 @@ A successful transfer is only one gate. Inspect destination datasets and snapsho
 Keep destination retention and credentials deliberate. Do not use destructive receive/rollback options to resolve a mismatch without understanding the data that would be lost. A removable pool also needs a documented import, completed-transfer, and export procedure using the correct device identity.
 
 For PVE-managed guest replication, use the installed release's supported workflow rather than treating a standalone dataset copy as a complete replacement for guest backup and configuration recovery.
+
+### Choose the replication mechanism
+
+| Mechanism | Scope | Check before scheduling |
+|---|---|---|
+| PVE storage replication | Guest volumes managed by the PVE replication framework | Supported storage, target node, matching storage ID, capacity, and replication logs |
+| Syncoid | Selected standalone ZFS datasets and snapshots | Source/target scope, SSH permissions, common history, and destination recovery |
+
+For PVE-managed guests, consult the [storage replication reference](https://github.com/proxmox/pve-docs/blob/master/pvesr.adoc). Inspect cluster health and quorum before a recovery exercise. Replication is asynchronous, so changes after the last successful sync may be lost if a node fails. It is not an independently retained backup history.
+
+For Syncoid, verify options against the installed version. In particular, --no-sync-snap uses existing snapshots rather than creating a new synchronization snapshot. Do not assume a bandwidth option or retention policy from another version applies unchanged.
 
 ## 6. Review and clean up only the lab resources
 

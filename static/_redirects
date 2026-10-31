@@ -8,3 +8,5 @@
 /posts/2026-05-28-proxmox-backup-server-setup /posts/2026-05-08-proxmox-backup-server-setup/ 301
 /posts/2026-05-15-proxmox-backup-server-deployment/ /posts/2026-05-08-proxmox-backup-server-setup/ 301
 /posts/2026-05-15-proxmox-backup-server-deployment /posts/2026-05-08-proxmox-backup-server-setup/ 301
+/posts/2026-06-15-proxmox-zfs-snapshot-replication-backup/ /posts/2026-05-08-zfs-snapshot-strategies/ 301
+/posts/2026-06-15-proxmox-zfs-snapshot-replication-backup /posts/2026-05-08-zfs-snapshot-strategies/ 301
