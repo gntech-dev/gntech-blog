@@ -181,6 +181,83 @@ Connect failure and missed-run alerts to the actual command result. Send success
 
 Keep retention separate until recovery is proven. Preview candidate archives, verify off-site availability and required recovery history, and scope deletion to this workflow. Do not delete older backups before confirming the new required copy succeeded.
 
+### Install a systemd service and daily timer
+
+Run this section from a root Bash shell on a systemd host, inside the validated project at its stable path. Keep the same Compose project name when moving an existing deployment; changing it can select different volumes. The example assumes a local, root-managed Docker Engine and Python 3 for reading Compose's resolved project name.
+
+The path check keeps generated unit values simple. Use a stable path without spaces, percent signs, or shell metacharacters. Review any existing units with these names before replacing them.
+
+```bash
+backup_project_dir=$(pwd -P)
+backup_project_name=$(docker compose config --format json |
+  python3 -c 'import json,sys; print(json.load(sys.stdin)["name"])')
+[[ "$backup_project_dir" =~ ^/[a-zA-Z0-9_./-]+$ ]] || exit 1
+[[ "$backup_project_name" =~ ^[a-z0-9][a-z0-9_-]*$ ]] || exit 1
+test -x "$backup_project_dir/backup.sh" || exit 1
+
+cat > /etc/systemd/system/gntech-postgres-backup.service <<EOF
+[Unit]
+Description=GNTECH PostgreSQL logical backup
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=$backup_project_dir
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=COMPOSE_PROJECT_NAME=$backup_project_name
+ExecStart=$backup_project_dir/backup.sh
+UMask=0077
+TimeoutStartSec=30min
+StandardOutput=journal
+StandardError=journal
+EOF
+
+cat > /etc/systemd/system/gntech-postgres-backup.timer <<'EOF'
+[Unit]
+Description=Daily GNTECH PostgreSQL backup
+
+[Timer]
+OnCalendar=*-*-* 02:00:00
+RandomizedDelaySec=15min
+Persistent=true
+Unit=gntech-postgres-backup.service
+
+[Install]
+WantedBy=timers.target
+EOF
+
+systemd-analyze verify /etc/systemd/system/gntech-postgres-backup.service \
+  /etc/systemd/system/gntech-postgres-backup.timer
+systemctl daemon-reload
+```
+
+The service uses the resolved Compose project explicitly and runs without your interactive shell environment. Root access to Docker is intentional here; these units require review before adapting to a rootless engine or a remote Docker context. All database commands must still target the intended project.
+
+Test the service before enabling the timer:
+
+```bash
+systemctl start gntech-postgres-backup.service
+systemctl show gntech-postgres-backup.service \
+  -p Result -p ExecMainStatus -p ActiveState
+journalctl -u gntech-postgres-backup.service --no-pager -n 40
+systemctl enable --now gntech-postgres-backup.timer
+systemctl list-timers --all gntech-postgres-backup.timer
+```
+
+Require `Result=success`, `ExecMainStatus=0`, and a new published archive. A completed oneshot normally becomes inactive; that alone is not a failure. This timer runs at 02:00 in the **host's time zone**, plus up to 15 minutes of random delay. Check `timedatectl`. `Persistent=true` can trigger a catch-up after downtime; it does not replay every missed daily backup.
+
+A nonzero script exit, including lock contention or a stopped source, marks the service failed and records stderr in the journal. Inspect `Result`, `ExecMainStatus`, and the journal before retrying. The timer being active proves only that it is waiting, not that backups are succeeding.
+
+Use these signals in your monitoring system and separately alert on overdue successful archives. This example sends no email or webhook and cannot detect a powered-off host by itself. Avoid `RemainAfterExit=yes`: leaving this oneshot active prevents later timer activations from running it again. See [systemd timers](https://www.freedesktop.org/software/systemd/man/latest/systemd.timer.html).
+
+To stop this schedule while retaining the units and backups:
+
+```bash
+systemctl disable --now gntech-postgres-backup.timer
+```
+
 ## 6. Add encrypted off-site recovery
 
 Database dumps here are plaintext data in a compressed archive. File permissions restrict local access but are not encryption.
