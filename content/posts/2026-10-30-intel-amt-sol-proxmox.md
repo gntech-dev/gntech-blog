@@ -38,7 +38,9 @@ That small mistake reveals an important distinction: the Linux shell, the login 
 
 ## What this setup provides
 
-![SOL connection path from the administrator's client through Intel AMT authentication, the Linux serial device and serial getty, to separate Linux authentication and a shell.](/images/diagrams/amt-sol-path.svg)
+[![SOL connection path from the administrator's client through Intel AMT authentication, the Linux serial device and serial getty, to separate Linux authentication and a shell.](/images/diagrams/amt-sol-path.svg)](/images/diagrams/amt-sol-path.svg)
+
+[Open the full-size diagram](/images/diagrams/amt-sol-path.svg) to zoom or inspect its labels.
 
 *AMT authentication opens the management connection; Linux authentication opens a host session. Serial input and output travel in both directions. Log out of Linux before using the client's Disconnect control. The example ttyS0 must be confirmed on your hardware.*
 
