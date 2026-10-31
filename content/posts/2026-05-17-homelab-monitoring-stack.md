@@ -199,6 +199,12 @@ docker compose down
 
 Do not add `--volumes` unless you intend to delete the stored monitoring data. Restart using the same Compose project identity and the recorded image references. A fresh volume creates a fresh deployment, not a restoration of your historical data.
 
+## Continue reading
+
+- [Alloy and Loki log collection](/posts/2026-05-14-grafana-alloy-log-collection/) — Explore the separate log pipeline after verifying the metrics path.
+- [Docker Compose health checks](/posts/2026-05-14-docker-compose-healthchecks/) — Understand why a running container and a ready service are different states.
+- [Proxmox Backup Server](/posts/2026-05-08-proxmox-backup-server-setup/) — Plan guest recovery alongside monitoring; dashboards do not replace backups.
+
 ## Validation and references
 
 The update consolidates the previous May 9 and May 17 articles. It removes unsupported claims of a fixed RAM footprint, complete ready-made dashboards, and confirmed incident outcomes. Bash syntax and configuration structure can be checked locally; this example has not been deployed or exercised against a live Docker host during preparation. Live upstream retrieval was unavailable.
