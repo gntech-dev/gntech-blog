@@ -18,7 +18,7 @@ The sequence is a **publication plan**, not a claim that every component has bee
 
 | Part | Topic | Status | Read now |
 | --- | --- | --- | --- |
-| 01 | Architecture and design: trust boundaries, network plan, inventory | Planned | [Proxmox networking background](/posts/2026-05-08-proxmox-networking-bridges-vlans/) |
+| 01 | Architecture and design: trust boundaries, network plan, inventory | Article ready for review | [Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) |
 | 02 | Hetzner Proxmox foundation: installation, ZFS, management, recovery | Planned | [Proxmox security hardening](/posts/2026-05-20-proxmox-security-hardening/) |
 | 03 | Two MikroTik CHR routers: isolated transit bridges and routed IPs | Existing standalone guide; series integration pending | [Dual-CHR Hetzner tutorial](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) |
 | 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | Planned | [Proxmox firewall guide](/posts/2026-06-16-proxmox-firewall-security-hardening/) |
