@@ -65,6 +65,8 @@ A comfortable client and a tested recovery console solve different parts of the 
 1. [ThinkPad T420 with Arch Linux and i3](/posts/2026-10-30-thinkpad-t420-arch-i3/) — build a focused administration desktop.
 2. [Intel AMT Serial over LAN on Proxmox](/posts/2026-10-30-intel-amt-sol-proxmox/) — set up text-console login and learn how to disconnect cleanly.
 
+3. [MeshCentral with Cloudflare Tunnel](/posts/2026-10-31-meshcentral-cloudflare-tunnel/) — deploy a remote-support console, enroll a test agent, and check relayed sessions.
+
 **Practice goal:** connect to the intended host, verify its identity, log out, and reconnect to a fresh login prompt.
 
 ## How to use a guide

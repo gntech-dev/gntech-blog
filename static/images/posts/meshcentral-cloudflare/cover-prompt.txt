@@ -1,0 +1,4 @@
+Tool: built-in image_gen (imagegen skill), generated October 31, 2026.
+Use: editorial illustration. Not a screenshot, measured result, or precise network diagram.
+
+Create a wide editorial cover illustration for a practical homelab blog article about deploying MeshCentral remote device management through Cloudflare Tunnel. Scene: a small home server and an administrator laptop on a tidy desk, with a few abstract remote endpoint screens connected through a softly glowing cloud and a protected outbound tunnel motif. Professional polished illustration, clear recognizable devices, restrained details, readable at thumbnail size, landscape composition. Convey remote administration and outbound connectivity conceptually. No written text, no fake terminal commands, no screenshots, no brand logos, no watermark. This is an illustrative cover, not a precise network diagram.
