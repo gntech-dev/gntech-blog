@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">Troubleshooting Guacamole RDP latency</title><desc id="desc">Browser to Cloudflare Tunnel to Guacamole and guacd to Windows RDP, with segments A B and C.</desc>
+<rect width="1200" height="630" fill="#0b1423"/>
+<circle cx="1080" cy="70" r="230" fill="#15273e" opacity=".7"/>
+<text x="70" y="95" fill="#f3f8ff" font-family="sans-serif" font-size="44" font-weight="700">Where is the RDP lag?</text>
+<text x="70" y="137" fill="#a8bed3" font-family="sans-serif" font-size="24">Apache Guacamole  ·  Cloudflare Tunnel  ·  Windows</text>
+<g font-family="sans-serif" text-anchor="middle">
+<rect x="65" y="228" width="220" height="164" rx="20" fill="#19314d" stroke="#6ac5ed" stroke-width="3"/>
+<rect x="85" y="247" width="180" height="100" rx="8" fill="#102034" stroke="#6ac5ed" stroke-width="2"/><path d="M101 330 L249 330" stroke="#6ac5ed" stroke-width="4"/>
+<text x="175" y="375" fill="#fff" font-size="25">Browser</text>
+<rect x="353" y="228" width="220" height="164" rx="20" fill="#19314d" stroke="#faad5b" stroke-width="3"/>
+<path d="M421 292c-8-33 36-51 56-19 35-14 63 27 40 47H408c-23-15-12-33 13-28z" fill="#faad5b"/>
+<text x="463" y="375" fill="#fff" font-size="23">Cloudflare</text>
+<rect x="642" y="228" width="220" height="164" rx="20" fill="#19314d" stroke="#7fdfba" stroke-width="3"/>
+<rect x="697" y="265" width="111" height="69" rx="9" fill="#7fdfba"/><path d="M709 288l16 12-16 12m27 0h36" fill="none" stroke="#14293c" stroke-width="6"/>
+<text x="752" y="375" fill="#fff" font-size="23">Guacamole</text>
+<rect x="929" y="228" width="220" height="164" rx="20" fill="#19314d" stroke="#abb8fb" stroke-width="3"/>
+<rect x="975" y="260" width="128" height="78" rx="6" fill="#abb8fb"/><path d="M1039 260v78m-64-39h128" stroke="#19314d" stroke-width="5"/>
+<text x="1039" y="375" fill="#fff" font-size="23">Windows RDP</text>
+<g stroke="#d6e2f2" stroke-width="5" fill="none"><path d="M287 309h62m-15-12 15 12-15 12"/><path d="M576 309h62m-15-12 15 12-15 12"/><path d="M865 309h60m-15-12 15 12-15 12"/></g>
+<g fill="#e7f1ff" font-size="20" font-weight="700"><text x="320" y="263">A</text><text x="607" y="263">B</text><text x="898" y="263">C</text></g>
+</g>
+<text x="75" y="478" fill="#b9ccdf" font-family="sans-serif" font-size="24">A  Browser &amp; tunnel transport</text>
+<text x="75" y="517" fill="#b9ccdf" font-family="sans-serif" font-size="24">B  Web app &amp; guacd gateway</text>
+<text x="75" y="556" fill="#b9ccdf" font-family="sans-serif" font-size="24">C  RDP route &amp; Windows workload</text>
+<text x="1110" y="574" text-anchor="end" fill="#7c9aaf" font-family="sans-serif" font-size="19">GNTECH · DIAGNOSTIC GUIDE</text>
+</svg>

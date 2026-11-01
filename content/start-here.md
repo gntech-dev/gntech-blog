@@ -5,7 +5,7 @@ date: 2026-10-30T14:00:00-04:00
 draft: false
 translationKey: start-here
 ShowToc: true
-lastmod: 2026-10-31
+lastmod: 2026-11-01
 ---
 
 Welcome to **GnTech**. Pick the problem you want to solve, then follow a short path through the guides. You do not need to read the blog in publication order.
@@ -66,6 +66,7 @@ A comfortable client and a tested recovery console solve different parts of the 
 2. [Intel AMT Serial over LAN on Proxmox](/posts/2026-10-30-intel-amt-sol-proxmox/) — set up text-console login and learn how to disconnect cleanly.
 
 3. [MeshCentral with Cloudflare Tunnel](/posts/2026-10-31-meshcentral-cloudflare-tunnel/) — deploy a remote-support console, enroll a test agent, and check relayed sessions.
+4. [Troubleshoot slow Guacamole RDP through Cloudflare Tunnel](/posts/2026-11-01-guacamole-rdp-cloudflare-latency/) — isolate browser, gateway, and Windows latency with a controlled A/B test.
 
 **Practice goal:** connect to the intended host, verify its identity, log out, and reconnect to a fresh login prompt.
 
