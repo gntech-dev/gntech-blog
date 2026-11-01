@@ -8,6 +8,8 @@ ShowToc: true
 lastmod: 2026-11-01
 ---
 
+For a complete, ordered deployment journey, visit the [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/), which tracks planned installments and related published guides.
+
 Welcome to **GnTech**. Pick the problem you want to solve, then follow a short path through the guides. You do not need to read the blog in publication order.
 
 | Your goal | Start with |
