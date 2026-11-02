@@ -92,10 +92,17 @@ Add one static route on each router:
 
 Use the matching route on each side. Do not advertise a default route or management VLAN.
 
-Permit only these source and destination networks in both directions, before the existing final drop. Reverse the tunnel interface names on home and adapt the rules to the actual policy:
+Permit only these source and destination networks in both directions, before the existing final drop. The first pair is for the Hetzner CHR; the second is for the home router. Interface direction changes because packets enter and leave each router on opposite sides:
+
+Hetzner CHR:
 
     /ip/firewall/filter/add chain=forward action=accept in-interface=wg-home-hz src-address=10.10.20.0/24 dst-address=10.12.0.0/24 comment="Home servers to Hetzner workloads"
     /ip/firewall/filter/add chain=forward action=accept out-interface=wg-home-hz src-address=10.12.0.0/24 dst-address=10.10.20.0/24 comment="Hetzner workloads to home servers"
+
+Home router:
+
+    /ip/firewall/filter/add chain=forward action=accept out-interface=wg-hetzner src-address=10.10.20.0/24 dst-address=10.12.0.0/24 comment="Home servers to Hetzner workloads"
+    /ip/firewall/filter/add chain=forward action=accept in-interface=wg-hetzner src-address=10.12.0.0/24 dst-address=10.10.20.0/24 comment="Hetzner workloads to home servers"
 
 Review source NAT. A masquerade rule limited to WAN should not match the tunnel. If your existing rule is broad, add a narrow no-NAT exception before it. Do not use NAT to hide a missing return route.
 
