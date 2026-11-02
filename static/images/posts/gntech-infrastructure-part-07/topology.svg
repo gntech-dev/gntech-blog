@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+<title id="title">Hybrid identity architecture and access boundary</title>
+<desc id="desc">A scoped synchronization service copies selected directory objects and attributes from on-premises Active Directory to Microsoft Entra ID. Users then access cloud applications through SSO and Conditional Access. Separate cloud-only emergency accounts provide an independent recovery path.</desc>
+<defs>
+  <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071426"/><stop offset="1" stop-color="#142f49"/></linearGradient>
+  <linearGradient id="link" x2="1"><stop stop-color="#42d5ff"/><stop offset="1" stop-color="#ffbd72"/></linearGradient>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#56cfff"/></marker>
+</defs>
+<rect width="1200" height="560" rx="22" fill="url(#bg)"/>
+<g font-family="Arial,sans-serif" fill="#eef6fc">
+  <text x="54" y="58" font-size="28" font-weight="700">Hybrid identity: sync narrowly, protect cloud access</text>
+  <text x="55" y="88" font-size="16" fill="#b6cadb">Conceptual flow · authentication, provisioning, and application SSO are separate controls</text>
+  <rect x="48" y="145" width="275" height="260" rx="18" fill="#10243a" stroke="#48cfff" stroke-width="2"/>
+  <text x="185" y="182" text-anchor="middle" font-size="20" font-weight="700">ON-PREMISES AD DS</text>
+  <rect x="82" y="215" width="207" height="84" rx="12" fill="#173a53" stroke="#49cfff"/>
+  <text x="185" y="247" text-anchor="middle" font-size="17" font-weight="700">Forest + domain</text>
+  <text x="185" y="273" text-anchor="middle" font-size="14" fill="#c0d2e0">Source for synced attributes</text>
+  <text x="185" y="345" text-anchor="middle" font-size="14" fill="#b9c9d7">Approved pilot OU / group</text>
+  <text x="185" y="371" text-anchor="middle" font-size="14" fill="#b9c9d7">Writable DC · private network</text>
+
+  <rect x="416" y="175" width="300" height="200" rx="18" fill="#17283a" stroke="#ffbd72" stroke-width="2"/>
+  <text x="566" y="212" text-anchor="middle" font-size="20" font-weight="700">SYNC SERVICE</text>
+  <rect x="453" y="238" width="226" height="84" rx="12" fill="#30313a" stroke="#ffbd72"/>
+  <text x="566" y="269" text-anchor="middle" font-size="17" font-weight="700">Cloud Sync or Connect Sync</text>
+  <text x="566" y="295" text-anchor="middle" font-size="14" fill="#dbc8b1">Hardened Tier 0 host / agents</text>
+  <text x="566" y="349" text-anchor="middle" font-size="14" fill="#dbc8b1">Scope + export review + health</text>
+
+  <rect x="810" y="145" width="338" height="260" rx="18" fill="#10243a" stroke="#48cfff" stroke-width="2"/>
+  <text x="979" y="182" text-anchor="middle" font-size="20" font-weight="700">MICROSOFT ENTRA ID</text>
+  <rect x="846" y="215" width="266" height="84" rx="12" fill="#173a53" stroke="#49cfff"/>
+  <text x="979" y="247" text-anchor="middle" font-size="17" font-weight="700">Cloud identities + policies</text>
+  <text x="979" y="273" text-anchor="middle" font-size="14" fill="#c0d2e0">Managed auth / federation choice</text>
+  <text x="979" y="345" text-anchor="middle" font-size="14" fill="#b9c9d7">Conditional Access · MFA</text>
+  <text x="979" y="371" text-anchor="middle" font-size="14" fill="#b9c9d7">Sign-in logs · alerts · review</text>
+
+  <path d="M323 270H416" stroke="url(#link)" stroke-width="6" marker-end="url(#arrow)"/>
+  <text x="370" y="250" text-anchor="middle" font-size="12" fill="#d5e8f4">selected objects</text>
+  <path d="M716 270H810" stroke="url(#link)" stroke-width="6" marker-end="url(#arrow)"/>
+  <text x="763" y="250" text-anchor="middle" font-size="12" fill="#d5e8f4">configured sync</text>
+
+  <rect x="430" y="435" width="286" height="73" rx="14" fill="#252c35" stroke="#b7c5d1"/>
+  <text x="573" y="464" text-anchor="middle" font-size="16" font-weight="700">Independent recovery</text>
+  <text x="573" y="489" text-anchor="middle" font-size="13" fill="#c1ced7">cloud-only emergency accounts</text>
+  <path d="M716 471H820V405" fill="none" stroke="#b7c5d1" stroke-width="3" stroke-dasharray="7 7"/>
+  <text x="923" y="467" text-anchor="middle" font-size="15" fill="#b9c9d7">SSO to assigned cloud apps</text>
+  <text x="979" y="510" text-anchor="middle" font-size="13" fill="#b9c9d7">Policy evaluates access; app integration is configured separately</text>
+  <text x="600" y="542" text-anchor="middle" font-size="13" fill="#91a9bd">Illustrative design only · no live GNTECH tenant or synchronization state shown</text>
+</g>
+</svg>

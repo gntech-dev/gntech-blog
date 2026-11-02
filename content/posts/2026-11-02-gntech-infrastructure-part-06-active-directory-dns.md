@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 06 of 12** · [Previous: Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) · Next: Part 07 — Hybrid Identity and Entra ID (planned)
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 06 of 12** · [Previous: Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) · [Next: Part 07 — Hybrid Identity and Entra ID](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/)
 
 This installment builds a **new, isolated Windows Server 2025 lab forest** and explains the DNS records Active Directory needs. It does not configure, extend, or test the existing GNTECH.ME domain. Do not run the new-forest commands in a production environment.
 
