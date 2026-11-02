@@ -14,9 +14,9 @@ cover:
   relative: false
 ---
 
-**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 05 of 12** · [Previous: Part 03 — Dual MikroTik CHR](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) · Next: Part 06 — Active Directory (planned)
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 05 of 12** · [Previous: Part 04 — Proxmox Firewall and Network Isolation](/posts/2026-11-01-gntech-infrastructure-part-04-proxmox-firewall-isolation/) · [Next: Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/)
 
-Part 04 — Proxmox Firewall and Isolation is in a separate review PR. This installment continues the series from Part 03. A site-to-site VPN connects selected services after home and Hetzner networks have separate boundaries. This generic tutorial uses WireGuard on RouterOS v7 and explicit routes between example subnets. Addresses, keys, endpoints, and rules are examples, not copied from a live GNTECH configuration. Nothing here was applied to or tested on live infrastructure.
+[Part 04 — Proxmox Firewall and Network Isolation](/posts/2026-11-01-gntech-infrastructure-part-04-proxmox-firewall-isolation/) establishes the forwarding and isolation policy that this installment extends. A site-to-site VPN connects selected services after home and Hetzner networks have separate boundaries. This generic tutorial uses WireGuard on RouterOS v7 and explicit routes between example subnets. Addresses, keys, endpoints, and rules are examples, not copied from a live GNTECH configuration. Nothing here was applied to or tested on live infrastructure.
 
 ## Scope and topology
 
