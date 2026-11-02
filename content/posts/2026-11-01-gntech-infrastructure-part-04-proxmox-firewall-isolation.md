@@ -8,9 +8,9 @@ tags: [gntech-infrastructure, proxmox, nftables, firewall, hetzner, ipv6, mikrot
 keywords: [Proxmox nftables forwarding, Hetzner Proxmox NAT, vmbr3 isolation, MikroTik CHR firewall, IPv6 forwarding]
 summary: "Protect the routing boundary before opening services: inventory firewall ownership, apply a deliberately scoped IPv4 forwarding and NAT lab, test negative paths, and keep a verified rollback."
 cover:
-  image: "/images/posts/gntech-infrastructure-part-04/featured.svg"
-  alt: "Cinematic-style editorial illustration of protected datacenter servers and an illuminated shield; no monitoring figures or production status represented."
-  caption: "Original conceptual cover art. A separate diagram below explains the actual network policy."
+  image: "/images/posts/gntech-infrastructure-part-04/featured.webp"
+  alt: "Conceptual AI-generated datacenter artwork for the Proxmox firewall tutorial; interface indicators are illustrative, not live status."
+  caption: "Conceptual AI-generated editorial artwork. The interface and status indicators are illustrative, not operational evidence; see the technical policy diagram below."
   relative: false
 ---
 
