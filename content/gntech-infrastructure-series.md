@@ -21,7 +21,7 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | 01 | Architecture and design: trust boundaries, network plan, inventory | Existing article | [Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) |
 | 02 | Hetzner Proxmox foundation: installation, ZFS, management, recovery | Article ready for review | [Part 02 — Hetzner Proxmox Foundation](/posts/2026-11-01-gntech-infrastructure-part-02-hetzner-proxmox/) |
 | 03 | Two MikroTik CHR routers: isolated transit bridges and routed IPs | Article ready for review | [Part 03 — Dual MikroTik CHR](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) |
-| 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | Planned | [Proxmox firewall guide](/posts/2026-06-16-proxmox-firewall-security-hardening/) |
+| 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | Article ready for review | [Part 04 — Firewall and Network Isolation](/posts/2026-11-01-gntech-infrastructure-part-04-proxmox-firewall-isolation/) |
 | 05 | Home-to-Hetzner networking: routing, VPN, fail-safe access | Planned | [MikroTik WireGuard](/posts/2026-05-08-mikrotik-wireguard-vpn/) |
 | 06 | Active Directory: Windows Server, DNS, domain controllers | Planned | [Windows Server GPO guide](/posts/2026-05-14-windows-server-2025-group-policy-management/) |
 | 07 | Hybrid identity: Entra ID, synchronization, SSO, MFA | Planned | [Entra Connect Sync](/posts/2026-05-14-windows-server-2025-entra-connect-sync/) |
@@ -59,4 +59,4 @@ Each future part should provide a scope and architecture diagram, prerequisites,
 
 Publication order should follow dependencies, but the index can be updated independently. Existing standalone articles remain at their current URLs to avoid breaking links; cross-link or add series metadata only after editorial review.
 
-**Next planned deliverable:** Part 04 — Proxmox Firewall and Network Isolation.
+**Next planned deliverable:** Part 05 — Home-to-Hetzner Connectivity and routing failure recovery.
