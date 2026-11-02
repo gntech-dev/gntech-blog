@@ -20,7 +20,7 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | --- | --- | --- | --- |
 | 01 | Architecture and design: trust boundaries, network plan, inventory | Existing article | [Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) |
 | 02 | Hetzner Proxmox foundation: installation, ZFS, management, recovery | Article ready for review | [Part 02 — Hetzner Proxmox Foundation](/posts/2026-11-01-gntech-infrastructure-part-02-hetzner-proxmox/) |
-| 03 | Two MikroTik CHR routers: isolated transit bridges and routed IPs | Existing standalone guide; series integration pending | [Dual-CHR Hetzner tutorial](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) |
+| 03 | Two MikroTik CHR routers: isolated transit bridges and routed IPs | Article ready for review | [Part 03 — Dual MikroTik CHR](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) |
 | 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | Planned | [Proxmox firewall guide](/posts/2026-06-16-proxmox-firewall-security-hardening/) |
 | 05 | Home-to-Hetzner networking: routing, VPN, fail-safe access | Planned | [MikroTik WireGuard](/posts/2026-05-08-mikrotik-wireguard-vpn/) |
 | 06 | Active Directory: Windows Server, DNS, domain controllers | Planned | [Windows Server GPO guide](/posts/2026-05-14-windows-server-2025-group-policy-management/) |
@@ -31,7 +31,7 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | 11 | Monitoring: Prometheus, Grafana, Loki, Uptime Kuma | Planned | [Monitoring stack](/posts/2026-05-17-homelab-monitoring-stack/) |
 | 12 | End-to-end security validation and operational handoff | Planned | [MikroTik firewall rules](/posts/2026-05-24-mikrotik-firewall-rules/) |
 
-**Status key:** *Planned* means the dedicated series installment is not yet written. A linked existing article is supporting reading, **not** a completed series part. Part 03 currently has a standalone tutorial; its inclusion in this table does not mean it has been retroactively reviewed as a series installment.
+**Status key:** *Planned* means the dedicated series installment is not yet written. A linked existing article is supporting reading, **not** a completed series part. Part 03 reuses the established URL of the original standalone tutorial; series metadata and safeguards are proposed for review.
 
 ## Supporting reading by workstream
 
@@ -59,4 +59,4 @@ Each future part should provide a scope and architecture diagram, prerequisites,
 
 Publication order should follow dependencies, but the index can be updated independently. Existing standalone articles remain at their current URLs to avoid breaking links; cross-link or add series metadata only after editorial review.
 
-**Next planned deliverable:** Part 03 — review and integrate the existing dual-CHR tutorial into the numbered series, without changing its established URL.
+**Next planned deliverable:** Part 04 — Proxmox Firewall and Network Isolation.
