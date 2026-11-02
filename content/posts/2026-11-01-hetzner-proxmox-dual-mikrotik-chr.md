@@ -1,9 +1,10 @@
 ---
-title: "Hetzner Proxmox with Two MikroTik CHR Routers: A Reproducible Network Lab"
+title: "GNTECH Infrastructure Part 03: Two MikroTik CHR Routers on Hetzner Proxmox"
 description: "Build a routed Hetzner Proxmox topology with two isolated MikroTik CHR guests, a private VM LAN, source NAT, and safe validation."
 date: 2026-11-01T15:00:00-04:00
 draft: false
-tags: [proxmox, hetzner, mikrotik, chr, networking, nftables, cloudflare]
+ShowToc: true
+tags: [gntech-infrastructure, proxmox, hetzner, mikrotik, chr, networking, nftables, cloudflare]
 keywords: [Hetzner Proxmox networking, MikroTik CHR Proxmox, routed additional IPv4, Proxmox nftables]
 summary: "A staged, console-first tutorial for a Hetzner Proxmox host with two routed CHR transit networks and a separate NATed private VM LAN."
 cover:
@@ -12,6 +13,8 @@ cover:
   caption: "Conceptual architecture; example IPs are documentation-only."
   relative: false
 ---
+
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 03 of 12** · [Previous: Part 02 — Hetzner Proxmox Foundation](/posts/2026-11-01-gntech-infrastructure-part-02-hetzner-proxmox/) · Next: Part 04 — Firewall and Network Isolation (planned)
 
 A dedicated Hetzner server can host more than one virtual router without turning the Proxmox management interface into a guest-facing switch. The trick is to separate **host WAN**, **router transit links**, and **ordinary VM networking**, and to keep an out-of-band recovery path throughout the change.
 
@@ -33,6 +36,10 @@ Each CHR also needs a **separate LAN-side interface** for its own workloads. Cre
 The example uses documentation-only public addresses `192.0.2.10` (host), `198.51.100.10` (CHR-A) and `203.0.113.10` (CHR-B). These are placeholders, **not routable addresses**. In practice, you need two provider-routed additional IPv4 addresses or another explicitly supported routed allocation, with provider routing verified **before** configuring guests.
 
 ## 0. Preconditions and a recovery plan
+
+**Coming from Part 02?** It already creates `vmbr1`, `vmbr2`, and `vmbr3`. **Do not append their definitions again.** Review the existing bridges, then add only missing `vmbr10` and `vmbr20` for the separate CHR workload LANs. The full firewall and NAT policy belongs to Part 04; the NAT fragment here is a preview.
+
+Verify Hetzner's exact additional IPv4 type, provider route, and MAC requirements before proceeding: a virtual-MAC bridging recipe is not interchangeable with routed additional IPs. See the [Hetzner virtualization guide](https://docs.hetzner.com/robot/dedicated-server/virtualization/general/).
 
 - A supported Proxmox VE host at Hetzner, with verified local console / rescue access.
 - The existing host WAN IP, prefix, gateway, interface name, and any provider-specific route configuration recorded.
@@ -64,10 +71,10 @@ cp -a /etc/network/interfaces "/root/interfaces.pre-chr.$(date +%Y%m%d-%H%M%S)"
 **Keep the existing `vmbr0` WAN stanza unchanged.** The following is an **append-only illustration**, not a complete replacement for `/etc/network/interfaces`. Check for duplicate bridge names first.
 
 ```bash
-grep -nE '^iface vmbr(1|2|3|10|20) ' /etc/network/interfaces || true
+grep -nE '^(auto|iface) vmbr(1|2|3|10|20)([[:space:]]|$)' /etc/network/interfaces || true
 ```
 
-Only if those bridges do not already exist, append this block. Review the file before applying:
+**Standalone deployments only:** append the complete block below only if *none* of these bridges exists. If following Part 02, **skip the complete command** and add only the missing `vmbr10`/`vmbr20` stanzas, after checking for conflicts. Review the file before applying:
 
 ```bash
 cat >> /etc/network/interfaces <<'EOF'
@@ -110,13 +117,14 @@ EOF
 Inspect the diff, then use Proxmox's `ifreload -a` from the recovery console **only after** validating the complete interfaces file:
 
 ```bash
-diff -u /root/interfaces.pre-chr.* /etc/network/interfaces || true
+BACKUP=$(find /root -maxdepth 1 -name "interfaces.pre-chr.*" -type f -printf "%T@ %p\n" | sort -nr | head -n 1 | cut -d" " -f2-)
+test -n "$BACKUP" && diff -u "$BACKUP" /etc/network/interfaces || true
 ifquery --check -a
 # Once reviewed from the console:
 # ifreload -a
 ```
 
-The wildcard diff assumes only one matching backup; if several exist, specify the exact backup path instead.
+Confirm that the selected dated backup is the correct baseline; do not trust an arbitrary matching backup.
 
 ## 2. Create two CHR guests
 
@@ -164,8 +172,8 @@ With provider routing **already confirmed**, the Proxmox host needs one /32 rout
 
 ```bash
 # Replace both documentation-only public IPs with your real provider-routed addresses.
-ip route replace 198.51.100.10/32 via 10.255.1.2 dev vmbr1
-ip route replace 203.0.113.10/32 via 10.255.2.2 dev vmbr2
+ # ip route replace 198.51.100.10/32 via 10.255.1.2 dev vmbr1
+ # ip route replace 203.0.113.10/32 via 10.255.2.2 dev vmbr2
 ip route get 198.51.100.10
 ip route get 203.0.113.10
 ```
@@ -254,7 +262,7 @@ If a transit route is wrong, remove only that route:
 
 ```bash
 # Substitute the real address; example range shown intentionally.
-ip route del 198.51.100.10/32 via 10.255.1.2 dev vmbr1
+ # ip route del 198.51.100.10/32 via 10.255.1.2 dev vmbr1
 ```
 
 If the bridge change fails, use the Hetzner rescue console to restore the **specific dated** `/etc/network/interfaces` backup and apply the recovered configuration after inspection. Remove the forwarding sysctl only if it was introduced by this lab and no other workload depends on it. Keep the original firewall ruleset available for restoration; never flush all nftables rules on a remote production server.
@@ -263,4 +271,8 @@ If the bridge change fails, use the Hetzner rescue console to restore the **spec
 
 This article provides a **reproducible design and staged configuration examples**, not a claim that the commands were executed against your server. Provider routing, CHR license and image version, Proxmox storage identifiers, nftables integration, and IPv6 delegation must be checked for each environment.
 
-Official references: [Proxmox network configuration](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#sysadmin_network_configuration), [MikroTik CHR](https://help.mikrotik.com/docs/spaces/ROS/pages/18350234/Cloud+Hosted+Router+CHR), [Hetzner dedicated-server networking](https://docs.hetzner.com/robot/dedicated-server/network/), and [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).
+## Next in the series
+
+**Part 04 — Proxmox Firewall and Network Isolation** will cover explicit forwarding, anti-spoofing, SNAT, IPv6 policy, and verification with firewall counters. The NAT example above is not a complete firewall configuration.
+
+Official references: [Proxmox network configuration](https://pve.proxmox.com/pve-docs/pve-admin-guide.html#sysadmin_network_configuration), [MikroTik CHR](https://manual.mikrotik.com/docs/getting-started/installation-and-upgrade/install/chr-installation/), [Hetzner dedicated-server networking](https://docs.hetzner.com/robot/dedicated-server/network/), and [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/).

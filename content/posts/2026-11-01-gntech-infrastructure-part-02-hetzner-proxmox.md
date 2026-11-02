@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 02 of 12** · [Previous: Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) · Next: Part 03 — MikroTik CHR (see the [existing standalone router guide](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/))
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 02 of 12** · [Previous: Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) · [Next: Part 03 — Two MikroTik CHR Routers](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/)
 
 A remote hypervisor is different from a Proxmox box at home: if you lose its WAN route or firewall access, there is no keyboard you can simply plug in. Before deploying a router VM, **prove that the host can be managed and recovered independently**.
 
@@ -312,7 +312,7 @@ If the host's OS or storage installation fails, rollback may require a **reinsta
 
 The tutorial documents an installation **decision process**, read-only preflight commands, a staged private-bridge example, security boundaries, and a rollback plan. It does **not** claim to have run `installimage`, installed Proxmox on a dedicated server, exercised real Hetzner routing, configured a live firewall, or confirmed provider rescue access. Those steps require an environment-specific acceptance record.
 
-**Next:** [Part 03 — Two MikroTik CHR Routers, Transit Networks, and Routed Public IPs](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) (existing standalone guide; series integration to be reviewed).
+**Next:** [Part 03 — Two MikroTik CHR Routers, Transit Networks, and Routed Public IPs](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) (retains its established URL).
 
 ### Official references
 
