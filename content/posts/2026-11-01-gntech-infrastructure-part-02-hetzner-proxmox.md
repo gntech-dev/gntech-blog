@@ -8,7 +8,7 @@ tags: [gntech-infrastructure, proxmox, hetzner, zfs, networking, security]
 keywords: [Hetzner Proxmox installation, Hetzner Proxmox ZFS, Proxmox rescue networking, dedicated server virtualization]
 summary: "Build the host before the routers: choose a storage layout, preserve provider WAN connectivity, prepare isolated bridges, and prove emergency recovery."
 cover:
-  image: "/images/posts/gntech-infrastructure-part-02/featured.png"
+  image: "/images/posts/gntech-infrastructure-part-02/featured.webp"
   alt: "Conceptual AI-generated editorial cover for GNTECH Infrastructure Part 2; the technical architecture diagram is inside the article."
   caption: "Conceptual AI-generated editorial artwork. The technical topology diagram remains in the article."
   relative: false

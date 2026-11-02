@@ -7,7 +7,7 @@ tags: [gntech-infrastructure, architecture, proxmox, mikrotik, hetzner, zero-tru
 keywords: [hybrid homelab architecture, Hetzner Proxmox network design, MikroTik CHR architecture, GNTECH infrastructure]
 summary: "Before deploying routers and VMs, define trust boundaries, IP ownership, management recovery, and a testable rollout plan."
 cover:
-  image: "/images/posts/gntech-infrastructure-part-01/featured.png"
+  image: "/images/posts/gntech-infrastructure-part-01/featured.webp"
   alt: "Conceptual AI-generated editorial cover for GNTECH Infrastructure Part 1; the technical architecture diagram is inside the article."
   caption: "Conceptual AI-generated editorial artwork. The technical topology diagram remains in the article."
   relative: false
