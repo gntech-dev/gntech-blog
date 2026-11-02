@@ -21,7 +21,7 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | 01 | Architecture and design: trust boundaries, network plan, inventory | Existing article | [Part 01 — Architecture and Design](/posts/2026-11-01-gntech-infrastructure-part-01-architecture/) |
 | 02 | Hetzner Proxmox foundation: installation, ZFS, management, recovery | Article ready for review | [Part 02 — Hetzner Proxmox Foundation](/posts/2026-11-01-gntech-infrastructure-part-02-hetzner-proxmox/) |
 | 03 | Two MikroTik CHR routers: isolated transit bridges and routed IPs | Article ready for review | [Part 03 — Dual MikroTik CHR](/posts/2026-11-01-hetzner-proxmox-dual-mikrotik-chr/) |
-| 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | In review | [Part 04 — Proxmox Firewall and Network Isolation](/posts/2026-11-01-gntech-infrastructure-part-04-proxmox-firewall-isolation/) |
+| 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | In review (PR #54) | Pending review |
 | 05 | Home-to-Hetzner connectivity: WireGuard, scoped routes, recovery | Article ready for review | [Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) |
 | 06 | Active Directory: Windows Server, DNS, domain controllers | Planned | [Windows Server GPO guide](/posts/2026-05-14-windows-server-2025-group-policy-management/) |
 | 07 | Hybrid identity: Entra ID, synchronization, SSO, MFA | Planned | [Entra Connect Sync](/posts/2026-05-14-windows-server-2025-entra-connect-sync/) |
