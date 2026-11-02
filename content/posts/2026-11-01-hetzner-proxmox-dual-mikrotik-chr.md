@@ -8,9 +8,9 @@ tags: [gntech-infrastructure, proxmox, hetzner, mikrotik, chr, networking, nftab
 keywords: [Hetzner Proxmox networking, MikroTik CHR Proxmox, routed additional IPv4, Proxmox nftables]
 summary: "A staged, console-first tutorial for a Hetzner Proxmox host with two routed CHR transit networks and a separate NATed private VM LAN."
 cover:
-  image: "/images/posts/hetzner-proxmox-dual-chr/cover.svg"
-  alt: "Topology showing Hetzner WAN, a Proxmox host, two isolated CHR transit bridges, and a separate private VM bridge."
-  caption: "Conceptual architecture; example IPs are documentation-only."
+  image: "/images/posts/hetzner-proxmox-dual-chr/featured.svg"
+  alt: "Cinematic isometric datacenter server racks with blue and purple lighting for a dual MikroTik CHR networking guide."
+  caption: "Conceptual editorial cover; the routed topology diagram remains in the article."
   relative: false
 ---
 
