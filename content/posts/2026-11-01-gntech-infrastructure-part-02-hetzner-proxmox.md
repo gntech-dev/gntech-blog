@@ -8,9 +8,9 @@ tags: [gntech-infrastructure, proxmox, hetzner, zfs, networking, security]
 keywords: [Hetzner Proxmox installation, Hetzner Proxmox ZFS, Proxmox rescue networking, dedicated server virtualization]
 summary: "Build the host before the routers: choose a storage layout, preserve provider WAN connectivity, prepare isolated bridges, and prove emergency recovery."
 cover:
-  image: "/images/posts/gntech-infrastructure-part-02/cover.svg"
-  alt: "Hetzner WAN connecting to a Proxmox host, with a separate rescue path and isolated bridges for two future MikroTik CHR routers and private VMs."
-  caption: "Original conceptual diagram; network connectivity and deployment status are illustrative."
+  image: "/images/posts/gntech-infrastructure-part-02/featured.svg"
+  alt: "Cinematic isometric Hetzner Proxmox server infrastructure in cool blue and warm amber light."
+  caption: "Conceptual editorial cover; the host and recovery diagram remains in the article."
   relative: false
 ---
 
