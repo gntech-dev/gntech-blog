@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="570" viewBox="0 0 1100 570" role="img" aria-labelledby="title desc">
+<title id="title">Scoped browser administration and independent recovery</title>
+<desc id="desc">The browser reaches Cloudflare Access. Authorized requests traverse an outbound tunnel to a connector and one HTTPS origin. A separate VPN or console provides recovery without Cloudflare Access.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10Z" fill="#72d9ed"/></marker></defs>
+<rect width="1100" height="570" rx="20" fill="#101b30"/>
+<g font-family="Arial,sans-serif" text-anchor="middle" fill="#edf4ff">
+<text x="550" y="48" font-size="28" font-weight="bold">One application, explicit trust boundaries</text>
+<rect x="45" y="115" width="225" height="100" rx="12" fill="#243953" stroke="#72d9ed"/>
+<text x="157" y="155" font-size="22">Admin browser</text><text x="157" y="185" font-size="17">Public hostname</text>
+<rect x="420" y="115" width="260" height="100" rx="12" fill="#45331f" stroke="#ffae5c"/>
+<text x="550" y="155" font-size="22">Cloudflare Access</text><text x="550" y="185" font-size="17">Identity + policy</text>
+<rect x="45" y="340" width="225" height="110" rx="12" fill="#243953" stroke="#72d9ed"/>
+<text x="157" y="378" font-size="22">Connector VM</text><text x="157" y="408" font-size="17">Validates Access token</text><text x="157" y="432" font-size="17">Outbound tunnel</text>
+<rect x="420" y="340" width="260" height="110" rx="12" fill="#243953" stroke="#72d9ed"/>
+<text x="550" y="378" font-size="22">Private HTTPS origin</text><text x="550" y="408" font-size="17">10.3.0.10:8443</text><text x="550" y="432" font-size="17">Native login + roles</text>
+<rect x="810" y="340" width="245" height="110" rx="12" fill="#263d36" stroke="#9bd7a8"/>
+<text x="932" y="380" font-size="22">Recovery route</text><text x="932" y="411" font-size="17">Separate VPN / console</text>
+<path d="M270 165H415" stroke="#72d9ed" stroke-width="3" marker-end="url(#arrow)"/><text x="343" y="144" font-size="16">HTTPS</text>
+<path d="M157 340V275H550V220" fill="none" stroke="#72d9ed" stroke-width="3" marker-end="url(#arrow)"/><text x="360" y="257" font-size="16">Connector-initiated tunnel session</text>
+<path d="M270 395H415" stroke="#72d9ed" stroke-width="3" marker-end="url(#arrow)"/><text x="343" y="372" font-size="16">Verified TLS</text>
+<path d="M810 395H685" stroke="#9bd7a8" stroke-width="3" stroke-dasharray="8 5" marker-end="url(#arrow)"/>
+<text x="550" y="500" font-size="18">Origin firewall: connector + approved recovery only</text>
+<text x="550" y="535" font-size="17" fill="#b7c8df">Public DNS name does not make the origin publicly reachable. Example topology.</text>
+</g></svg>

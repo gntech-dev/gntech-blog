@@ -24,8 +24,8 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | 04 | Proxmox firewall: forwarding, SNAT, IPv6, isolation | Published | [Part 04 — Proxmox Firewall and Network Isolation](/posts/2026-11-01-gntech-infrastructure-part-04-proxmox-firewall-isolation/) |
 | 05 | Home-to-Hetzner connectivity: WireGuard, scoped routes, recovery | Published | [Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) |
 | 06 | Active Directory and DNS: forest, domain controllers, client discovery | Published | [Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/) |
-| 07 | Hybrid identity: Entra ID, synchronization, SSO, MFA | Article ready for review | [Part 07 — Hybrid Identity and Entra ID](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/) |
-| 08 | Cloudflare Zero Trust: tunnels and authenticated administration | Planned | [Cloudflare Tunnel for Docker](/posts/2026-05-14-cloudflare-tunnel-docker/) |
+| 07 | Hybrid identity: Entra ID, synchronization, SSO, MFA | Published | [Part 07 — Hybrid Identity and Entra ID](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/) |
+| 08 | Cloudflare Zero Trust: tunnels and authenticated administration | Article ready for review | [Part 08 — Cloudflare Zero Trust](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/) |
 | 09 | Container platform: Docker Compose, Traefik, application deployment | Planned | [Traefik reverse proxy](/posts/2026-05-09-traefik-reverse-proxy-docker/) |
 | 10 | Backup and disaster recovery: PBS, ZFS, restore drills | Planned | [PBS setup](/posts/2026-05-08-proxmox-backup-server-setup/) |
 | 11 | Monitoring: Prometheus, Grafana, Loki, Uptime Kuma | Planned | [Monitoring stack](/posts/2026-05-17-homelab-monitoring-stack/) |
@@ -59,4 +59,4 @@ Each future part should provide a scope and architecture diagram, prerequisites,
 
 Publication order should follow dependencies, but the index can be updated independently. Existing standalone articles remain at their current URLs to avoid breaking links; cross-link or add series metadata only after editorial review.
 
-**Next planned deliverable:** Part 08 — Cloudflare Zero Trust.
+**Next planned deliverable:** Part 09 — Docker Compose and Traefik.

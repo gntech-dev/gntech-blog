@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 07 of 12** · [Previous: Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/) · Next: Part 08 — Cloudflare Zero Trust (planned)
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 07 of 12** · [Previous: Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/) · [Next: Part 08 — Cloudflare Zero Trust](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/)
 
 Hybrid identity connects an on-premises Active Directory forest to Microsoft Entra ID so people can use a consistent identity across local and cloud services. Synchronization provisions directory objects and selected attributes. It is not a directory backup, and it does not automatically make every application use single sign-on (SSO).
 
@@ -129,7 +129,7 @@ If the pilot behaves unexpectedly, stop expansion and follow the engine-specific
 
 This article provides a planning and pilot framework. It does not create a tenant, configure a sync engine, validate the GNTECH domain, or prove that a particular organization's applications support the selected SSO flow. Licensing, supported features, interfaces, and service requirements can change; use the linked Microsoft documentation as the deployment authority.
 
-Part 08 will cover Cloudflare Zero Trust and authenticated administrative access. For current context, review [Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) and [Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/).
+[Part 08](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/) covers Cloudflare Zero Trust and authenticated administrative access. For current context, review [Part 05 — Home-to-Hetzner Connectivity](/posts/2026-11-02-gntech-infrastructure-part-05-home-to-hetzner-connectivity/) and [Part 06 — Active Directory and DNS](/posts/2026-11-02-gntech-infrastructure-part-06-active-directory-dns/).
 
 ### Official references
 

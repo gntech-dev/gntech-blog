@@ -47,3 +47,27 @@ The workflow reports a check; it does not change repository protection settings.
 After its first successful run, the owner can make `Build and audit blog` a
 required check in the master branch rules. Until that is configured, a failed
 check does not itself prevent someone with merge permission from merging.
+
+## Scheduled authoring when shell Git has no credentials
+
+A connected GitHub app does not imply that `git push` in a disposable shell is
+configured. Discover and verify the connector first. For connector-only writes:
+
+1. Read the default branch head commit and its tree, then inspect open PRs.
+2. Create blobs for binary assets with `encoding: base64` using the actual file
+   bytes. Use normal Git blob paths ending in `.png` or `.webp`; never commit a
+   base64 text representation as the image.
+3. Create a tree based on that default-branch tree with the complete changed
+   files, then a commit whose parent is that branch head.
+4. Create a unique topic branch at the new commit and open a PR. Never write to
+   master or merge automatically.
+5. Inspect the resulting PR head and its publishing workflow checks. A missing
+   local Hugo binary is not a reason to discard completed work: open a draft PR
+   and let `Blog publishing checks` run its pinned, checksum-verified Hugo build.
+   Keep it draft while checks fail or remain unresolved. Report local and CI
+   results separately and verify the exact head SHA before claiming success.
+
+Install local Hugo using the pinned version and checksum process in the workflow
+when network access permits it. Do not assume tools or working files survive
+between scheduled runs. Preserve a complete incomplete article on its PR branch
+and continue that work before creating a duplicate topic.
