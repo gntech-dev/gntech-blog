@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="290" viewBox="0 0 860 290" role="img" aria-labelledby="title">
+  <title id="title">Proxmox backup and recovery across two sites</title>
+  <rect width="860" height="290" rx="16" fill="#0d1929"/>
+  <g fill="#162b40" stroke="#7294b7" stroke-width="2">
+    <rect x="35" y="25" width="320" height="240" rx="12"/>
+    <rect x="505" y="25" width="320" height="240" rx="12"/>
+  </g>
+  <g fill="#254766" stroke="#79bae7" stroke-width="2">
+    <rect x="90" y="79" width="210" height="45" rx="8"/>
+    <rect x="90" y="193" width="210" height="45" rx="8"/>
+    <rect x="560" y="79" width="210" height="45" rx="8"/>
+    <rect x="560" y="193" width="210" height="45" rx="8"/>
+  </g>
+  <g fill="#eaf5ff" font-family="sans-serif" font-size="16" text-anchor="middle">
+    <text x="195" y="55">Primary site</text>
+    <text x="665" y="55">Recovery site</text>
+    <text x="195" y="108">Primary PVE guest</text>
+    <text x="195" y="222">Primary PBS</text>
+    <text x="665" y="108">Recovery PVE guest</text>
+    <text x="665" y="222">Off-site PBS</text>
+    <text x="242" y="163">Backup</text>
+    <text x="713" y="163">Restore</text>
+    <text x="430" y="201">Pull sync data</text>
+  </g>
+  <g fill="none" stroke="#ffad59" stroke-width="3">
+    <path d="M195 126v62m-6-9 6 9 6-9"/>
+    <path d="M665 191v-62m-6 9 6-9 6 9"/>
+    <path d="M302 217h252m-9-6 9 6-9 6"/>
+  </g>
+</svg>

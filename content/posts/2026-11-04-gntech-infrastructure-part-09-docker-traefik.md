@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 09 of 12** · [Previous: Part 08 — Cloudflare Zero Trust](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/) · Next: Part 10 — Backup and Disaster Recovery (planned)
+**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 09 of 12** · [Previous: Part 08 — Cloudflare Zero Trust](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/) · [Next: Part 10 — Backup and Disaster Recovery](/posts/2026-11-04-gntech-infrastructure-part-10-backup-disaster-recovery/)
 
 Part 08 set the rules for reaching an administrative application. This part builds the origin on a dedicated Linux guest. Traefik terminates HTTPS, reaches the app by its Docker service name, and reads its routes from a mounted directory. That keeps the Docker API out of the proxy container and gives you a route file to review before deploying a change.
 
