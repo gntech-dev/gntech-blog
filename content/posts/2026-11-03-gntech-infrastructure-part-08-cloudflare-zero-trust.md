@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 08 of 12** · [Previous: Part 07 — Hybrid Identity](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/) · Next: Part 09 — Docker Compose and Traefik (planned)
+**Series:** [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 08 of 12** · [Previous: Part 07 — Hybrid Identity](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/) · [Next: Part 09 — Docker Compose and Traefik](/posts/2026-11-04-gntech-infrastructure-part-09-docker-traefik/)
 
 A tunnel can make an administration page reachable without an inbound port forward. Authentication is a separate decision: the hostname needs an Access application, a narrow policy, and a protected origin. This installment joins those controls into one reviewable path.
 
