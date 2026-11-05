@@ -27,8 +27,8 @@ The sequence is a **publication plan**, not a claim that every component has bee
 | 07 | Hybrid identity: Entra ID, synchronization, SSO, MFA | Published | [Part 07 — Hybrid Identity and Entra ID](/posts/2026-11-02-gntech-infrastructure-part-07-hybrid-identity-entra-id/) |
 | 08 | Cloudflare Zero Trust: tunnels and authenticated administration | Published | [Part 08 — Cloudflare Zero Trust](/posts/2026-11-03-gntech-infrastructure-part-08-cloudflare-zero-trust/) |
 | 09 | Container platform: private HTTPS ingress and application persistence | Published | [Part 09 — Docker Compose and Traefik](/posts/2026-11-04-gntech-infrastructure-part-09-docker-traefik/) |
-| 10 | Backup and disaster recovery: off-site PBS restore drill | Article ready for review | [Part 10 — Backup and Disaster Recovery](/posts/2026-11-04-gntech-infrastructure-part-10-backup-disaster-recovery/) |
-| 11 | Monitoring: Prometheus, Grafana, Loki, Uptime Kuma | Planned | [Monitoring stack](/posts/2026-05-17-homelab-monitoring-stack/) |
+| 10 | Backup and disaster recovery: off-site PBS restore drill | Published | [Part 10 — Backup and Disaster Recovery](/posts/2026-11-04-gntech-infrastructure-part-10-backup-disaster-recovery/) |
+| 11 | Monitoring: backup evidence freshness and missing-data alerts | Article ready for review | [Part 11 — Monitoring and Observability](/posts/2026-11-05-gntech-infrastructure-part-11-monitoring/) |
 | 12 | End-to-end security validation and operational handoff | Planned | [MikroTik firewall rules](/posts/2026-05-24-mikrotik-firewall-rules/) |
 
 **Status key:** *Planned* means the dedicated series installment is not yet written. A linked existing article is supporting reading, **not** a completed series part. Part 03 reuses the established URL of the original standalone tutorial; series metadata and safeguards are proposed for review.
@@ -59,4 +59,4 @@ Each future part should provide a scope and architecture diagram, prerequisites,
 
 Publication order should follow dependencies, but the index can be updated independently. Existing standalone articles remain at their current URLs to avoid breaking links; cross-link or add series metadata only after editorial review.
 
-**Next planned deliverable:** Part 11 — Monitoring and Observability.
+**Next planned deliverable:** Part 12 — Security Validation and Operations.
