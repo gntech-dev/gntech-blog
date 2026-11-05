@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="230" viewBox="0 0 860 230" role="img" aria-labelledby="t">
+<title id="t">Backup evidence collection and alert delivery</title>
+<rect width="860" height="230" rx="16" fill="#0d1929"/>
+<g fill="#193650" stroke="#79bae7" stroke-width="2">
+<rect x="20" y="85" width="170" height="60" rx="8"/>
+<rect x="230" y="85" width="170" height="60" rx="8"/>
+<rect x="440" y="85" width="170" height="60" rx="8"/>
+<rect x="650" y="85" width="190" height="60" rx="8"/>
+</g>
+<g fill="#eaf5ff" font-family="sans-serif" font-size="16" text-anchor="middle">
+<text x="105" y="120">Evidence writer</text><text x="315" y="120">Node Exporter</text>
+<text x="525" y="120">Prometheus</text><text x="745" y="120">Alertmanager</text>
+<text x="105" y="180">Synthetic lab value</text><text x="315" y="180">Textfile collector</text>
+<text x="525" y="180">Age and absence</text><text x="745" y="180">Separate delivery test</text>
+<text x="430" y="42">Data flow from evidence to notification routing</text>
+</g>
+<g fill="none" stroke="#ffad59" stroke-width="3">
+<path d="M190 115h34m-8-6 8 6-8 6"/><path d="M400 115h34m-8-6 8 6-8 6"/>
+<path d="M610 115h34m-8-6 8 6-8 6" stroke-dasharray="5 4"/>
+</g></svg>

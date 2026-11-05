@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 10 of 12** · [Previous: Part 09 — Docker Compose and Traefik](/posts/2026-11-04-gntech-infrastructure-part-09-docker-traefik/) · Next: Part 11 — Monitoring and Observability (planned)
+**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 10 of 12** · [Previous: Part 09 — Docker Compose and Traefik](/posts/2026-11-04-gntech-infrastructure-part-09-docker-traefik/) · [Next: Part 11 — Monitoring and Observability](/posts/2026-11-05-gntech-infrastructure-part-11-monitoring/)
 
 A successful backup job tells you the primary datastore accepted a backup. To rehearse a site outage, start at the other end. Can a recovery host reach the off-site datastore, decrypt the right snapshot, and boot a usable guest without calling back to the primary site?
 
