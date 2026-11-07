@@ -1,7 +1,7 @@
 ---
 title: "Keep Linux Logs Across Reboots Without Letting the Journal Fill the Disk"
 description: "Configure persistent systemd journal storage, set disk and age limits, verify a reboot marker, and distinguish rotation from destructive vacuuming."
-date: 2026-11-07T06:00:00-04:00
+date: 2026-11-07T00:00:00-04:00
 draft: false
 ShowToc: true
 tags: [linux, systemd, logging, operations, homelab]
