@@ -14,7 +14,7 @@ cover:
   relative: false
 ---
 
-**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 11 of 12** · [Previous: Part 10 — Backup and Disaster Recovery](/posts/2026-11-04-gntech-infrastructure-part-10-backup-disaster-recovery/) · Next: Part 12 — Security Validation and Operations (planned)
+**Series** · [GNTECH Infrastructure Deployment Series](/gntech-infrastructure-series/) · **Part 11 of 12** · [Previous: Part 10 — Backup and Disaster Recovery](/posts/2026-11-04-gntech-infrastructure-part-10-backup-disaster-recovery/) · [Next: Part 12 — Security Validation and Operations](/posts/2026-11-05-gntech-infrastructure-part-12-security-operations/)
 
 The off-site restore drill in Part 10 gives you recovery evidence for one point in time. Monitoring helps you notice when that evidence stops arriving. A reachable backup server can still hold an old backup, and an empty dashboard can mean the collector has stopped reporting.
 
