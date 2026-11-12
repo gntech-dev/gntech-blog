@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="360" viewBox="0 0 840 360" role="img" aria-labelledby="title desc">
+  <title id="title">Independent paths for PBS restore</title>
+  <desc id="desc">The recovery host reads the encrypted snapshot from off-site PBS with a local restore credential. A separate offline kit supplies the matching encryption key and its passphrase. The primary identity service is outside both paths.</desc>
+  <rect width="840" height="360" rx="22" fill="#101d2d"/>
+  <defs>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0 0 9 4.5 0 9z" fill="#7dd3fc"/>
+    </marker>
+  </defs>
+  <g stroke="#7dd3fc" stroke-width="3" fill="none" marker-end="url(#arrow)">
+    <path d="M283 84 H336 Q359 84 359 109 V138 Q359 159 381 159 H509"/>
+    <path d="M283 230 H336 Q359 230 359 206 V184 Q359 165 381 165 H509"/>
+  </g>
+  <g fill="#20384d" stroke="#70b9d9" stroke-width="2">
+    <rect x="36" y="38" width="247" height="92" rx="13"/>
+    <rect x="36" y="184" width="247" height="92" rx="13"/>
+    <rect x="522" y="107" width="281" height="109" rx="13"/>
+  </g>
+  <g font-family="system-ui, sans-serif" fill="#f4f8ff" font-size="22" font-weight="650">
+    <text x="55" y="73">Off-site PBS</text>
+    <text x="55" y="218">Offline recovery kit</text>
+    <text x="542" y="144">Clean recovery host</text>
+  </g>
+  <g font-family="system-ui, sans-serif" fill="#c9e5f4" font-size="17">
+    <text x="55" y="103">Encrypted snapshot</text>
+    <text x="55" y="248">Matching key + passphrase</text>
+    <text x="542" y="174">Read with local PBS credential</text>
+    <text x="542" y="196">Decrypt and verify restored file</text>
+    <text x="36" y="321">Primary identity service unavailable during the drill</text>
+  </g>
+</svg>
