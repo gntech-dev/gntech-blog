@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="290" viewBox="0 0 800 290" role="img" aria-labelledby="title desc">
+  <title id="title">PBS snapshots and key generations</title>
+  <desc id="desc">The snapshot before rotation uses key A and the snapshot after rotation uses key B. The recovery kit retains both keys while their corresponding snapshots are kept.</desc>
+  <rect width="800" height="290" rx="20" fill="#101d2d"/>
+  <g font-family="system-ui,sans-serif" font-size="21" fill="#edf5ff" font-weight="600">
+    <rect x="30" y="35" width="290" height="60" rx="12" fill="#394038" stroke="#f2c675"/>
+    <rect x="30" y="128" width="290" height="60" rx="12" fill="#20384d" stroke="#7dd3fc"/>
+    <rect x="500" y="35" width="270" height="60" rx="12" fill="#394038" stroke="#f2c675"/>
+    <rect x="500" y="128" width="270" height="60" rx="12" fill="#20384d" stroke="#7dd3fc"/>
+    <text x="52" y="73">Snapshot before rotation</text>
+    <text x="52" y="166">Snapshot after rotation</text>
+    <text x="525" y="73">Key A in recovery kit</text>
+    <text x="525" y="166">Key B in recovery kit</text>
+    <text x="30" y="247" font-size="19" font-weight="400">Keep each key as long as any retained copy needs it.</text>
+  </g>
+  <g fill="none" stroke-width="3">
+    <path d="M500 65H332l12-8m-12 8 12 8" stroke="#f2c675"/>
+    <path d="M500 158H332l12-8m-12 8 12 8" stroke="#7dd3fc"/>
+  </g>
+</svg>
